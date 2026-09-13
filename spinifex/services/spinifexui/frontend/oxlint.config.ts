@@ -104,6 +104,7 @@ export default defineConfig({
         "anti-slop/no-unknown-returns": "off",
         "eslint/require-await": "off",
         "import/first": "off",
+        "typescript/await-thenable": "off",
         "typescript/consistent-type-imports": "off",
         "typescript/no-non-null-assertion": "off",
         "typescript/no-unsafe-argument": "off",

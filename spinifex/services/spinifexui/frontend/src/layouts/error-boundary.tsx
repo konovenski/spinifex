@@ -29,7 +29,8 @@ export function ErrorBoundary({ error, reset }: ErrorComponentProps) {
             </div>
             <h1 className="text-2xl font-semibold">Something went wrong</h1>
             <p className="text-muted-foreground">
-              {error.message || "An unexpected error occurred"}
+              {(error instanceof Error ? error.message : String(error)) ||
+                "An unexpected error occurred"}
             </p>
             <div className="flex justify-center gap-2">
               <Button onClick={handleTryAgain} variant="default">
