@@ -41,6 +41,9 @@ func AWSOperationInventory() map[string]ServiceOperationInventory {
 			Registered: mapKeys(gateway_ecs.Actions),
 			Stubbed:    gateway_ecs.StubbedActionNames(),
 		},
+		"eks": {
+			Registered: eksActionNames(),
+		},
 		"elasticloadbalancingv2": {
 			Registered: mapKeys(elbv2Actions),
 		},

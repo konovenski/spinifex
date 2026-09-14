@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"slices"
 
 	"github.com/mulgadc/bluebottle/pkg/auth"
 	"github.com/mulgadc/spinifex/spinifex/awserrors"
@@ -214,6 +215,17 @@ var eksRoutes = []eksRoute{
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListTagsForResource(ctx, gw.NATSConn, acct, p[0])
 		}},
+}
+
+// eksActionNames returns the distinct actions in eksRoutes in stable order.
+// Deduplicated because an action may be reachable by more than one route.
+func eksActionNames() []string {
+	names := make([]string, 0, len(eksRoutes))
+	for _, route := range eksRoutes {
+		names = append(names, route.action)
+	}
+	slices.Sort(names)
+	return slices.Compact(names)
 }
 
 // lookupEKSAction matches method+path against eksRoutes, returning the action,

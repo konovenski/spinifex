@@ -10,6 +10,7 @@ Implemented means a modelled operation is registered to a real handler. Stub and
 | ec2 | 2016-11-15 | 625 | 121 | 121 | 0 | 0 | 504 | 0 |
 | ecr | 2015-09-21 | 47 | 39 | 19 | 13 | 7 | 11 | 3 |
 | ecs | 2014-11-13 | 56 | 39 | 31 | 5 | 0 | 20 | 3 |
+| eks | 2017-11-01 | 56 | 38 | 34 | 0 | 0 | 22 | 4 |
 | elasticloadbalancingv2 | 2015-12-01 | 46 | 37 | 33 | 0 | 0 | 13 | 4 |
 | iam | 2010-05-08 | 159 | 75 | 75 | 0 | 0 | 84 | 0 |
 | rds | 2014-10-31 | 162 | 43 | 26 | 0 | 12 | 124 | 5 |
@@ -335,6 +336,55 @@ None.
 <details><summary>Registered outside the pinned model (3)</summary>
 
 `PollAssignments`, `ProvisionCapacity`, `ReportTaskGPU`
+
+
+</details>
+
+## eks
+
+Implements **34 of 56** modelled operations (60.7%).
+
+<details><summary>Implemented (34)</summary>
+
+`AssociateAccessPolicy`, `AssociateIdentityProviderConfig`, `CreateAccessEntry`, `CreateAddon`, `CreateCluster`, `CreateNodegroup`, `DeleteAccessEntry`, `DeleteAddon`
+
+`DeleteCluster`, `DeleteNodegroup`, `DescribeAccessEntry`, `DescribeAddon`, `DescribeAddonVersions`, `DescribeCluster`, `DescribeIdentityProviderConfig`, `DescribeNodegroup`
+
+`DisassociateAccessPolicy`, `DisassociateIdentityProviderConfig`, `ListAccessEntries`, `ListAccessPolicies`, `ListAddons`, `ListAssociatedAccessPolicies`, `ListClusters`, `ListIdentityProviderConfigs`
+
+`ListNodegroups`, `ListTagsForResource`, `TagResource`, `UntagResource`, `UpdateAccessEntry`, `UpdateAddon`, `UpdateClusterConfig`, `UpdateClusterVersion`
+
+`UpdateNodegroupConfig`, `UpdateNodegroupVersion`
+
+
+</details>
+
+<details><summary>Missing from dispatch (22)</summary>
+
+`AssociateEncryptionConfig`, `CreateEksAnywhereSubscription`, `CreateFargateProfile`, `CreatePodIdentityAssociation`, `DeleteEksAnywhereSubscription`, `DeleteFargateProfile`, `DeletePodIdentityAssociation`, `DeregisterCluster`
+
+`DescribeAddonConfiguration`, `DescribeEksAnywhereSubscription`, `DescribeFargateProfile`, `DescribeInsight`, `DescribePodIdentityAssociation`, `DescribeUpdate`, `ListEksAnywhereSubscriptions`, `ListFargateProfiles`
+
+`ListInsights`, `ListPodIdentityAssociations`, `ListUpdates`, `RegisterCluster`, `UpdateEksAnywhereSubscription`, `UpdatePodIdentityAssociation`
+
+
+</details>
+
+<details><summary>Registered stubs (0)</summary>
+
+None.
+
+</details>
+
+<details><summary>Deliberately unsupported (0)</summary>
+
+None.
+
+</details>
+
+<details><summary>Registered outside the pinned model (4)</summary>
+
+`GetRecoveryDirective`, `ListInternalAddons`, `PublishInternal`, `WebhookTokenReview`
 
 
 </details>

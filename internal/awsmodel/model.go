@@ -28,6 +28,7 @@ const (
 	EC2                    Service = "ec2"
 	ECR                    Service = "ecr"
 	ECS                    Service = "ecs"
+	EKS                    Service = "eks"
 	ElasticLoadBalancingV2 Service = "elasticloadbalancingv2"
 	IAM                    Service = "iam"
 	RDS                    Service = "rds"
