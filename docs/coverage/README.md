@@ -21,12 +21,12 @@ Spinifex serves the AWS APIs below. Every page counts the operations in the pinn
 
 | Service | Implemented | Modelled | Coverage |
 |---|---:|---:|---:|
-| [ACM](/docs/acm-api-coverage) | 9 | 15 | 60.0% |
-| [EC2](/docs/ec2-api-coverage) | 121 | 625 | 19.4% |
-| [ECR](/docs/ecr-api-coverage) | 19 | 47 | 40.4% |
-| [ECS](/docs/ecs-api-coverage) | 31 | 56 | 55.4% |
-| [EKS](/docs/eks-api-coverage) | 34 | 56 | 60.7% |
-| [ELBv2](/docs/elbv2-api-coverage) | 33 | 46 | 71.7% |
-| [IAM](/docs/iam-api-coverage) | 75 | 159 | 47.2% |
-| [RDS](/docs/rds-api-coverage) | 26 | 162 | 16.0% |
-| [STS](/docs/sts-api-coverage) | 4 | 8 | 50.0% |
+| [ACM](/coverage/acm) | 9 | 15 | 60.0% |
+| [EC2](/coverage/ec2) | 121 | 625 | 19.4% |
+| [ECR](/coverage/ecr) | 19 | 47 | 40.4% |
+| [ECS](/coverage/ecs) | 31 | 56 | 55.4% |
+| [EKS](/coverage/eks) | 34 | 56 | 60.7% |
+| [ELBv2](/coverage/elbv2) | 33 | 46 | 71.7% |
+| [IAM](/coverage/iam) | 75 | 159 | 47.2% |
+| [RDS](/coverage/rds) | 26 | 162 | 16.0% |
+| [STS](/coverage/sts) | 4 | 8 | 50.0% |

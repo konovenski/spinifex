@@ -12,7 +12,7 @@ import (
 
 func testPageSet(t *testing.T) PageSet {
 	t.Helper()
-	contents, err := os.ReadFile(filepath.Join("..", "..", "docs", "compatibility", "pages.json"))
+	contents, err := os.ReadFile(filepath.Join("..", "..", "docs", "coverage", "pages.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,18 +37,26 @@ func TestParsePageSetAcceptsTheCheckedInFile(t *testing.T) {
 }
 
 func TestParsePageSetRejectsUnpublishableMetadata(t *testing.T) {
+	// A well-formed index, so each case below fails only for its own reason.
+	index := `"index":{"name":"All","title":"All","seoTitle":"` + strings.Repeat("x", 39) +
+		` — Spinifex Docs","description":"` + strings.Repeat("x", 155) + `","tags":["aws"]}`
+	head := `{"category":"Coverage","basePath":"/coverage",`
+
 	for name, contents := range map[string]string{
-		"unknown service":  `{"category":"Coverage","index":{},"services":{"notaservice":{}}}`,
-		"missing category": `{"index":{},"services":{}}`,
-		"unknown field":    `{"category":"Coverage","colour":"blue","index":{},"services":{}}`,
-		"short seoTitle": `{"category":"Coverage","index":{"slug":"aws-api-coverage","name":"All","title":"All",` +
+		"unknown service":  head + index + `,"services":{"notaservice":{}}}`,
+		"missing category": `{"basePath":"/coverage",` + index + `,"services":{}}`,
+		"missing basePath": `{"category":"Coverage",` + index + `,"services":{}}`,
+		"unknown field":    head + `"colour":"blue",` + index + `,"services":{}}`,
+		"index with a slug": head + `"index":{"slug":"aws","name":"All","title":"All","seoTitle":"` +
+			strings.Repeat("x", 39) + ` — Spinifex Docs","description":"` + strings.Repeat("x", 155) + `","tags":["aws"]}}`,
+		"short seoTitle": head + `"index":{"name":"All","title":"All",` +
 			`"seoTitle":"Too short — Spinifex Docs","description":"` + strings.Repeat("x", 155) + `","tags":["aws"]}}`,
-		"missing suffix": `{"category":"Coverage","index":{"slug":"aws-api-coverage","name":"All","title":"All",` +
+		"missing suffix": head + `"index":{"name":"All","title":"All",` +
 			`"seoTitle":"` + strings.Repeat("x", 55) + `","description":"` + strings.Repeat("x", 155) + `","tags":["aws"]}}`,
-		"short description": `{"category":"Coverage","index":{"slug":"aws-api-coverage","name":"All","title":"All",` +
+		"short description": head + `"index":{"name":"All","title":"All",` +
 			`"seoTitle":"` + strings.Repeat("x", 39) + ` — Spinifex Docs","description":"too short","tags":["aws"]}}`,
-		"bad slug": `{"category":"Coverage","index":{"slug":"AWS Coverage","name":"All","title":"All",` +
-			`"seoTitle":"` + strings.Repeat("x", 39) + ` — Spinifex Docs","description":"` + strings.Repeat("x", 155) + `","tags":["aws"]}}`,
+		"bad service slug": head + index + `,"services":{"sts":{"slug":"STS Coverage","name":"STS","title":"STS",` +
+			`"seoTitle":"` + strings.Repeat("x", 39) + ` — Spinifex Docs","description":"` + strings.Repeat("x", 155) + `","tags":["aws"]}}}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := ParsePageSet([]byte(contents)); err == nil {
@@ -325,13 +333,13 @@ func TestRenderIndexPageLinksEveryPublishedService(t *testing.T) {
 	for _, service := range Services() {
 		page, published := pages.Services[service]
 		if !published {
-			if strings.Contains(index, "/docs/"+string(service)+"-api-coverage") {
+			if strings.Contains(index, pages.BasePath+"/"+string(service)) {
 				t.Errorf("index links unpublished service %q", service)
 			}
 			continue
 		}
-		if !strings.Contains(index, "["+page.Name+"](/docs/"+page.Slug+")") {
-			t.Errorf("index does not link %q at /docs/%s", page.Name, page.Slug)
+		if !strings.Contains(index, "["+page.Name+"]("+pages.BasePath+"/"+page.Slug+")") {
+			t.Errorf("index does not link %q at %s/%s", page.Name, pages.BasePath, page.Slug)
 		}
 	}
 }

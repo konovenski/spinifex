@@ -137,9 +137,12 @@ type PageMetadata struct {
 	Internal []string `json:"internal,omitempty"`
 }
 
-// PageSet is the metadata for the index page and every service page.
+// PageSet is the metadata for the index page and every service page. BasePath
+// is the site section the pages are published under; the index answers it, so
+// the index alone carries no slug.
 type PageSet struct {
 	Category string                   `json:"category"`
+	BasePath string                   `json:"basePath"`
 	Index    PageMetadata             `json:"index"`
 	Services map[Service]PageMetadata `json:"services"`
 }
@@ -156,9 +159,12 @@ func ParsePageSet(contents []byte) (PageSet, error) {
 	if pages.Category == "" {
 		return PageSet{}, fmt.Errorf("awsmodel: coverage pages: category is empty")
 	}
+	if !strings.HasPrefix(pages.BasePath, "/") {
+		return PageSet{}, fmt.Errorf("awsmodel: coverage pages: basePath %q is not a site path", pages.BasePath)
+	}
 
 	slugs := map[string]bool{}
-	if err := validatePage("index", pages.Index, slugs); err != nil {
+	if err := validateIndexPage(pages.Index); err != nil {
 		return PageSet{}, err
 	}
 	// A known service may be left out. S3 is: Predastore serves that surface,
@@ -180,6 +186,14 @@ func ParsePageSet(contents []byte) (PageSet, error) {
 	return pages, nil
 }
 
+// The index answers the section's base path, so it has no slug of its own.
+func validateIndexPage(page PageMetadata) error {
+	if page.Slug != "" {
+		return fmt.Errorf("awsmodel: coverage page index: slug %q is set, but the index answers the base path", page.Slug)
+	}
+	return validateFrontmatter("index", page)
+}
+
 func validatePage(owner string, page PageMetadata, slugs map[string]bool) error {
 	fail := func(format string, args ...any) error {
 		return fmt.Errorf("awsmodel: coverage page %s: %s", owner, fmt.Sprintf(format, args...))
@@ -191,6 +205,13 @@ func validatePage(owner string, page PageMetadata, slugs map[string]bool) error 
 		return fail("slug %q is used by another page", page.Slug)
 	}
 	slugs[page.Slug] = true
+	return validateFrontmatter(owner, page)
+}
+
+func validateFrontmatter(owner string, page PageMetadata) error {
+	fail := func(format string, args ...any) error {
+		return fmt.Errorf("awsmodel: coverage page %s: %s", owner, fmt.Sprintf(format, args...))
+	}
 	if page.Name == "" || page.Title == "" {
 		return fail("name and title are required")
 	}
@@ -316,8 +337,8 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 		if !ok {
 			continue
 		}
-		fmt.Fprintf(&body, "| [%s](/docs/%s) | %d | %d | %.1f%% |\n",
-			page.Name, page.Slug, len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent())
+		fmt.Fprintf(&body, "| [%s](%s/%s) | %d | %d | %.1f%% |\n",
+			page.Name, pages.BasePath, page.Slug, len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent())
 	}
 
 	if intro != "" {

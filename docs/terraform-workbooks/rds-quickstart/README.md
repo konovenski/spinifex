@@ -17,7 +17,7 @@ sections:
   - troubleshooting
 resources:
   - title: "RDS API Coverage"
-    url: "/docs/rds-api-coverage"
+    url: "/coverage/rds"
   - title: "Terraform AWS Provider — aws_db_instance"
     url: "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance"
   - title: "Spinifex Repository"
@@ -30,7 +30,7 @@ resources:
 
 > The smallest end-to-end RDS example on Spinifex: a VPC with a public client subnet and a private DB subnet, a DB subnet group, a parameter group, a PostgreSQL DB instance, and a client VM with `psql` already pointed at the endpoint.
 
-This workbook is **PostgreSQL throughout** — the engine, the `postgres18` parameter group, port `5432`, the client package and the `~/.pgpass` credential are all PostgreSQL's. Spinifex also serves MariaDB 11.8 under `engine = "mariadb"`; running this workbook against it means changing `engine`, `engine_version`, the parameter-group `family` to `mariadb11.8`, the security-group port to `3306` and the client to `mariadb-client`. See the [RDS API coverage page](/docs/rds-api-coverage) for both engines' pins, families and limits. Note that `mysql` is not an accepted engine and is not an alias for `mariadb`.
+This workbook is **PostgreSQL throughout** — the engine, the `postgres18` parameter group, port `5432`, the client package and the `~/.pgpass` credential are all PostgreSQL's. Spinifex also serves MariaDB 11.8 under `engine = "mariadb"`; running this workbook against it means changing `engine`, `engine_version`, the parameter-group `family` to `mariadb11.8`, the security-group port to `3306` and the client to `mariadb-client`. See the [RDS API coverage page](/coverage/rds) for both engines' pins, families and limits. Note that `mysql` is not an accepted engine and is not an alias for `mariadb`.
 
 ## Overview
 

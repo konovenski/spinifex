@@ -1,7 +1,7 @@
 {
   "category": "Coverage",
+  "basePath": "/coverage",
   "index": {
-    "slug": "aws-api-coverage",
     "name": "All services",
     "title": "AWS API Coverage",
     "seoTitle": "Which AWS API Operations Spinifex Implements — Spinifex Docs",
@@ -16,7 +16,7 @@
   },
   "services": {
     "acm": {
-      "slug": "acm-api-coverage",
+      "slug": "acm",
       "name": "ACM",
       "title": "ACM API Coverage",
       "seoTitle": "AWS Certificate Manager API Coverage — Spinifex Docs",
@@ -31,7 +31,7 @@
       ]
     },
     "ec2": {
-      "slug": "ec2-api-coverage",
+      "slug": "ec2",
       "name": "EC2",
       "title": "EC2 API Coverage",
       "seoTitle": "Amazon EC2 API Coverage on Spinifex — Spinifex Docs",
@@ -52,7 +52,7 @@
       }
     },
     "ecr": {
-      "slug": "ecr-api-coverage",
+      "slug": "ecr",
       "name": "ECR",
       "title": "ECR API Coverage",
       "seoTitle": "Elastic Container Registry API Coverage — Spinifex Docs",
@@ -78,7 +78,7 @@
       }
     },
     "ecs": {
-      "slug": "ecs-api-coverage",
+      "slug": "ecs",
       "name": "ECS",
       "title": "ECS API Coverage",
       "seoTitle": "Elastic Container Service API Coverage — Spinifex Docs",
@@ -98,7 +98,7 @@
       ]
     },
     "eks": {
-      "slug": "eks-api-coverage",
+      "slug": "eks",
       "name": "EKS",
       "title": "EKS API Coverage",
       "seoTitle": "Elastic Kubernetes Service API Coverage — Spinifex Docs",
@@ -119,7 +119,7 @@
       ]
     },
     "elasticloadbalancingv2": {
-      "slug": "elbv2-api-coverage",
+      "slug": "elbv2",
       "name": "ELBv2",
       "title": "ELBv2 API Coverage",
       "seoTitle": "Elastic Load Balancing v2 API Coverage — Spinifex Docs",
@@ -138,7 +138,7 @@
       ]
     },
     "iam": {
-      "slug": "iam-api-coverage",
+      "slug": "iam",
       "name": "IAM",
       "title": "IAM API Coverage",
       "seoTitle": "AWS IAM API Operation Coverage on Spinifex — Spinifex Docs",
@@ -180,7 +180,7 @@
       }
     },
     "rds": {
-      "slug": "rds-api-coverage",
+      "slug": "rds",
       "name": "RDS",
       "title": "RDS API Coverage",
       "seoTitle": "Relational Database Service API Coverage — Spinifex Docs",
@@ -223,7 +223,7 @@
       }
     },
     "sts": {
-      "slug": "sts-api-coverage",
+      "slug": "sts",
       "name": "STS",
       "title": "STS API Coverage",
       "seoTitle": "AWS Security Token Service API Coverage — Spinifex Docs",

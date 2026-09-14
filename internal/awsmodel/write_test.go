@@ -10,11 +10,11 @@ import (
 )
 
 // stagePages copies the checked-in metadata into a temp directory so a write
-// test cannot touch docs/compatibility.
+// test cannot touch docs/coverage.
 func stagePages(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
-	contents, err := os.ReadFile(filepath.Join("..", "..", "docs", "compatibility", "pages.json"))
+	contents, err := os.ReadFile(filepath.Join("..", "..", "docs", "coverage", "pages.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,25 +40,25 @@ func TestWritePagesWritesAServicePageAndTheIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	service, err := os.ReadFile(filepath.Join(dir, "sts-api-coverage", "README.md"))
+	service, err := os.ReadFile(filepath.Join(dir, "sts", "README.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(service), "| `AssumeRole` | "+StatusImplemented+" |") {
 		t.Errorf("service page is missing its operation table:\n%s", service)
 	}
-	index, err := os.ReadFile(filepath.Join(dir, "aws-api-coverage", "README.md"))
+	index, err := os.ReadFile(filepath.Join(dir, "README.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(index), "[STS](/docs/sts-api-coverage)") {
+	if !strings.Contains(string(index), "[STS](/coverage/sts)") {
 		t.Errorf("index does not link the service page:\n%s", index)
 	}
 }
 
 func TestWritePagesIncludesAnIntroAndOverwritesTheGeneratedPage(t *testing.T) {
 	dir := stagePages(t)
-	pageDir := filepath.Join(dir, "sts-api-coverage")
+	pageDir := filepath.Join(dir, "sts")
 	if err := os.MkdirAll(pageDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

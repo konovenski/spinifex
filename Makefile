@@ -181,7 +181,7 @@ test-harness:
 # JetStream, with only the daemon-side NATS subjects stubbed.
 AWS_MODEL_CONFORMANCE_REPORT ?= $(CURDIR)/.cache/aws-model-conformance-report.txt
 AWS_MODEL_CONFORMANCE_MODE ?= fail
-AWS_MODEL_OPERATION_COVERAGE_DIR ?= $(CURDIR)/docs/compatibility
+AWS_MODEL_OPERATION_COVERAGE_DIR ?= $(CURDIR)/docs/coverage
 # -count=1 is load-bearing: the conformance report is written by the test binary,
 # so a cached pass skips the run, leaves no report, and the cat below fails the
 # target. It also keeps the conformance gate honest — a cached result would mean
