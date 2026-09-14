@@ -26,14 +26,6 @@ Clusters, services and tasks run on EC2 container instances. There is no Fargate
 
 ### Operations
 
-| Status | Meaning |
-|---|---|
-| ✅ Implemented | A modelled operation bound to a real handler. |
-| 🟡 Stub | A registered handler that answers with a fixed or empty result. |
-| 🚫 Not supported | A registered handler that deliberately refuses, so a client sees "not offered" rather than an unknown action. |
-| ❌ Not implemented | Modelled by AWS, not registered by Spinifex. |
-| 🔒 Outside the pinned model | Registered by Spinifex but absent from the pinned model — an internal route, not a tenant-callable AWS action. |
-
 | Operation | Status |
 |---|---|
 | `CreateCapacityProvider` | ✅ Implemented |

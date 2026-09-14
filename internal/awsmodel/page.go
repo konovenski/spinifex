@@ -108,10 +108,12 @@ func ParsePageSet(contents []byte) (PageSet, error) {
 	if err := validatePage("index", pages.Index, slugs); err != nil {
 		return PageSet{}, err
 	}
+	// A known service may be left out. S3 is: Predastore serves that surface,
+	// so the gateway dispatch tables hold no honest number to publish for it.
 	for _, service := range Services() {
 		page, ok := pages.Services[service]
 		if !ok {
-			return PageSet{}, fmt.Errorf("awsmodel: coverage pages: no entry for service %q", service)
+			continue
 		}
 		if err := validatePage(string(service), page, slugs); err != nil {
 			return PageSet{}, err
@@ -165,23 +167,24 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	if !ok {
 		return "", fmt.Errorf("awsmodel: coverage pages: no entry for service %q", coverage.Service)
 	}
+	// An opaque service has no dispatch table to count, so there is no honest
+	// number to put on a page. It is left out until a real one exists.
+	if coverage.Opaque {
+		return "", fmt.Errorf("awsmodel: %s coverage is not enumerable, so it has no publishable page", coverage.Service)
+	}
 
 	var body strings.Builder
 	writeFrontmatter(&body, page, pages.Category)
 	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", page.Title)
 
-	writeSummary(&body, coverage, page)
+	fmt.Fprintf(&body, "Spinifex implements **%d of the %d** operations in the %s `%s` API model, as pinned in `aws-sdk-go %s` — **%.1f%%**.\n\n",
+		len(coverage.Implemented), len(coverage.Modelled), page.Name, coverage.APIVersion, SourceSDKVersion, coverage.ImplementedPercent())
 
 	if intro != "" {
 		body.WriteString(strings.TrimSpace(intro) + "\n\n")
 	}
-	if coverage.Opaque {
-		return strings.TrimRight(body.String(), "\n") + "\n", nil
-	}
 
-	body.WriteString("### Operations\n\n")
-	writeStatusLegend(&body)
-	body.WriteString("\n| Operation | Status |\n|---|---|\n")
+	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
 	for _, status := range coverage.OperationStatuses() {
 		fmt.Fprintf(&body, "| `%s` | %s |\n", status.Operation, status.Status)
 	}
@@ -202,46 +205,16 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 	for _, coverage := range sortedCoverages(coverages) {
 		page, ok := pages.Services[coverage.Service]
 		if !ok {
-			return "", fmt.Errorf("awsmodel: coverage pages: no entry for service %q", coverage.Service)
-		}
-		if coverage.Opaque {
-			fmt.Fprintf(&body, "| [%s](/docs/%s) | %s | — | %d | — |\n", page.Name, page.Slug, coverage.APIVersion, len(coverage.Modelled))
 			continue
 		}
 		fmt.Fprintf(&body, "| [%s](/docs/%s) | %s | %d | %d | %.1f%% |\n",
 			page.Name, page.Slug, coverage.APIVersion, len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent())
 	}
 
-	body.WriteString("\n")
-	writeStatusLegend(&body)
 	if intro != "" {
 		body.WriteString("\n" + strings.TrimSpace(intro) + "\n")
 	}
 	return body.String(), nil
-}
-
-// writeSummary states the implemented-of-modelled count, or why there is none.
-func writeSummary(body *strings.Builder, coverage OperationCoverage, page PageMetadata) {
-	if coverage.Opaque {
-		fmt.Fprintf(body, "The %s API model pins **%d** operations at API version `%s`, but Spinifex's coverage of them is not mechanically enumerable: %s\n\n",
-			page.Name, len(coverage.Modelled), coverage.APIVersion, coverage.Note)
-		return
-	}
-	fmt.Fprintf(body, "Spinifex implements **%d of the %d** operations in the %s `%s` API model, as pinned in `aws-sdk-go %s` — **%.1f%%**.\n\n",
-		len(coverage.Implemented), len(coverage.Modelled), page.Name, coverage.APIVersion, SourceSDKVersion, coverage.ImplementedPercent())
-}
-
-func writeStatusLegend(body *strings.Builder) {
-	body.WriteString("| Status | Meaning |\n|---|---|\n")
-	for _, entry := range [][2]string{
-		{StatusImplemented, "A modelled operation bound to a real handler."},
-		{StatusStub, "A registered handler that answers with a fixed or empty result."},
-		{StatusNotSupported, "A registered handler that deliberately refuses, so a client sees \"not offered\" rather than an unknown action."},
-		{StatusNotImplemented, "Modelled by AWS, not registered by Spinifex."},
-		{StatusOutsideModel, "Registered by Spinifex but absent from the pinned model — an internal route, not a tenant-callable AWS action."},
-	} {
-		fmt.Fprintf(body, "| %s | %s |\n", entry[0], entry[1])
-	}
 }
 
 func writeFrontmatter(body *strings.Builder, page PageMetadata, category string) {

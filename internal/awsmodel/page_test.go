@@ -1,10 +1,12 @@
-package awsmodel
+package awsmodel_test
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	. "github.com/mulgadc/spinifex/internal/awsmodel"
 )
 
 func testPageSet(t *testing.T) PageSet {
@@ -23,10 +25,13 @@ func testPageSet(t *testing.T) PageSet {
 func TestParsePageSetAcceptsTheCheckedInFile(t *testing.T) {
 	pages := testPageSet(t)
 
-	for _, service := range Services() {
-		if _, ok := pages.Services[service]; !ok {
-			t.Errorf("no page metadata for service %q", service)
-		}
+	if len(pages.Services) == 0 {
+		t.Fatal("no service pages are configured")
+	}
+	// S3 is deliberately unpublished: Predastore serves that surface, so the
+	// gateway dispatch tables hold no honest number for it.
+	if _, ok := pages.Services[S3]; ok {
+		t.Error("S3 has page metadata but no enumerable coverage to publish")
 	}
 }
 
@@ -137,33 +142,28 @@ func TestRenderServicePageRejectsIntroOpeningASection(t *testing.T) {
 	}
 }
 
-func TestRenderServicePageStatesOpaqueCoverage(t *testing.T) {
+// An opaque service has no dispatch table to count, so publishing a page for it
+// would report 0% where the truth is that the surface is served elsewhere.
+func TestRenderServicePageRefusesOpaqueCoverage(t *testing.T) {
 	pages := testPageSet(t)
-	coverage, err := CompareOperations(S3, DispatchInventory{
+	coverage, err := CompareOperations(STS, DispatchInventory{
 		Opaque: true,
-		Note:   "Predastore serves this surface.",
+		Note:   "Served elsewhere.",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	page, err := RenderServicePage(coverage, pages, "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(page, "not mechanically enumerable: Predastore serves this surface.") {
-		t.Errorf("page does not state why coverage is not enumerable:\n%s", page)
-	}
-	if strings.Contains(page, "### Operations") || strings.Contains(page, "%**") {
-		t.Errorf("opaque page claims a percentage or an operation table:\n%s", page)
+	if _, err := RenderServicePage(coverage, pages, ""); err == nil {
+		t.Fatal("RenderServicePage published a page for a service with no enumerable coverage")
 	}
 }
 
-func TestRenderIndexPageLinksEveryService(t *testing.T) {
+func TestRenderIndexPageLinksEveryPublishedService(t *testing.T) {
 	pages := testPageSet(t)
 	coverages := make([]OperationCoverage, 0, len(Services()))
 	for _, service := range Services() {
-		coverage, err := CompareOperations(service, DispatchInventory{Opaque: true, Note: "not measured here."})
+		coverage, err := CompareOperations(service, DispatchInventory{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -175,7 +175,13 @@ func TestRenderIndexPageLinksEveryService(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, service := range Services() {
-		page := pages.Services[service]
+		page, published := pages.Services[service]
+		if !published {
+			if strings.Contains(index, "/docs/"+string(service)+"-api-coverage") {
+				t.Errorf("index links unpublished service %q", service)
+			}
+			continue
+		}
 		if !strings.Contains(index, "["+page.Name+"](/docs/"+page.Slug+")") {
 			t.Errorf("index does not link %q at /docs/%s", page.Name, page.Slug)
 		}

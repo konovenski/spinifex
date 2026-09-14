@@ -84,7 +84,10 @@ func writePages(outputDir string, coverages []awsmodel.OperationCoverage) error 
 	}
 
 	for _, coverage := range coverages {
-		page := pages.Services[coverage.Service]
+		page, ok := pages.Services[coverage.Service]
+		if !ok {
+			continue
+		}
 		intro, err := readIntro(outputDir, page.Slug)
 		if err != nil {
 			return err
