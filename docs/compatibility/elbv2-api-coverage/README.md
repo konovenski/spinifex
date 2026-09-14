@@ -75,6 +75,4 @@ The data plane is a system-managed load balancer VM, launched automatically duri
 | `SetSecurityGroups` | ✅ Implemented |
 | `SetSubnets` | ✅ Implemented |
 | `DescribeListenerAttributes` | 🔒 Outside the pinned model |
-| `GetLBConfig` | 🔒 Outside the pinned model |
-| `LBAgentHeartbeat` | 🔒 Outside the pinned model |
 | `ModifyListenerAttributes` | 🔒 Outside the pinned model |

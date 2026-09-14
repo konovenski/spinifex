@@ -25,7 +25,7 @@ Spinifex implements **26 of the 162** operations (**16.0%**) in the RDS `2014-10
 
 Spinifex offers PostgreSQL and MariaDB. Each DB instance is one dedicated system-owned VM running the engine directly, launched from a platform AMI and hidden from the customer's EC2 API. `Engine` is fixed at create: there is no in-place engine change, no cross-engine snapshot restore and no migration between the two.
 
-`mysql` is not an accepted engine and is not an alias for `mariadb`. MariaDB is offered under its own AWS engine name, exactly as AWS RDS offers it, so a client — including Terraform's `aws_db_instance` — must set `engine = "mariadb"`. Aliasing would report an engine and a version the instance is not running, and the discrepancy would propagate into `DescribeDBInstances`, parameter-group families and snapshot metadata.
+`mysql` is not an accepted engine and is not an alias for `mariadb`. MariaDB is offered under its own AWS engine name, exactly as AWS RDS offers it, so a client — including Terraform's `aws_db_instance` — must set `engine = "mariadb"`.
 
 Engine versions are pinned per engine. An `EngineVersion` naming anything but the pin is rejected, including a narrower minor version, because the AMI makes no promise about which minor it carries.
 
@@ -37,11 +37,9 @@ The engine is reached over a customer-account ENI injected into a subnet of the 
 
 Both engines enforce encrypted connections by default: `rds.force_ssl` on PostgreSQL and `require_secure_transport` on MariaDB. For MariaDB this is a deliberate divergence from AWS, which leaves it off. Both are boolean, modifiable and dynamic, so setting either to `0` in a parameter group restores plaintext without a reboot.
 
-Enforcement requires that the connection is encrypted, not that the client validates the certificate. The engine serves a per-instance certificate signed by the cluster CA carrying both the ENI address and the DNS name, so a client that wants full verification can have it. A deployment holding no cluster CA cannot serve TLS at all, and a parameter group asking for enforcement there is refused rather than quietly ignored.
-
 ### Rejected parameters
 
-A parameter whose omission would create a false safety, security or availability guarantee is rejected with `InvalidParameterValue` rather than silently dropped. Parameters that are merely inert — `AutoMinorVersionUpgrade`, `CopyTagsToSnapshot`, `DeleteAutomatedBackups`, Performance Insights and Enhanced Monitoring fields — are accepted as no-ops.
+A parameter whose omission would create a false safety, security or availability guarantee is rejected with `InvalidParameterValue` rather than silently dropped.
 
 | Parameter | Why it is rejected |
 |-----------|--------------------|
@@ -89,12 +87,12 @@ A parameter whose omission would create a false safety, security or availability
 | `CopyOptionGroup` | ❌ Not implemented |
 | `CreateBlueGreenDeployment` | ❌ Not implemented |
 | `CreateCustomDBEngineVersion` | ❌ Not implemented |
-| `CreateDBCluster` | ⛔ Not applicable |
+| `CreateDBCluster` | ⛔ Not applicable [1](#notes) |
 | `CreateDBClusterEndpoint` | ❌ Not implemented |
 | `CreateDBClusterParameterGroup` | ❌ Not implemented |
 | `CreateDBClusterSnapshot` | ❌ Not implemented |
 | `CreateDBInstance` | ✅ Implemented |
-| `CreateDBInstanceReadReplica` | ⛔ Not applicable |
+| `CreateDBInstanceReadReplica` | ⛔ Not applicable [4](#notes) |
 | `CreateDBParameterGroup` | ✅ Implemented |
 | `CreateDBProxy` | ❌ Not implemented |
 | `CreateDBProxyEndpoint` | ❌ Not implemented |
@@ -105,11 +103,11 @@ A parameter whose omission would create a false safety, security or availability
 | `CreateEventSubscription` | ❌ Not implemented |
 | `CreateGlobalCluster` | ❌ Not implemented |
 | `CreateIntegration` | ❌ Not implemented |
-| `CreateOptionGroup` | ⛔ Not applicable |
+| `CreateOptionGroup` | ⛔ Not applicable [2](#notes) |
 | `CreateTenantDatabase` | ❌ Not implemented |
 | `DeleteBlueGreenDeployment` | ❌ Not implemented |
 | `DeleteCustomDBEngineVersion` | ❌ Not implemented |
-| `DeleteDBCluster` | ⛔ Not applicable |
+| `DeleteDBCluster` | ⛔ Not applicable [1](#notes) |
 | `DeleteDBClusterAutomatedBackup` | ❌ Not implemented |
 | `DeleteDBClusterEndpoint` | ❌ Not implemented |
 | `DeleteDBClusterParameterGroup` | ❌ Not implemented |
@@ -126,7 +124,7 @@ A parameter whose omission would create a false safety, security or availability
 | `DeleteEventSubscription` | ❌ Not implemented |
 | `DeleteGlobalCluster` | ❌ Not implemented |
 | `DeleteIntegration` | ❌ Not implemented |
-| `DeleteOptionGroup` | ⛔ Not applicable |
+| `DeleteOptionGroup` | ⛔ Not applicable [2](#notes) |
 | `DeleteTenantDatabase` | ❌ Not implemented |
 | `DeregisterDBProxyTargets` | ❌ Not implemented |
 | `DescribeAccountAttributes` | ❌ Not implemented |
@@ -139,7 +137,7 @@ A parameter whose omission would create a false safety, security or availability
 | `DescribeDBClusterParameters` | ❌ Not implemented |
 | `DescribeDBClusterSnapshotAttributes` | ❌ Not implemented |
 | `DescribeDBClusterSnapshots` | ❌ Not implemented |
-| `DescribeDBClusters` | ⛔ Not applicable |
+| `DescribeDBClusters` | ⛔ Not applicable [1](#notes) |
 | `DescribeDBEngineVersions` | ✅ Implemented |
 | `DescribeDBInstanceAutomatedBackups` | ✅ Implemented |
 | `DescribeDBInstances` | ✅ Implemented |
@@ -166,7 +164,7 @@ A parameter whose omission would create a false safety, security or availability
 | `DescribeGlobalClusters` | ❌ Not implemented |
 | `DescribeIntegrations` | ❌ Not implemented |
 | `DescribeOptionGroupOptions` | ❌ Not implemented |
-| `DescribeOptionGroups` | ⛔ Not applicable |
+| `DescribeOptionGroups` | ⛔ Not applicable [2](#notes) |
 | `DescribeOrderableDBInstanceOptions` | ✅ Implemented |
 | `DescribePendingMaintenanceActions` | ❌ Not implemented |
 | `DescribeReservedDBInstances` | ❌ Not implemented |
@@ -177,14 +175,14 @@ A parameter whose omission would create a false safety, security or availability
 | `DisableHttpEndpoint` | ❌ Not implemented |
 | `DownloadDBLogFilePortion` | ❌ Not implemented |
 | `EnableHttpEndpoint` | ❌ Not implemented |
-| `FailoverDBCluster` | ⛔ Not applicable |
+| `FailoverDBCluster` | ⛔ Not applicable [1](#notes) |
 | `FailoverGlobalCluster` | ❌ Not implemented |
 | `ListTagsForResource` | ✅ Implemented |
 | `ModifyActivityStream` | ❌ Not implemented |
 | `ModifyCertificates` | ❌ Not implemented |
 | `ModifyCurrentDBClusterCapacity` | ❌ Not implemented |
 | `ModifyCustomDBEngineVersion` | ❌ Not implemented |
-| `ModifyDBCluster` | ⛔ Not applicable |
+| `ModifyDBCluster` | ⛔ Not applicable [1](#notes) |
 | `ModifyDBClusterEndpoint` | ❌ Not implemented |
 | `ModifyDBClusterParameterGroup` | ❌ Not implemented |
 | `ModifyDBClusterSnapshotAttribute` | ❌ Not implemented |
@@ -201,9 +199,9 @@ A parameter whose omission would create a false safety, security or availability
 | `ModifyEventSubscription` | ❌ Not implemented |
 | `ModifyGlobalCluster` | ❌ Not implemented |
 | `ModifyIntegration` | ❌ Not implemented |
-| `ModifyOptionGroup` | ⛔ Not applicable |
+| `ModifyOptionGroup` | ⛔ Not applicable [2](#notes) |
 | `ModifyTenantDatabase` | ❌ Not implemented |
-| `PromoteReadReplica` | ⛔ Not applicable |
+| `PromoteReadReplica` | ⛔ Not applicable [4](#notes) |
 | `PromoteReadReplicaDBCluster` | ❌ Not implemented |
 | `PurchaseReservedDBInstancesOffering` | ❌ Not implemented |
 | `RebootDBCluster` | ❌ Not implemented |
@@ -222,7 +220,7 @@ A parameter whose omission would create a false safety, security or availability
 | `RestoreDBClusterToPointInTime` | ❌ Not implemented |
 | `RestoreDBInstanceFromDBSnapshot` | ✅ Implemented |
 | `RestoreDBInstanceFromS3` | ❌ Not implemented |
-| `RestoreDBInstanceToPointInTime` | ⛔ Not applicable |
+| `RestoreDBInstanceToPointInTime` | ⛔ Not applicable [3](#notes) |
 | `RevokeDBSecurityGroupIngress` | ❌ Not implemented |
 | `StartActivityStream` | ❌ Not implemented |
 | `StartDBCluster` | ❌ Not implemented |
@@ -236,8 +234,10 @@ A parameter whose omission would create a false safety, security or availability
 | `SwitchoverBlueGreenDeployment` | ❌ Not implemented |
 | `SwitchoverGlobalCluster` | ❌ Not implemented |
 | `SwitchoverReadReplica` | ❌ Not implemented |
-| `AcknowledgeDBBootstrap` | 🔒 Outside the pinned model |
-| `GetDBBootstrapConfig` | 🔒 Outside the pinned model |
-| `PollDBCommands` | 🔒 Outside the pinned model |
-| `RegisterDBInstance` | 🔒 Outside the pinned model |
-| `SubmitDBStateChange` | 🔒 Outside the pinned model |
+
+### Notes
+
+1. Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly.
+2. Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server.
+3. Point-in-time restore needs continuous transaction-log archival, which the backup path does not keep.
+4. Replication between instances is not offered, so there is no replica to create or promote.

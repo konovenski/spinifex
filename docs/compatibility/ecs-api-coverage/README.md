@@ -84,6 +84,3 @@ Clusters, services and tasks run on EC2 container instances. There is no Fargate
 | `UpdateServicePrimaryTaskSet` | ❌ Not implemented |
 | `UpdateTaskProtection` | ❌ Not implemented |
 | `UpdateTaskSet` | ❌ Not implemented |
-| `PollAssignments` | 🔒 Outside the pinned model |
-| `ProvisionCapacity` | 🔒 Outside the pinned model |
-| `ReportTaskGPU` | 🔒 Outside the pinned model |

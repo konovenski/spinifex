@@ -64,7 +64,18 @@
         "ecr",
         "containers",
         "registry"
-      ]
+      ],
+      "notApplicable": {
+        "BatchGetRepositoryScanningConfiguration": "image-scanning",
+        "DescribeImageScanFindings": "image-scanning",
+        "GetRegistryScanningConfiguration": "image-scanning",
+        "PutImageScanningConfiguration": "image-scanning",
+        "PutRegistryScanningConfiguration": "image-scanning",
+        "StartImageScan": "image-scanning"
+      },
+      "notes": {
+        "image-scanning": "Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty."
+      }
     },
     "ecs": {
       "slug": "ecs-api-coverage",
@@ -79,6 +90,11 @@
         "ecs",
         "containers",
         "orchestration"
+      ],
+      "internal": [
+        "PollAssignments",
+        "ProvisionCapacity",
+        "ReportTaskGPU"
       ]
     },
     "eks": {
@@ -94,6 +110,12 @@
         "eks",
         "kubernetes",
         "containers"
+      ],
+      "internal": [
+        "GetRecoveryDirective",
+        "ListInternalAddons",
+        "PublishInternal",
+        "WebhookTokenReview"
       ]
     },
     "elasticloadbalancingv2": {
@@ -109,6 +131,10 @@
         "elbv2",
         "load balancing",
         "networking"
+      ],
+      "internal": [
+        "GetLBConfig",
+        "LBAgentHeartbeat"
       ]
     },
     "iam": {
@@ -167,7 +193,34 @@
         "databases",
         "postgresql",
         "mariadb"
-      ]
+      ],
+      "internal": [
+        "AcknowledgeDBBootstrap",
+        "GetDBBootstrapConfig",
+        "PollDBCommands",
+        "RegisterDBInstance",
+        "SubmitDBStateChange"
+      ],
+      "notApplicable": {
+        "CreateDBCluster": "clusters",
+        "CreateDBInstanceReadReplica": "read-replicas",
+        "CreateOptionGroup": "option-groups",
+        "DeleteDBCluster": "clusters",
+        "DeleteOptionGroup": "option-groups",
+        "DescribeDBClusters": "clusters",
+        "DescribeOptionGroups": "option-groups",
+        "FailoverDBCluster": "clusters",
+        "ModifyDBCluster": "clusters",
+        "ModifyOptionGroup": "option-groups",
+        "PromoteReadReplica": "read-replicas",
+        "RestoreDBInstanceToPointInTime": "point-in-time-restore"
+      },
+      "notes": {
+        "clusters": "Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly.",
+        "option-groups": "Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server.",
+        "point-in-time-restore": "Point-in-time restore needs continuous transaction-log archival, which the backup path does not keep.",
+        "read-replicas": "Replication between instances is not offered, so there is no replica to create or promote."
+      }
     },
     "sts": {
       "slug": "sts-api-coverage",

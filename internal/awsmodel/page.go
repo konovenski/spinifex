@@ -50,16 +50,19 @@ func (c OperationCoverage) ImplementedPercent() float64 {
 }
 
 // OperationStatuses returns every modelled operation with its dispatch state,
-// followed by the registered operations the pinned model does not describe.
+// followed by the registered operations the pinned model does not describe,
+// less the internal routes the page declares.
 //
-// notApplicable declares operations the platform will never serve, mapped to
-// the note key explaining why. A refusing handler is the same fact reached
-// mechanically, so both publish as StatusNotApplicable.
-func (c OperationCoverage) OperationStatuses(notApplicable map[string]string) ([]OperationStatus, error) {
+// The page's NotApplicable declares operations the platform will never serve,
+// mapped to the note key explaining why. A refusing handler is the same fact
+// reached mechanically, so both publish as StatusNotApplicable.
+func (c OperationCoverage) OperationStatuses(page PageMetadata) ([]OperationStatus, error) {
 	registered := toSet(c.Registered)
 	stubbed := toSet(c.Stubbed)
 	unsupported := toSet(c.Unsupported)
 	modelled := toSet(c.Modelled)
+	extra := toSet(c.Extra)
+	notApplicable := page.NotApplicable
 
 	for operation, noteKey := range notApplicable {
 		switch {
@@ -70,6 +73,14 @@ func (c OperationCoverage) OperationStatuses(notApplicable map[string]string) ([
 		case registered[operation] && !unsupported[operation]:
 			return nil, fmt.Errorf("awsmodel: %s operation %q is declared not applicable but is registered to a handler", c.Service, operation)
 		}
+	}
+
+	internal := map[string]bool{}
+	for _, operation := range page.Internal {
+		if !extra[operation] {
+			return nil, fmt.Errorf("awsmodel: %s route %q is declared internal but is not a registered route outside the pinned model", c.Service, operation)
+		}
+		internal[operation] = true
 	}
 
 	statuses := make([]OperationStatus, 0, len(c.Modelled)+len(c.Extra))
@@ -90,6 +101,9 @@ func (c OperationCoverage) OperationStatuses(notApplicable map[string]string) ([
 		statuses = append(statuses, OperationStatus{Operation: operation, Status: status})
 	}
 	for _, operation := range c.Extra {
+		if internal[operation] {
+			continue
+		}
 		statuses = append(statuses, OperationStatus{Operation: operation, Status: StatusOutsideModel})
 	}
 	return statuses, nil
@@ -115,6 +129,12 @@ type PageMetadata struct {
 	// dispatch tables at render, so a typo or a later implementation fails the
 	// build rather than publishing a claim that has quietly become false.
 	NotApplicable map[string]string `json:"notApplicable,omitempty"`
+
+	// Internal names registered routes that carry platform plumbing rather than
+	// a tenant-callable AWS action, which the page leaves out. A route outside
+	// the pinned model that is not declared here is published, so a real AWS
+	// operation newer than the pin surfaces instead of disappearing quietly.
+	Internal []string `json:"internal,omitempty"`
 }
 
 // PageSet is the metadata for the index page and every service page.
@@ -253,7 +273,7 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 		body.WriteString(strings.TrimSpace(intro) + "\n\n")
 	}
 
-	statuses, err := coverage.OperationStatuses(page.NotApplicable)
+	statuses, err := coverage.OperationStatuses(page)
 	if err != nil {
 		return "", err
 	}

@@ -26,7 +26,7 @@ Repository metadata is served over the AWS API on the gateway endpoint. Image da
 
 The split explains the largest group of unimplemented operations below. The layer-transfer operations — `BatchCheckLayerAvailability`, `InitiateLayerUpload`, `UploadLayerPart`, `CompleteLayerUpload` and `GetDownloadUrlForLayer` — are registered stubs because the `/v2/` endpoint carries that traffic instead. A client using `docker` or any OCI-compatible tool never calls them.
 
-Vulnerability scanning is not offered, so the image-scanning operations refuse deliberately rather than pretending to have found nothing. Registry replication is likewise absent: a deployment is a single registry, with no cross-region peer to replicate to.
+Registry replication is absent as well: a deployment is a single registry, with no cross-region peer to replicate to.
 
 ### Operations
 
@@ -35,7 +35,7 @@ Vulnerability scanning is not offered, so the image-scanning operations refuse d
 | `BatchCheckLayerAvailability` | 🟡 Stub |
 | `BatchDeleteImage` | ✅ Implemented |
 | `BatchGetImage` | ✅ Implemented |
-| `BatchGetRepositoryScanningConfiguration` | ⛔ Not applicable |
+| `BatchGetRepositoryScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `CompleteLayerUpload` | 🟡 Stub |
 | `CreatePullThroughCacheRule` | ❌ Not implemented |
 | `CreateRepository` | ✅ Implemented |
@@ -47,7 +47,7 @@ Vulnerability scanning is not offered, so the image-scanning operations refuse d
 | `DeleteRepositoryCreationTemplate` | ❌ Not implemented |
 | `DeleteRepositoryPolicy` | ✅ Implemented |
 | `DescribeImageReplicationStatus` | ❌ Not implemented |
-| `DescribeImageScanFindings` | ⛔ Not applicable |
+| `DescribeImageScanFindings` | ⛔ Not applicable [1](#notes) |
 | `DescribeImages` | ✅ Implemented |
 | `DescribePullThroughCacheRules` | ❌ Not implemented |
 | `DescribeRegistry` | 🟡 Stub |
@@ -58,20 +58,20 @@ Vulnerability scanning is not offered, so the image-scanning operations refuse d
 | `GetLifecyclePolicy` | ✅ Implemented |
 | `GetLifecyclePolicyPreview` | ✅ Implemented |
 | `GetRegistryPolicy` | 🟡 Stub |
-| `GetRegistryScanningConfiguration` | ⛔ Not applicable |
+| `GetRegistryScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `GetRepositoryPolicy` | ✅ Implemented |
 | `InitiateLayerUpload` | 🟡 Stub |
 | `ListImages` | ✅ Implemented |
 | `ListTagsForResource` | ✅ Implemented |
 | `PutImage` | ✅ Implemented |
-| `PutImageScanningConfiguration` | ⛔ Not applicable |
+| `PutImageScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `PutImageTagMutability` | ✅ Implemented |
 | `PutLifecyclePolicy` | ✅ Implemented |
 | `PutRegistryPolicy` | 🟡 Stub |
-| `PutRegistryScanningConfiguration` | ⛔ Not applicable |
+| `PutRegistryScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `PutReplicationConfiguration` | 🟡 Stub |
 | `SetRepositoryPolicy` | ✅ Implemented |
-| `StartImageScan` | ⛔ Not applicable |
+| `StartImageScan` | ⛔ Not applicable [1](#notes) |
 | `StartLifecyclePolicyPreview` | ✅ Implemented |
 | `TagResource` | 🟡 Stub |
 | `UntagResource` | 🟡 Stub |
@@ -82,3 +82,7 @@ Vulnerability scanning is not offered, so the image-scanning operations refuse d
 | `GetImageScanningConfiguration` | 🔒 Outside the pinned model |
 | `ListRepositories` | 🔒 Outside the pinned model |
 | `ReplicateImage` | 🔒 Outside the pinned model |
+
+### Notes
+
+1. Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty.

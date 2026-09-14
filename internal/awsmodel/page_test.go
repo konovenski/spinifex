@@ -3,6 +3,7 @@ package awsmodel_test
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -157,7 +158,7 @@ func TestOperationStatusesRejectsStaleNotApplicableClaims(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			if _, err := coverage.OperationStatuses(declared); err == nil {
+			if _, err := coverage.OperationStatuses(PageMetadata{NotApplicable: declared}); err == nil {
 				t.Fatal("OperationStatuses accepted a claim that cannot hold")
 			}
 		})
@@ -170,7 +171,9 @@ func TestOperationStatusesCarriesTheNoteKey(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	statuses, err := coverage.OperationStatuses(map[string]string{"GetFederationToken": "no-broker"})
+	statuses, err := coverage.OperationStatuses(PageMetadata{
+		NotApplicable: map[string]string{"GetFederationToken": "no-broker"},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,6 +187,44 @@ func TestOperationStatusesCarriesTheNoteKey(t *testing.T) {
 		return
 	}
 	t.Fatal("declared operation is missing from the table")
+}
+
+// Platform plumbing is left out of a page about the AWS API, but only where it
+// is declared: an undeclared route stays visible, so a real AWS operation newer
+// than the pinned model cannot disappear by being registered.
+func TestOperationStatusesHidesDeclaredInternalRoutes(t *testing.T) {
+	coverage, err := CompareOperations(STS, DispatchInventory{
+		Registered: []string{"AssumeRole", "PublishInternal", "AheadOfThePin"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	statuses, err := coverage.OperationStatuses(PageMetadata{Internal: []string{"PublishInternal"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, status := range statuses {
+		if status.Operation == "PublishInternal" {
+			t.Error("a declared internal route is published")
+		}
+	}
+	if !slices.ContainsFunc(statuses, func(s OperationStatus) bool {
+		return s.Operation == "AheadOfThePin" && s.Status == StatusOutsideModel
+	}) {
+		t.Error("an undeclared route outside the pinned model is not published")
+	}
+}
+
+func TestOperationStatusesRejectsAnInternalRouteThatIsModelled(t *testing.T) {
+	coverage, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := coverage.OperationStatuses(PageMetadata{Internal: []string{"AssumeRole"}}); err == nil {
+		t.Fatal("OperationStatuses hid a modelled AWS operation as internal plumbing")
+	}
 }
 
 // A footnote reused across operations is written once, and both directions of
