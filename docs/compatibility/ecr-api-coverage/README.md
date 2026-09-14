@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **19 of the 47** operations in the ECR `2015-09-21` API model, as pinned in `aws-sdk-go v1.55.8` — **40.4%**.
+Spinifex implements **19 of the 47** operations (40.4%) in the ECR `2015-09-21` API model.
 
 ### Two endpoints, one registry
 
@@ -35,7 +35,7 @@ Vulnerability scanning is not offered, so the image-scanning operations refuse d
 | `BatchCheckLayerAvailability` | 🟡 Stub |
 | `BatchDeleteImage` | ✅ Implemented |
 | `BatchGetImage` | ✅ Implemented |
-| `BatchGetRepositoryScanningConfiguration` | 🚫 Not supported |
+| `BatchGetRepositoryScanningConfiguration` | ⛔ Not applicable |
 | `CompleteLayerUpload` | 🟡 Stub |
 | `CreatePullThroughCacheRule` | ❌ Not implemented |
 | `CreateRepository` | ✅ Implemented |
@@ -47,7 +47,7 @@ Vulnerability scanning is not offered, so the image-scanning operations refuse d
 | `DeleteRepositoryCreationTemplate` | ❌ Not implemented |
 | `DeleteRepositoryPolicy` | ✅ Implemented |
 | `DescribeImageReplicationStatus` | ❌ Not implemented |
-| `DescribeImageScanFindings` | 🚫 Not supported |
+| `DescribeImageScanFindings` | ⛔ Not applicable |
 | `DescribeImages` | ✅ Implemented |
 | `DescribePullThroughCacheRules` | ❌ Not implemented |
 | `DescribeRegistry` | 🟡 Stub |
@@ -58,20 +58,20 @@ Vulnerability scanning is not offered, so the image-scanning operations refuse d
 | `GetLifecyclePolicy` | ✅ Implemented |
 | `GetLifecyclePolicyPreview` | ✅ Implemented |
 | `GetRegistryPolicy` | 🟡 Stub |
-| `GetRegistryScanningConfiguration` | 🚫 Not supported |
+| `GetRegistryScanningConfiguration` | ⛔ Not applicable |
 | `GetRepositoryPolicy` | ✅ Implemented |
 | `InitiateLayerUpload` | 🟡 Stub |
 | `ListImages` | ✅ Implemented |
 | `ListTagsForResource` | ✅ Implemented |
 | `PutImage` | ✅ Implemented |
-| `PutImageScanningConfiguration` | 🚫 Not supported |
+| `PutImageScanningConfiguration` | ⛔ Not applicable |
 | `PutImageTagMutability` | ✅ Implemented |
 | `PutLifecyclePolicy` | ✅ Implemented |
 | `PutRegistryPolicy` | 🟡 Stub |
-| `PutRegistryScanningConfiguration` | 🚫 Not supported |
+| `PutRegistryScanningConfiguration` | ⛔ Not applicable |
 | `PutReplicationConfiguration` | 🟡 Stub |
 | `SetRepositoryPolicy` | ✅ Implemented |
-| `StartImageScan` | 🚫 Not supported |
+| `StartImageScan` | ⛔ Not applicable |
 | `StartLifecyclePolicyPreview` | ✅ Implemented |
 | `TagResource` | 🟡 Stub |
 | `UntagResource` | 🟡 Stub |

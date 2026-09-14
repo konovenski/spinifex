@@ -43,7 +43,10 @@
         "ec2",
         "compute",
         "vpc"
-      ]
+      ],
+      "notApplicable": {
+        "DescribeSpotPriceHistory": "On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented."
+      }
     },
     "ecr": {
       "slug": "ecr-api-coverage",
@@ -118,7 +121,28 @@
         "iam",
         "identity",
         "policies"
-      ]
+      ],
+      "notApplicable": {
+        "CreateServiceLinkedRole": "Service-linked roles exist for AWS service principals, which this platform has none of.",
+        "CreateServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
+        "DeleteSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
+        "DeleteServiceLinkedRole": "Service-linked roles exist for AWS service principals, which this platform has none of.",
+        "DeleteServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
+        "DeleteSigningCertificate": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.",
+        "GenerateOrganizationsAccessReport": "AWS Organizations is not offered, so there is no organization to report on.",
+        "GetOrganizationsAccessReport": "AWS Organizations is not offered, so there is no organization to report on.",
+        "GetSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
+        "GetServiceLinkedRoleDeletionStatus": "Service-linked roles exist for AWS service principals, which this platform has none of.",
+        "ListSSHPublicKeys": "CodeCommit SSH keys; the service does not exist here.",
+        "ListServiceSpecificCredentials": "CodeCommit credentials; the service does not exist here.",
+        "ListSigningCertificates": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.",
+        "ResetServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
+        "UpdateSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
+        "UpdateServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
+        "UpdateSigningCertificate": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.",
+        "UploadSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
+        "UploadSigningCertificate": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS."
+      }
     },
     "rds": {
       "slug": "rds-api-coverage",

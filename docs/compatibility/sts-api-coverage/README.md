@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **4 of the 8** operations in the STS `2011-06-15` API model, as pinned in `aws-sdk-go v1.55.8` — **50.0%**.
+Spinifex implements **4 of the 8** operations (50.0%) in the STS `2011-06-15` API model.
 
 ### Trust policies
 

@@ -19,7 +19,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **26 of the 162** operations in the RDS `2014-10-31` API model, as pinned in `aws-sdk-go v1.55.8` — **16.0%**.
+Spinifex implements **26 of the 162** operations (16.0%) in the RDS `2014-10-31` API model.
 
 ### Engines
 
@@ -62,12 +62,12 @@ A parameter whose omission would create a false safety, security or availability
 | `CopyOptionGroup` | ❌ Not implemented |
 | `CreateBlueGreenDeployment` | ❌ Not implemented |
 | `CreateCustomDBEngineVersion` | ❌ Not implemented |
-| `CreateDBCluster` | 🚫 Not supported |
+| `CreateDBCluster` | ⛔ Not applicable |
 | `CreateDBClusterEndpoint` | ❌ Not implemented |
 | `CreateDBClusterParameterGroup` | ❌ Not implemented |
 | `CreateDBClusterSnapshot` | ❌ Not implemented |
 | `CreateDBInstance` | ✅ Implemented |
-| `CreateDBInstanceReadReplica` | 🚫 Not supported |
+| `CreateDBInstanceReadReplica` | ⛔ Not applicable |
 | `CreateDBParameterGroup` | ✅ Implemented |
 | `CreateDBProxy` | ❌ Not implemented |
 | `CreateDBProxyEndpoint` | ❌ Not implemented |
@@ -78,11 +78,11 @@ A parameter whose omission would create a false safety, security or availability
 | `CreateEventSubscription` | ❌ Not implemented |
 | `CreateGlobalCluster` | ❌ Not implemented |
 | `CreateIntegration` | ❌ Not implemented |
-| `CreateOptionGroup` | 🚫 Not supported |
+| `CreateOptionGroup` | ⛔ Not applicable |
 | `CreateTenantDatabase` | ❌ Not implemented |
 | `DeleteBlueGreenDeployment` | ❌ Not implemented |
 | `DeleteCustomDBEngineVersion` | ❌ Not implemented |
-| `DeleteDBCluster` | 🚫 Not supported |
+| `DeleteDBCluster` | ⛔ Not applicable |
 | `DeleteDBClusterAutomatedBackup` | ❌ Not implemented |
 | `DeleteDBClusterEndpoint` | ❌ Not implemented |
 | `DeleteDBClusterParameterGroup` | ❌ Not implemented |
@@ -99,7 +99,7 @@ A parameter whose omission would create a false safety, security or availability
 | `DeleteEventSubscription` | ❌ Not implemented |
 | `DeleteGlobalCluster` | ❌ Not implemented |
 | `DeleteIntegration` | ❌ Not implemented |
-| `DeleteOptionGroup` | 🚫 Not supported |
+| `DeleteOptionGroup` | ⛔ Not applicable |
 | `DeleteTenantDatabase` | ❌ Not implemented |
 | `DeregisterDBProxyTargets` | ❌ Not implemented |
 | `DescribeAccountAttributes` | ❌ Not implemented |
@@ -112,7 +112,7 @@ A parameter whose omission would create a false safety, security or availability
 | `DescribeDBClusterParameters` | ❌ Not implemented |
 | `DescribeDBClusterSnapshotAttributes` | ❌ Not implemented |
 | `DescribeDBClusterSnapshots` | ❌ Not implemented |
-| `DescribeDBClusters` | 🚫 Not supported |
+| `DescribeDBClusters` | ⛔ Not applicable |
 | `DescribeDBEngineVersions` | ✅ Implemented |
 | `DescribeDBInstanceAutomatedBackups` | ✅ Implemented |
 | `DescribeDBInstances` | ✅ Implemented |
@@ -139,7 +139,7 @@ A parameter whose omission would create a false safety, security or availability
 | `DescribeGlobalClusters` | ❌ Not implemented |
 | `DescribeIntegrations` | ❌ Not implemented |
 | `DescribeOptionGroupOptions` | ❌ Not implemented |
-| `DescribeOptionGroups` | 🚫 Not supported |
+| `DescribeOptionGroups` | ⛔ Not applicable |
 | `DescribeOrderableDBInstanceOptions` | ✅ Implemented |
 | `DescribePendingMaintenanceActions` | ❌ Not implemented |
 | `DescribeReservedDBInstances` | ❌ Not implemented |
@@ -150,14 +150,14 @@ A parameter whose omission would create a false safety, security or availability
 | `DisableHttpEndpoint` | ❌ Not implemented |
 | `DownloadDBLogFilePortion` | ❌ Not implemented |
 | `EnableHttpEndpoint` | ❌ Not implemented |
-| `FailoverDBCluster` | 🚫 Not supported |
+| `FailoverDBCluster` | ⛔ Not applicable |
 | `FailoverGlobalCluster` | ❌ Not implemented |
 | `ListTagsForResource` | ✅ Implemented |
 | `ModifyActivityStream` | ❌ Not implemented |
 | `ModifyCertificates` | ❌ Not implemented |
 | `ModifyCurrentDBClusterCapacity` | ❌ Not implemented |
 | `ModifyCustomDBEngineVersion` | ❌ Not implemented |
-| `ModifyDBCluster` | 🚫 Not supported |
+| `ModifyDBCluster` | ⛔ Not applicable |
 | `ModifyDBClusterEndpoint` | ❌ Not implemented |
 | `ModifyDBClusterParameterGroup` | ❌ Not implemented |
 | `ModifyDBClusterSnapshotAttribute` | ❌ Not implemented |
@@ -174,9 +174,9 @@ A parameter whose omission would create a false safety, security or availability
 | `ModifyEventSubscription` | ❌ Not implemented |
 | `ModifyGlobalCluster` | ❌ Not implemented |
 | `ModifyIntegration` | ❌ Not implemented |
-| `ModifyOptionGroup` | 🚫 Not supported |
+| `ModifyOptionGroup` | ⛔ Not applicable |
 | `ModifyTenantDatabase` | ❌ Not implemented |
-| `PromoteReadReplica` | 🚫 Not supported |
+| `PromoteReadReplica` | ⛔ Not applicable |
 | `PromoteReadReplicaDBCluster` | ❌ Not implemented |
 | `PurchaseReservedDBInstancesOffering` | ❌ Not implemented |
 | `RebootDBCluster` | ❌ Not implemented |
@@ -195,7 +195,7 @@ A parameter whose omission would create a false safety, security or availability
 | `RestoreDBClusterToPointInTime` | ❌ Not implemented |
 | `RestoreDBInstanceFromDBSnapshot` | ✅ Implemented |
 | `RestoreDBInstanceFromS3` | ❌ Not implemented |
-| `RestoreDBInstanceToPointInTime` | 🚫 Not supported |
+| `RestoreDBInstanceToPointInTime` | ⛔ Not applicable |
 | `RevokeDBSecurityGroupIngress` | ❌ Not implemented |
 | `StartActivityStream` | ❌ Not implemented |
 | `StartDBCluster` | ❌ Not implemented |

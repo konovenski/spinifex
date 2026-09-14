@@ -1,23 +1,14 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"io/fs"
 	"os"
-	"path/filepath"
 
 	"github.com/mulgadc/spinifex/internal/awsmodel"
 	"github.com/mulgadc/spinifex/spinifex/gateway"
 
 	_ "github.com/mulgadc/bluebottle/pkg/fipsboot"
-)
-
-const (
-	pagesFile = "pages.json"
-	introFile = "intro.md"
-	pageFile  = "README.md"
 )
 
 func main() {
@@ -32,7 +23,7 @@ func main() {
 		fmt.Print(awsmodel.RenderCoverageSummary(coverages))
 		return
 	}
-	if err := writePages(*outputDir, coverages); err != nil {
+	if err := awsmodel.WritePages(*outputDir, coverages); err != nil {
 		fail(err)
 	}
 }
@@ -71,67 +62,4 @@ func compareAll() ([]awsmodel.OperationCoverage, error) {
 		coverages = append(coverages, coverage)
 	}
 	return coverages, nil
-}
-
-func writePages(outputDir string, coverages []awsmodel.OperationCoverage) error {
-	contents, err := os.ReadFile(filepath.Join(outputDir, pagesFile))
-	if err != nil {
-		return fmt.Errorf("read page metadata: %w", err)
-	}
-	pages, err := awsmodel.ParsePageSet(contents)
-	if err != nil {
-		return err
-	}
-
-	for _, coverage := range coverages {
-		page, ok := pages.Services[coverage.Service]
-		if !ok {
-			continue
-		}
-		intro, err := readIntro(outputDir, page.Slug)
-		if err != nil {
-			return err
-		}
-		body, err := awsmodel.RenderServicePage(coverage, pages, intro)
-		if err != nil {
-			return err
-		}
-		if err := writePage(outputDir, page.Slug, body); err != nil {
-			return err
-		}
-	}
-
-	intro, err := readIntro(outputDir, pages.Index.Slug)
-	if err != nil {
-		return err
-	}
-	body, err := awsmodel.RenderIndexPage(coverages, pages, intro)
-	if err != nil {
-		return err
-	}
-	return writePage(outputDir, pages.Index.Slug, body)
-}
-
-// readIntro returns the hand-written prose for a page, or "" where the page has
-// none. An intro is optional by design: most services have nothing to add.
-func readIntro(outputDir, slug string) (string, error) {
-	contents, err := os.ReadFile(filepath.Join(outputDir, slug, introFile))
-	if errors.Is(err, fs.ErrNotExist) {
-		return "", nil
-	}
-	if err != nil {
-		return "", fmt.Errorf("read %s intro: %w", slug, err)
-	}
-	return string(contents), nil
-}
-
-func writePage(outputDir, slug, body string) error {
-	dir := filepath.Join(outputDir, slug)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return fmt.Errorf("create %s page directory: %w", slug, err)
-	}
-	if err := os.WriteFile(filepath.Join(dir, pageFile), []byte(body), 0o644); err != nil {
-		return fmt.Errorf("write %s page: %w", slug, err)
-	}
-	return nil
 }

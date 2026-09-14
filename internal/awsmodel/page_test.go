@@ -77,11 +77,11 @@ func TestRenderServicePageCarriesEveryStatus(t *testing.T) {
 		`category: "Coverage"`,
 		"sections:\n  - overview\n",
 		"# STS API Coverage\n\n## Overview\n",
-		"Spinifex implements **1 of the 8** operations in the STS `2011-06-15` API model",
+		"Spinifex implements **1 of the 8** operations (12.5%) in the STS `2011-06-15` API model.",
 		"### Scope\n\nHand-written prose.",
 		"| `AssumeRole` | " + StatusImplemented + " |",
 		"| `GetSessionToken` | " + StatusStub + " |",
-		"| `GetCallerIdentity` | " + StatusNotSupported + " |",
+		"| `GetCallerIdentity` | " + StatusNotApplicable + " |",
 		"| `AssumeRoleWithSAML` | " + StatusNotImplemented + " |",
 		"| `PublishInternal` | " + StatusOutsideModel + " |",
 	} {
@@ -140,6 +140,50 @@ func TestRenderServicePageRejectsIntroOpeningASection(t *testing.T) {
 	if _, err := RenderServicePage(coverage, pages, "## Troubleshooting\n"); err == nil {
 		t.Fatal("RenderServicePage accepted an intro that opens a new page section")
 	}
+}
+
+// A "never" claim is only worth publishing if it cannot quietly become false.
+func TestOperationStatusesRejectsStaleNotApplicableClaims(t *testing.T) {
+	coverage, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for name, declared := range map[string]map[string]string{
+		"not in the model": {"NotAnOperation": "a reason"},
+		"no reason":        {"GetFederationToken": ""},
+		"already implemented": {
+			"AssumeRole": "claims the platform will never serve an operation it already serves",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := coverage.OperationStatuses(declared); err == nil {
+				t.Fatal("OperationStatuses accepted a claim that cannot hold")
+			}
+		})
+	}
+}
+
+func TestOperationStatusesPublishesDeclaredReasons(t *testing.T) {
+	coverage, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	statuses, err := coverage.OperationStatuses(map[string]string{"GetFederationToken": "No federation broker."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, status := range statuses {
+		if status.Operation != "GetFederationToken" {
+			continue
+		}
+		if status.Status != StatusNotApplicable || status.Note != "No federation broker." {
+			t.Fatalf("status = %q, note = %q", status.Status, status.Note)
+		}
+		return
+	}
+	t.Fatal("declared operation is missing from the table")
 }
 
 // An opaque service has no dispatch table to count, so publishing a page for it

@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **33 of the 46** operations in the ELBv2 `2015-12-01` API model, as pinned in `aws-sdk-go v1.55.8` — **71.7%**.
+Spinifex implements **33 of the 46** operations (71.7%) in the ELBv2 `2015-12-01` API model.
 
 ### Two data planes
 

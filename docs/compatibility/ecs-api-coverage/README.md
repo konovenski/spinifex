@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **31 of the 56** operations in the ECS `2014-11-13` API model, as pinned in `aws-sdk-go v1.55.8` — **55.4%**.
+Spinifex implements **31 of the 56** operations (55.4%) in the ECS `2014-11-13` API model.
 
 ### No Fargate
 

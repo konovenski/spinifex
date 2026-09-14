@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **34 of the 56** operations in the EKS `2017-11-01` API model, as pinned in `aws-sdk-go v1.55.8` — **60.7%**.
+Spinifex implements **34 of the 56** operations (60.7%) in the EKS `2017-11-01` API model.
 
 ### Routing
 

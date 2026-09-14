@@ -15,7 +15,7 @@ import (
 const (
 	StatusImplemented    = "✅ Implemented"
 	StatusStub           = "🟡 Stub"
-	StatusNotSupported   = "🚫 Not supported"
+	StatusNotApplicable  = "⛔ Not applicable"
 	StatusNotImplemented = "❌ Not implemented"
 	StatusOutsideModel   = "🔒 Outside the pinned model"
 )
@@ -35,6 +35,7 @@ var slugPattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 type OperationStatus struct {
 	Operation string
 	Status    string
+	Note      string
 }
 
 // ImplementedPercent is the share of modelled operations bound to a real
@@ -48,10 +49,26 @@ func (c OperationCoverage) ImplementedPercent() float64 {
 
 // OperationStatuses returns every modelled operation with its dispatch state,
 // followed by the registered operations the pinned model does not describe.
-func (c OperationCoverage) OperationStatuses() []OperationStatus {
+//
+// notApplicable declares operations the platform will never serve, mapped to
+// the reason why. A refusing handler is the same fact reached mechanically, so
+// both publish as StatusNotApplicable; the declaration only adds the reason.
+func (c OperationCoverage) OperationStatuses(notApplicable map[string]string) ([]OperationStatus, error) {
 	registered := toSet(c.Registered)
 	stubbed := toSet(c.Stubbed)
 	unsupported := toSet(c.Unsupported)
+	modelled := toSet(c.Modelled)
+
+	for operation, reason := range notApplicable {
+		switch {
+		case reason == "":
+			return nil, fmt.Errorf("awsmodel: %s operation %q is declared not applicable with no reason", c.Service, operation)
+		case !modelled[operation]:
+			return nil, fmt.Errorf("awsmodel: %s operation %q is declared not applicable but is not in the pinned model", c.Service, operation)
+		case registered[operation] && !unsupported[operation]:
+			return nil, fmt.Errorf("awsmodel: %s operation %q is declared not applicable but is registered to a handler", c.Service, operation)
+		}
+	}
 
 	statuses := make([]OperationStatus, 0, len(c.Modelled)+len(c.Extra))
 	for _, operation := range c.Modelled {
@@ -60,16 +77,20 @@ func (c OperationCoverage) OperationStatuses() []OperationStatus {
 		case stubbed[operation]:
 			status = StatusStub
 		case unsupported[operation]:
-			status = StatusNotSupported
+			status = StatusNotApplicable
 		case registered[operation]:
 			status = StatusImplemented
+		}
+		if reason, ok := notApplicable[operation]; ok {
+			statuses = append(statuses, OperationStatus{Operation: operation, Status: StatusNotApplicable, Note: reason})
+			continue
 		}
 		statuses = append(statuses, OperationStatus{Operation: operation, Status: status})
 	}
 	for _, operation := range c.Extra {
 		statuses = append(statuses, OperationStatus{Operation: operation, Status: StatusOutsideModel})
 	}
-	return statuses
+	return statuses, nil
 }
 
 // PageMetadata is the checked-in frontmatter for one published coverage page.
@@ -82,6 +103,11 @@ type PageMetadata struct {
 	SEOTitle    string   `json:"seoTitle"`
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
+
+	// NotApplicable maps an operation the platform will never serve to the
+	// reason why. Checked against the model and the dispatch tables at render,
+	// so a typo or a later implementation fails the build rather than lying.
+	NotApplicable map[string]string `json:"notApplicable,omitempty"`
 }
 
 // PageSet is the metadata for the index page and every service page.
@@ -177,16 +203,29 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	writeFrontmatter(&body, page, pages.Category)
 	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", page.Title)
 
-	fmt.Fprintf(&body, "Spinifex implements **%d of the %d** operations in the %s `%s` API model, as pinned in `aws-sdk-go %s` — **%.1f%%**.\n\n",
-		len(coverage.Implemented), len(coverage.Modelled), page.Name, coverage.APIVersion, SourceSDKVersion, coverage.ImplementedPercent())
+	fmt.Fprintf(&body, "Spinifex implements **%d of the %d** operations (%.1f%%) in the %s `%s` API model.\n\n",
+		len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent(), page.Name, coverage.APIVersion)
 
 	if intro != "" {
 		body.WriteString(strings.TrimSpace(intro) + "\n\n")
 	}
 
-	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
-	for _, status := range coverage.OperationStatuses() {
-		fmt.Fprintf(&body, "| `%s` | %s |\n", status.Operation, status.Status)
+	statuses, err := coverage.OperationStatuses(page.NotApplicable)
+	if err != nil {
+		return "", err
+	}
+
+	body.WriteString("### Operations\n\n")
+	if len(page.NotApplicable) == 0 {
+		body.WriteString("| Operation | Status |\n|---|---|\n")
+		for _, status := range statuses {
+			fmt.Fprintf(&body, "| `%s` | %s |\n", status.Operation, status.Status)
+		}
+		return body.String(), nil
+	}
+	body.WriteString("| Operation | Status | Notes |\n|---|---|---|\n")
+	for _, status := range statuses {
+		fmt.Fprintf(&body, "| `%s` | %s | %s |\n", status.Operation, status.Status, status.Note)
 	}
 	return body.String(), nil
 }
