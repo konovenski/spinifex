@@ -29,6 +29,6 @@ Six additional production-referenced values are deliberately not accepted by the
 
 ## Operation coverage
 
-Phase 5 generates the public model-versus-dispatch inventory at `docs/aws-model-operation-coverage.md`. Run `make aws-model-coverage` to regenerate and print it. A normal `make build` and the integration target both regenerate the document so handler-map changes cannot silently leave it stale.
+Phase 5 generates the public model-versus-dispatch inventory as one page per service under `docs/compatibility/`, plus an index carrying the cross-service summary. Run `make aws-model-coverage` to regenerate the pages and print a terminal summary. A normal `make build` and the integration target both regenerate the pages so handler-map changes cannot silently leave them stale.
 
 The inventory counts modelled operations bound to real handlers separately from registered stubs and deliberately unsupported handlers. S3 is marked opaque because Spinifex delegates its REST surface to Predastore rather than using an operation-name dispatch table; no mechanical S3 coverage percentage is claimed.

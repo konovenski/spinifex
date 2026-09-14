@@ -1,0 +1,52 @@
+---
+title: "STS API Coverage"
+seoTitle: "AWS Security Token Service API Coverage — Spinifex Docs"
+description: "Every operation in the AWS STS API model and whether Spinifex implements it, covering role assumption, session tokens and web identity federation (IRSA)."
+category: "Coverage"
+sections:
+  - overview
+tags:
+  - aws
+  - compatibility
+  - coverage
+  - sts
+  - identity
+  - credentials
+---
+
+# STS API Coverage
+
+## Overview
+
+Spinifex implements **4 of the 8** operations in the STS `2011-06-15` API model, as pinned in `aws-sdk-go v1.55.8` — **50.0%**.
+
+### Trust policies
+
+Trust policies are validated at write time rather than silently narrowed at assume time. `NotPrincipal`, `NotAction`, empty-string `Action` elements and empty `Principal` blocks are all rejected as malformed.
+
+`Condition` blocks are rejected except on `AssumeRoleWithWebIdentity` with `StringEquals`, which is the shape IRSA needs and which Spinifex evaluates at assume time against the token's issuer, subject and audience. Anything wider is refused rather than accepted and ignored, because an accepted-but-unevaluated condition is a silent over-grant.
+
+### Parameters that are refused, not ignored
+
+Several inputs the model describes are deliberately rejected rather than accepted as no-ops: inline session policies and policy ARNs, session tags, and MFA serial numbers and token codes. Each of them would otherwise appear to restrict or strengthen a session that in fact carries the role's full permissions.
+
+### Operations
+
+| Status | Meaning |
+|---|---|
+| ✅ Implemented | A modelled operation bound to a real handler. |
+| 🟡 Stub | A registered handler that answers with a fixed or empty result. |
+| 🚫 Not supported | A registered handler that deliberately refuses, so a client sees "not offered" rather than an unknown action. |
+| ❌ Not implemented | Modelled by AWS, not registered by Spinifex. |
+| 🔒 Outside the pinned model | Registered by Spinifex but absent from the pinned model — an internal route, not a tenant-callable AWS action. |
+
+| Operation | Status |
+|---|---|
+| `AssumeRole` | ✅ Implemented |
+| `AssumeRoleWithSAML` | ❌ Not implemented |
+| `AssumeRoleWithWebIdentity` | ✅ Implemented |
+| `DecodeAuthorizationMessage` | ❌ Not implemented |
+| `GetAccessKeyInfo` | ❌ Not implemented |
+| `GetCallerIdentity` | ✅ Implemented |
+| `GetFederationToken` | ❌ Not implemented |
+| `GetSessionToken` | ✅ Implemented |

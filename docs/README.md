@@ -2,7 +2,7 @@
 
 This directory contains the Spinifex documentation. This is available in individual markdown files, and a generated website to aid navigation and browsing documentation at: [https://docs.mulgadc.com](https://docs.mulgadc.com/)
 
-The [AWS model operation coverage](aws-model-operation-coverage.md) report is generated from Spinifex's dispatch tables and the pinned AWS API models. Run `make aws-model-coverage` to regenerate and print it.
+The [AWS API coverage](compatibility/aws-api-coverage/README.md) pages are generated from Spinifex's dispatch tables and the pinned AWS API models, one page per service. Run `make aws-model-coverage` to regenerate them and print a summary. Only `pages.json` and the `intro.md` files under `compatibility/` are hand-written; every `README.md` there is generated and will be overwritten.
 
 ## Frontmatter
 

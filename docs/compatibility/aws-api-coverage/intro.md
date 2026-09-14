@@ -1,0 +1,3 @@
+### What "implemented" means here
+
+An operation is implemented when the gateway binds it to a real handler. These pages are generated from those dispatch tables on every build, so they cannot go stale against the code. That is a mechanical fact, and it is the only claim they make. It does not say the handler honours every parameter AWS models, and no page reports parameter or field-level detail: a handler receives a fully-populated typed SDK struct, so nothing distinguishes a field it honours from one it ignores. Behavioural conformance is measured separately by the integration conformance suite.

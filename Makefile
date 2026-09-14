@@ -181,7 +181,7 @@ test-harness:
 # JetStream, with only the daemon-side NATS subjects stubbed.
 AWS_MODEL_CONFORMANCE_REPORT ?= $(CURDIR)/.cache/aws-model-conformance-report.txt
 AWS_MODEL_CONFORMANCE_MODE ?= fail
-AWS_MODEL_OPERATION_COVERAGE_REPORT ?= $(CURDIR)/docs/aws-model-operation-coverage.md
+AWS_MODEL_OPERATION_COVERAGE_DIR ?= $(CURDIR)/docs/compatibility
 # -count=1 is load-bearing: the conformance report is written by the test binary,
 # so a cached pass skips the run, leaves no report, and the cat below fails the
 # target. It also keeps the conformance gate honest — a cached result would mean
@@ -191,14 +191,13 @@ test-integration:
 	$(_Q)LOG_IGNORE=1 AWS_MODEL_CONFORMANCE_MODE=$(AWS_MODEL_CONFORMANCE_MODE) AWS_MODEL_CONFORMANCE_REPORT=$(AWS_MODEL_CONFORMANCE_REPORT) go test -count=1 -tags=integration -timeout 60s ./tests/integration/... $(_RACEQ)
 	@cat $(AWS_MODEL_CONFORMANCE_REPORT)
 	@$(MAKE) --no-print-directory generate-aws-model-coverage
-	@echo "AWS operation coverage: $(AWS_MODEL_OPERATION_COVERAGE_REPORT)"
+	@echo "AWS operation coverage: $(AWS_MODEL_OPERATION_COVERAGE_DIR)"
 
 generate-aws-model-coverage:
-	@mkdir -p $(dir $(AWS_MODEL_OPERATION_COVERAGE_REPORT))
-	@go run ./cmd/aws-model-coverage > $(AWS_MODEL_OPERATION_COVERAGE_REPORT)
+	@go run ./cmd/aws-model-coverage -out $(AWS_MODEL_OPERATION_COVERAGE_DIR)
 
 aws-model-coverage: generate-aws-model-coverage
-	@cat $(AWS_MODEL_OPERATION_COVERAGE_REPORT)
+	@go run ./cmd/aws-model-coverage
 
 # Segscan storage oracle: needs the mulga umbrella repo's scripts/segscan
 # checked out alongside spinifex (see spinifex/testutil/segscanoracle), which

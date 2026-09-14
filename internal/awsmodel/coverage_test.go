@@ -32,20 +32,21 @@ func TestCompareOperationsRejectsInvalidInventory(t *testing.T) {
 	}
 }
 
-func TestRenderCoverageMarkdown(t *testing.T) {
+func TestRenderCoverageSummary(t *testing.T) {
 	coverage, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole"}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	report := RenderCoverageMarkdown([]OperationCoverage{coverage})
+	report := RenderCoverageSummary([]OperationCoverage{coverage})
 	for _, want := range []string{
-		"# AWS model operation coverage",
-		"| sts | 2011-06-15 | 8 | 1 | 1 | 0 | 0 | 7 | 0 |",
-		"Implements **1 of 8** modelled operations (12.5%).",
-		"<summary>Missing from dispatch (7)</summary>",
+		"aws-sdk-go " + SourceSDKVersion,
+		"1 of   8 implemented ( 12.5%)",
 	} {
 		if !strings.Contains(report, want) {
-			t.Errorf("report does not contain %q:\n%s", want, report)
+			t.Errorf("summary does not contain %q:\n%s", want, report)
 		}
+	}
+	if strings.Contains(report, "<details>") {
+		t.Errorf("summary contains raw HTML the docs site would escape:\n%s", report)
 	}
 }

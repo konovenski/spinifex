@@ -1,0 +1,57 @@
+---
+title: "ACM API Coverage"
+seoTitle: "AWS Certificate Manager API Coverage — Spinifex Docs"
+description: "Every operation in the AWS Certificate Manager API model and whether Spinifex implements it, generated from the gateway dispatch tables on each build."
+category: "Coverage"
+sections:
+  - overview
+tags:
+  - aws
+  - compatibility
+  - coverage
+  - acm
+  - certificates
+  - tls
+---
+
+# ACM API Coverage
+
+## Overview
+
+Spinifex implements **9 of the 15** operations in the ACM `2015-12-08` API model, as pinned in `aws-sdk-go v1.55.8` — **60.0%**.
+
+### Import and issuance
+
+Spinifex both stores externally-issued certificates and issues its own for load balancer listener references. Certificates are account-scoped, and a delete is refused while any listener still references the ARN — there is no force flag, matching AWS.
+
+`RequestCertificate` mints an ARN immediately and returns `PENDING_VALIDATION`; it never issues inline except against a tenant private CA, which has no domain to validate. The validation mode is derived from deployment state rather than configured: the DNS provider API where a credential exists, a manual TXT record where the platform hosts the zone, and a private CA otherwise — the only option for a deployment with no publicly delegated domain.
+
+Terraform's canonical certificate, DNS record and validation flow works unmodified in every mode. Where Spinifex owns the record write it emits no `ResourceRecord`, so iterating the validation options yields zero records and the validation resource still blocks correctly by polling until the certificate is issued.
+
+### Operations
+
+| Status | Meaning |
+|---|---|
+| ✅ Implemented | A modelled operation bound to a real handler. |
+| 🟡 Stub | A registered handler that answers with a fixed or empty result. |
+| 🚫 Not supported | A registered handler that deliberately refuses, so a client sees "not offered" rather than an unknown action. |
+| ❌ Not implemented | Modelled by AWS, not registered by Spinifex. |
+| 🔒 Outside the pinned model | Registered by Spinifex but absent from the pinned model — an internal route, not a tenant-callable AWS action. |
+
+| Operation | Status |
+|---|---|
+| `AddTagsToCertificate` | ✅ Implemented |
+| `DeleteCertificate` | ✅ Implemented |
+| `DescribeCertificate` | ✅ Implemented |
+| `ExportCertificate` | ❌ Not implemented |
+| `GetAccountConfiguration` | ❌ Not implemented |
+| `GetCertificate` | ✅ Implemented |
+| `ImportCertificate` | ✅ Implemented |
+| `ListCertificates` | ✅ Implemented |
+| `ListTagsForCertificate` | ✅ Implemented |
+| `PutAccountConfiguration` | ❌ Not implemented |
+| `RemoveTagsFromCertificate` | ✅ Implemented |
+| `RenewCertificate` | ❌ Not implemented |
+| `RequestCertificate` | ✅ Implemented |
+| `ResendValidationEmail` | ❌ Not implemented |
+| `UpdateCertificateOptions` | ❌ Not implemented |
