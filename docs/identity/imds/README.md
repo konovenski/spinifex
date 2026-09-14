@@ -1,5 +1,5 @@
 ---
-title: "AWS IMDS: Instance Metadata Service (IMDSv2)"
+title: "IMDS: Instance Metadata Service (IMDSv2)"
 description: "Query AWS instance metadata, read user data, and fetch short-lived IAM role credentials from inside a guest VM using IMDSv2 session tokens on Spinifex."
 category: "Identity"
 tags:

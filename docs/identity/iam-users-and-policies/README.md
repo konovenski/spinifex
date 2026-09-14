@@ -1,5 +1,5 @@
 ---
-title: "AWS IAM Users, Policies, and Access Keys"
+title: "IAM Users, Policies, and Access Keys"
 description: "Create AWS IAM users, issue and rotate access keys, and write and attach JSON policies that control exactly what each user can do in a Spinifex account."
 category: "Identity"
 tags:

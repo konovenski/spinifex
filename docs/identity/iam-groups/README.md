@@ -1,5 +1,5 @@
 ---
-title: "AWS IAM Groups for Shared User Permissions"
+title: "IAM Groups for Shared User Permissions"
 description: "Organise AWS IAM users into groups, manage membership, and attach managed or inline policies once for the whole team instead of granting them user by user."
 category: "Identity"
 tags:

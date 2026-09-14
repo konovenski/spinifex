@@ -1,5 +1,5 @@
 ---
-title: "AWS IAM Roles and Instance Profiles for EC2"
+title: "IAM Roles and Instance Profiles for EC2"
 description: "Create AWS IAM roles with trust policies, wrap them in instance profiles, and launch EC2 instances that receive credentials with no static access keys at all."
 category: "Identity"
 tags:

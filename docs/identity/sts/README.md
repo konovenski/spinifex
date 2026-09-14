@@ -1,5 +1,5 @@
 ---
-title: "AWS STS Temporary Credentials and AssumeRole"
+title: "STS Temporary Credentials and AssumeRole"
 description: "Use AWS STS to issue temporary credentials: assume an IAM role, request a session token, or federate Kubernetes workloads with OIDC web identity on Spinifex."
 category: "Identity"
 tags:
