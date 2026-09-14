@@ -77,7 +77,7 @@ func TestRenderServicePageCarriesEveryStatus(t *testing.T) {
 		`category: "Coverage"`,
 		"sections:\n  - overview\n",
 		"# STS API Coverage\n\n## Overview\n",
-		"Spinifex implements **1 of the 8** operations (12.5%) in the STS `2011-06-15` API model.",
+		"Spinifex implements **1 of the 8** operations (**12.5%**) in the STS `2011-06-15` API model.",
 		"### Scope\n\nHand-written prose.",
 		"| `AssumeRole` | " + StatusImplemented + " |",
 		"| `GetSessionToken` | " + StatusStub + " |",
@@ -164,13 +164,13 @@ func TestOperationStatusesRejectsStaleNotApplicableClaims(t *testing.T) {
 	}
 }
 
-func TestOperationStatusesPublishesDeclaredReasons(t *testing.T) {
+func TestOperationStatusesCarriesTheNoteKey(t *testing.T) {
 	coverage, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole"}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	statuses, err := coverage.OperationStatuses(map[string]string{"GetFederationToken": "No federation broker."})
+	statuses, err := coverage.OperationStatuses(map[string]string{"GetFederationToken": "no-broker"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,12 +178,75 @@ func TestOperationStatusesPublishesDeclaredReasons(t *testing.T) {
 		if status.Operation != "GetFederationToken" {
 			continue
 		}
-		if status.Status != StatusNotApplicable || status.Note != "No federation broker." {
-			t.Fatalf("status = %q, note = %q", status.Status, status.Note)
+		if status.Status != StatusNotApplicable || status.NoteKey != "no-broker" {
+			t.Fatalf("status = %q, note key = %q", status.Status, status.NoteKey)
 		}
 		return
 	}
 	t.Fatal("declared operation is missing from the table")
+}
+
+// A footnote reused across operations is written once, and both directions of
+// the reference are checked so neither side can rot.
+func TestRenderServicePageFootnotesSharedNotes(t *testing.T) {
+	pages := testPageSet(t)
+	iam := pages.Services[IAM]
+	if len(iam.Notes) == 0 {
+		t.Skip("no notes are declared for IAM")
+	}
+	coverage, err := CompareOperations(IAM, DispatchInventory{Registered: []string{"CreateUser"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	page, err := RenderServicePage(coverage, pages, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(page, "\n### Notes\n\n1. ") {
+		t.Errorf("page has no numbered notes section:\n%s", page)
+	}
+	if !strings.Contains(page, "| `UploadSSHPublicKey` | "+StatusNotApplicable+" [") {
+		t.Errorf("a declared operation carries no footnote reference:\n%s", page)
+	}
+	for _, text := range iam.Notes {
+		if strings.Count(page, text) != 1 {
+			t.Errorf("note %q is not written exactly once", text)
+		}
+	}
+}
+
+func TestRenderServicePageRejectsBrokenNoteReferences(t *testing.T) {
+	pages := testPageSet(t)
+	coverage, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sts := pages.Services[STS]
+
+	for name, mutate := range map[string]func(*PageMetadata){
+		"undefined note": func(p *PageMetadata) {
+			p.NotApplicable = map[string]string{"GetFederationToken": "nonexistent"}
+		},
+		"unreferenced note": func(p *PageMetadata) {
+			p.Notes = map[string]string{"orphan": "Nothing points at this."}
+		},
+		"empty note": func(p *PageMetadata) {
+			p.Notes = map[string]string{"blank": ""}
+			p.NotApplicable = map[string]string{"GetFederationToken": "blank"}
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			broken := sts
+			mutate(&broken)
+			pages.Services[STS] = broken
+			defer func() { pages.Services[STS] = sts }()
+
+			if _, err := RenderServicePage(coverage, pages, ""); err == nil {
+				t.Fatal("RenderServicePage accepted a broken note reference")
+			}
+		})
+	}
 }
 
 // An opaque service has no dispatch table to count, so publishing a page for it

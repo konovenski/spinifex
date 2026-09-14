@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **4 of the 8** operations (50.0%) in the STS `2011-06-15` API model.
+Spinifex implements **4 of the 8** operations (**50.0%**) in the STS `2011-06-15` API model.
 
 ### Trust policies
 

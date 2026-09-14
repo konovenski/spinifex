@@ -45,7 +45,10 @@
         "vpc"
       ],
       "notApplicable": {
-        "DescribeSpotPriceHistory": "On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented."
+        "DescribeSpotPriceHistory": "spot-price"
+      },
+      "notes": {
+        "spot-price": "On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented."
       }
     },
     "ecr": {
@@ -123,25 +126,31 @@
         "policies"
       ],
       "notApplicable": {
-        "CreateServiceLinkedRole": "Service-linked roles exist for AWS service principals, which this platform has none of.",
-        "CreateServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
-        "DeleteSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
-        "DeleteServiceLinkedRole": "Service-linked roles exist for AWS service principals, which this platform has none of.",
-        "DeleteServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
-        "DeleteSigningCertificate": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.",
-        "GenerateOrganizationsAccessReport": "AWS Organizations is not offered, so there is no organization to report on.",
-        "GetOrganizationsAccessReport": "AWS Organizations is not offered, so there is no organization to report on.",
-        "GetSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
-        "GetServiceLinkedRoleDeletionStatus": "Service-linked roles exist for AWS service principals, which this platform has none of.",
-        "ListSSHPublicKeys": "CodeCommit SSH keys; the service does not exist here.",
-        "ListServiceSpecificCredentials": "CodeCommit credentials; the service does not exist here.",
-        "ListSigningCertificates": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.",
-        "ResetServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
-        "UpdateSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
-        "UpdateServiceSpecificCredential": "CodeCommit credentials; the service does not exist here.",
-        "UpdateSigningCertificate": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.",
-        "UploadSSHPublicKey": "CodeCommit SSH keys; the service does not exist here.",
-        "UploadSigningCertificate": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS."
+        "CreateServiceLinkedRole": "service-linked-roles",
+        "CreateServiceSpecificCredential": "codecommit",
+        "DeleteSSHPublicKey": "codecommit",
+        "DeleteServiceLinkedRole": "service-linked-roles",
+        "DeleteServiceSpecificCredential": "codecommit",
+        "DeleteSigningCertificate": "signing-certificates",
+        "GenerateOrganizationsAccessReport": "organizations",
+        "GetOrganizationsAccessReport": "organizations",
+        "GetSSHPublicKey": "codecommit",
+        "GetServiceLinkedRoleDeletionStatus": "service-linked-roles",
+        "ListSSHPublicKeys": "codecommit",
+        "ListServiceSpecificCredentials": "codecommit",
+        "ListSigningCertificates": "signing-certificates",
+        "ResetServiceSpecificCredential": "codecommit",
+        "UpdateSSHPublicKey": "codecommit",
+        "UpdateServiceSpecificCredential": "codecommit",
+        "UpdateSigningCertificate": "signing-certificates",
+        "UploadSSHPublicKey": "codecommit",
+        "UploadSigningCertificate": "signing-certificates"
+      },
+      "notes": {
+        "codecommit": "CodeCommit credentials and SSH keys; the service does not exist here.",
+        "organizations": "AWS Organizations is not offered, so there is no organization to report on.",
+        "service-linked-roles": "Service-linked roles exist for AWS service principals, which this platform has none of.",
+        "signing-certificates": "X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS."
       }
     },
     "rds": {

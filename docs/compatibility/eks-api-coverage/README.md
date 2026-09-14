@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **34 of the 56** operations (60.7%) in the EKS `2017-11-01` API model.
+Spinifex implements **34 of the 56** operations (**60.7%**) in the EKS `2017-11-01` API model.
 
 ### Routing
 

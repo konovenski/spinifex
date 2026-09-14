@@ -19,14 +19,14 @@ tags:
 
 Spinifex serves the AWS APIs below. Every page counts the operations in the pinned `aws-sdk-go v1.55.8` `api-2.json` model for its service and reports, operation by operation, whether Spinifex implements it.
 
-| Service | API version | Implemented | Modelled | Coverage |
-|---|---|---:|---:|---:|
-| [ACM](/docs/acm-api-coverage) | 2015-12-08 | 9 | 15 | 60.0% |
-| [EC2](/docs/ec2-api-coverage) | 2016-11-15 | 121 | 625 | 19.4% |
-| [ECR](/docs/ecr-api-coverage) | 2015-09-21 | 19 | 47 | 40.4% |
-| [ECS](/docs/ecs-api-coverage) | 2014-11-13 | 31 | 56 | 55.4% |
-| [EKS](/docs/eks-api-coverage) | 2017-11-01 | 34 | 56 | 60.7% |
-| [ELBv2](/docs/elbv2-api-coverage) | 2015-12-01 | 33 | 46 | 71.7% |
-| [IAM](/docs/iam-api-coverage) | 2010-05-08 | 75 | 159 | 47.2% |
-| [RDS](/docs/rds-api-coverage) | 2014-10-31 | 26 | 162 | 16.0% |
-| [STS](/docs/sts-api-coverage) | 2011-06-15 | 4 | 8 | 50.0% |
+| Service | Implemented | Modelled | Coverage |
+|---|---:|---:|---:|
+| [ACM](/docs/acm-api-coverage) | 9 | 15 | 60.0% |
+| [EC2](/docs/ec2-api-coverage) | 121 | 625 | 19.4% |
+| [ECR](/docs/ecr-api-coverage) | 19 | 47 | 40.4% |
+| [ECS](/docs/ecs-api-coverage) | 31 | 56 | 55.4% |
+| [EKS](/docs/eks-api-coverage) | 34 | 56 | 60.7% |
+| [ELBv2](/docs/elbv2-api-coverage) | 33 | 46 | 71.7% |
+| [IAM](/docs/iam-api-coverage) | 75 | 159 | 47.2% |
+| [RDS](/docs/rds-api-coverage) | 26 | 162 | 16.0% |
+| [STS](/docs/sts-api-coverage) | 4 | 8 | 50.0% |

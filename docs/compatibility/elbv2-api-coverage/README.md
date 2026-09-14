@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **33 of the 46** operations (71.7%) in the ELBv2 `2015-12-01` API model.
+Spinifex implements **33 of the 46** operations (**71.7%**) in the ELBv2 `2015-12-01` API model.
 
 ### Two data planes
 

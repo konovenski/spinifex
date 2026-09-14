@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **19 of the 47** operations (40.4%) in the ECR `2015-09-21` API model.
+Spinifex implements **19 of the 47** operations (**40.4%**) in the ECR `2015-09-21` API model.
 
 ### Two endpoints, one registry
 

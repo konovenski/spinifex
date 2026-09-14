@@ -18,4 +18,31 @@ Enforcement requires that the connection is encrypted, not that the client valid
 
 ### Rejected parameters
 
-A parameter whose omission would create a false safety, security or availability guarantee is rejected rather than silently dropped — `MultiAZ=true` on a single-AZ platform, `PubliclyAccessible=true` against a private endpoint, `StorageEncrypted=false` where unencrypted storage is not offered. Parameters that are merely inert are accepted as no-ops.
+A parameter whose omission would create a false safety, security or availability guarantee is rejected with `InvalidParameterValue` rather than silently dropped. Parameters that are merely inert — `AutoMinorVersionUpgrade`, `CopyTagsToSnapshot`, `DeleteAutomatedBackups`, Performance Insights and Enhanced Monitoring fields — are accepted as no-ops.
+
+| Parameter | Why it is rejected |
+|-----------|--------------------|
+| `MultiAZ=true` | Single-AZ platform; a standby would not exist |
+| `PubliclyAccessible=true` | The endpoint is a private VPC address |
+| `StorageEncrypted=false` | Unencrypted storage is not offered |
+| `EnableIAMDatabaseAuthentication` | IAM database authentication is not implemented |
+| `Iops`, `StorageThroughput`, `StorageType` ≠ `gp3` | Provisioned performance classes are not implemented |
+| `KmsKeyId`, `TdeCredentialArn` | Storage is encrypted with the cluster key, not a customer-managed one |
+| `AvailabilityZone` | The platform exposes a single zone |
+| `AvailabilityZoneGroup` (orderable options) | It selects a zone or local-zone group, and naming a zone is already refused |
+| `DBSecurityGroups` | EC2-Classic security groups — use `VpcSecurityGroupIds` |
+| `DBClusterIdentifier`, `DBClusterSnapshotIdentifier` | Clustered engines are not offered |
+| `EnableCloudwatchLogsExports` | Log export is not implemented |
+| `EngineVersion` other than the engine's pin, `Engine` on modify | No in-place engine or version change |
+| `Engine=mysql` (and Aurora engines) | Oracle MySQL is not offered; `mariadb` is a distinct engine, not an alias for it |
+| `NewDBInstanceIdentifier` | The identifier is the DNS label and the KV key |
+| `DBPortNumber`, `DBSubnetGroupName` on modify | Both would move the endpoint |
+| `MaxAllocatedStorage` | Storage autoscaling is not implemented |
+| `ManageMasterUserPassword`, `RotateMasterUserPassword` | Secrets Manager integration is not offered |
+| `CACertificateIdentifier` | The serving certificate is minted from the cluster CA |
+| `Domain`, `DomainFqdn` | Active Directory domain join is not offered |
+| `OptionGroupName` | Option groups are not offered |
+| `CustomIamInstanceProfile` | The DB VM's instance profile is platform-owned |
+| `EnableCustomerOwnedIp` | An Outposts feature |
+| `ForceFailover` (reboot) | No standby to fail over to |
+| `DBSnapshotIdentifier` (stop) | Snapshot-on-stop is not implemented |

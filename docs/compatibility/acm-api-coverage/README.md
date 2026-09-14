@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **9 of the 15** operations (60.0%) in the ACM `2015-12-08` API model.
+Spinifex implements **9 of the 15** operations (**60.0%**) in the ACM `2015-12-08` API model.
 
 ### Import and issuance
 

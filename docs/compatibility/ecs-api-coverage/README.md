@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **31 of the 56** operations (55.4%) in the ECS `2014-11-13` API model.
+Spinifex implements **31 of the 56** operations (**55.4%**) in the ECS `2014-11-13` API model.
 
 ### No Fargate
 

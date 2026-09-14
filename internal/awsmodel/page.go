@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -31,11 +32,12 @@ const (
 
 var slugPattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 
-// OperationStatus is one row of a published coverage table.
+// OperationStatus is one row of a published coverage table. NoteKey names the
+// shared explanation behind the row's status, where one is declared.
 type OperationStatus struct {
 	Operation string
 	Status    string
-	Note      string
+	NoteKey   string
 }
 
 // ImplementedPercent is the share of modelled operations bound to a real
@@ -51,18 +53,18 @@ func (c OperationCoverage) ImplementedPercent() float64 {
 // followed by the registered operations the pinned model does not describe.
 //
 // notApplicable declares operations the platform will never serve, mapped to
-// the reason why. A refusing handler is the same fact reached mechanically, so
-// both publish as StatusNotApplicable; the declaration only adds the reason.
+// the note key explaining why. A refusing handler is the same fact reached
+// mechanically, so both publish as StatusNotApplicable.
 func (c OperationCoverage) OperationStatuses(notApplicable map[string]string) ([]OperationStatus, error) {
 	registered := toSet(c.Registered)
 	stubbed := toSet(c.Stubbed)
 	unsupported := toSet(c.Unsupported)
 	modelled := toSet(c.Modelled)
 
-	for operation, reason := range notApplicable {
+	for operation, noteKey := range notApplicable {
 		switch {
-		case reason == "":
-			return nil, fmt.Errorf("awsmodel: %s operation %q is declared not applicable with no reason", c.Service, operation)
+		case noteKey == "":
+			return nil, fmt.Errorf("awsmodel: %s operation %q is declared not applicable with no note", c.Service, operation)
 		case !modelled[operation]:
 			return nil, fmt.Errorf("awsmodel: %s operation %q is declared not applicable but is not in the pinned model", c.Service, operation)
 		case registered[operation] && !unsupported[operation]:
@@ -81,8 +83,8 @@ func (c OperationCoverage) OperationStatuses(notApplicable map[string]string) ([
 		case registered[operation]:
 			status = StatusImplemented
 		}
-		if reason, ok := notApplicable[operation]; ok {
-			statuses = append(statuses, OperationStatus{Operation: operation, Status: StatusNotApplicable, Note: reason})
+		if noteKey, ok := notApplicable[operation]; ok {
+			statuses = append(statuses, OperationStatus{Operation: operation, Status: StatusNotApplicable, NoteKey: noteKey})
 			continue
 		}
 		statuses = append(statuses, OperationStatus{Operation: operation, Status: status})
@@ -104,9 +106,14 @@ type PageMetadata struct {
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
 
-	// NotApplicable maps an operation the platform will never serve to the
-	// reason why. Checked against the model and the dispatch tables at render,
-	// so a typo or a later implementation fails the build rather than lying.
+	// Notes are the shared explanations a page footnotes, keyed by a short
+	// name. One note covers every operation that shares a reason.
+	Notes map[string]string `json:"notes,omitempty"`
+
+	// NotApplicable maps an operation the platform will never serve to the key
+	// of the note explaining why. Checked against the model, the notes and the
+	// dispatch tables at render, so a typo or a later implementation fails the
+	// build rather than publishing a claim that has quietly become false.
 	NotApplicable map[string]string `json:"notApplicable,omitempty"`
 }
 
@@ -182,6 +189,42 @@ func validatePage(owner string, page PageMetadata, slugs map[string]bool) error 
 	return nil
 }
 
+// noteOrder returns the note keys in the order they are published. Sorted by
+// key rather than by first use, so adding an operation cannot renumber a note
+// that is already published.
+func noteOrder(notes map[string]string) []string {
+	keys := make([]string, 0, len(notes))
+	for key := range notes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// numberNotes assigns each note its published footnote number, rejecting a note
+// nothing references and a reference to a note that does not exist.
+func numberNotes(page PageMetadata) (map[string]int, error) {
+	referenced := map[string]bool{}
+	for operation, key := range page.NotApplicable {
+		if _, ok := page.Notes[key]; !ok {
+			return nil, fmt.Errorf("awsmodel: coverage page %s: operation %q references undefined note %q", page.Slug, operation, key)
+		}
+		referenced[key] = true
+	}
+
+	numbering := make(map[string]int, len(page.Notes))
+	for index, key := range noteOrder(page.Notes) {
+		if !referenced[key] {
+			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is never referenced", page.Slug, key)
+		}
+		if page.Notes[key] == "" {
+			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is empty", page.Slug, key)
+		}
+		numbering[key] = index + 1
+	}
+	return numbering, nil
+}
+
 // RenderServicePage renders one publishable coverage page. intro is optional
 // hand-written prose emitted above the table; it may not open a new page
 // section, so its headings must be level three or deeper.
@@ -203,7 +246,7 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	writeFrontmatter(&body, page, pages.Category)
 	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", page.Title)
 
-	fmt.Fprintf(&body, "Spinifex implements **%d of the %d** operations (%.1f%%) in the %s `%s` API model.\n\n",
+	fmt.Fprintf(&body, "Spinifex implements **%d of the %d** operations (**%.1f%%**) in the %s `%s` API model.\n\n",
 		len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent(), page.Name, coverage.APIVersion)
 
 	if intro != "" {
@@ -214,18 +257,25 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	if err != nil {
 		return "", err
 	}
-
-	body.WriteString("### Operations\n\n")
-	if len(page.NotApplicable) == 0 {
-		body.WriteString("| Operation | Status |\n|---|---|\n")
-		for _, status := range statuses {
-			fmt.Fprintf(&body, "| `%s` | %s |\n", status.Operation, status.Status)
-		}
-		return body.String(), nil
+	numbering, err := numberNotes(page)
+	if err != nil {
+		return "", err
 	}
-	body.WriteString("| Operation | Status | Notes |\n|---|---|---|\n")
+
+	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
 	for _, status := range statuses {
-		fmt.Fprintf(&body, "| `%s` | %s | %s |\n", status.Operation, status.Status, status.Note)
+		if number, ok := numbering[status.NoteKey]; ok {
+			fmt.Fprintf(&body, "| `%s` | %s [%d](#notes) |\n", status.Operation, status.Status, number)
+			continue
+		}
+		fmt.Fprintf(&body, "| `%s` | %s |\n", status.Operation, status.Status)
+	}
+
+	if len(numbering) > 0 {
+		body.WriteString("\n### Notes\n\n")
+		for index, key := range noteOrder(page.Notes) {
+			fmt.Fprintf(&body, "%d. %s\n", index+1, page.Notes[key])
+		}
 	}
 	return body.String(), nil
 }
@@ -240,14 +290,14 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 	writeFrontmatter(&body, pages.Index, pages.Category)
 	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", pages.Index.Title)
 	fmt.Fprintf(&body, "Spinifex serves the AWS APIs below. Every page counts the operations in the pinned `aws-sdk-go %s` `api-2.json` model for its service and reports, operation by operation, whether Spinifex implements it.\n\n", SourceSDKVersion)
-	body.WriteString("| Service | API version | Implemented | Modelled | Coverage |\n|---|---|---:|---:|---:|\n")
+	body.WriteString("| Service | Implemented | Modelled | Coverage |\n|---|---:|---:|---:|\n")
 	for _, coverage := range sortedCoverages(coverages) {
 		page, ok := pages.Services[coverage.Service]
 		if !ok {
 			continue
 		}
-		fmt.Fprintf(&body, "| [%s](/docs/%s) | %s | %d | %d | %.1f%% |\n",
-			page.Name, page.Slug, coverage.APIVersion, len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent())
+		fmt.Fprintf(&body, "| [%s](/docs/%s) | %d | %d | %.1f%% |\n",
+			page.Name, page.Slug, len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent())
 	}
 
 	if intro != "" {
