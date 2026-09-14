@@ -33,7 +33,7 @@ The [OnLogic HX401](https://www.onlogic.com/hx401/) is a fanless, passive-cooled
 
 Single-node removes the distributed-storage guarantees of a multi-node cluster — Predastore runs RS(1,0) on one disk, so there is no erasure-coded redundancy. For edge deployments where data is generated locally, processed on-node, and shipped upstream on a schedule, or where the box provides compute capacity next to a sensor or control network rather than acting as a primary data store, this is the expected and appropriate configuration.
 
-<p align="center"><img src="../../../.github/assets/images/onlogic/HX401.png" alt="OnLogic HX401 fanless edge node"></p>
+<p align="center"><img src="../../../../.github/assets/images/onlogic/HX401.png" alt="OnLogic HX401 fanless edge node"></p>
 
 ### Platform
 

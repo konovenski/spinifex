@@ -39,7 +39,7 @@ This guide walks through the use of Spinifex to deploy a self-contained AI infer
 
 Specifically, we create an EKS cluster with two worker nodes, each consisting of a g7e.2xlarge EC2 instance with an attached GPU via VFIO passthrough, an ALB to route traffic to each node, ECR for storing and managing our workload images, and all of the associated security and certificate management requirements (IAM, ACM) you would expect from real AWS.
 
-<p align="center"><img src="../../../.github/assets/images/rtx6000/platform.png" alt="AI Platform request flow: HTTPS ingress → ALB routing → EKS ai-platform GPU workers"></p>
+<p align="center"><img src="../../../../.github/assets/images/rtx6000/platform.png" alt="AI Platform request flow: HTTPS ingress → ALB routing → EKS ai-platform GPU workers"></p>
 
 ### Platform
 
@@ -70,7 +70,7 @@ In this case, the two workloads demonstrated could both run comfortably on a sin
 
 ## Architecture
 
-<p align="center"><img src="../../../.github/assets/images/rtx6000/ai-platform-request-flow-2.png" alt="AI Platform request flow: HTTPS ingress → ALB routing → EKS ai-platform GPU workers"></p>
+<p align="center"><img src="../../../../.github/assets/images/rtx6000/ai-platform-request-flow-2.png" alt="AI Platform request flow: HTTPS ingress → ALB routing → EKS ai-platform GPU workers"></p>
 
 ### AWS services exercised
 

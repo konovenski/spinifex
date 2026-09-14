@@ -25,7 +25,7 @@ resources:
   - title: "GPU Passthrough"
     url: "/docs/gpu-passthrough"
   - title: "Cisco UCS: AWS-compatible cloud at the edge (companion document)"
-    url: "/docs/cisco-ucs-platform-benchmark"
+    url: "/hardware/cisco/platform-benchmark"
   - title: "Ultralytics YOLO"
     url: "https://docs.ultralytics.com"
   - title: "AWS: Accelerate CPU-based AI inference with Intel AMX on EC2"
@@ -48,7 +48,7 @@ cluster running Spinifex: real-time object detection plus a vision-language mode
 producing plain-English scene descriptions, both streaming from the same shared Predastore
 (S3-compatible) bucket as two entirely independent EC2-compatible instances.
 
-**Companion architectures:** [Cisco UCS: AWS-compatible cloud at the edge](/docs/cisco-ucs-platform-benchmark) · [vLLM Serving on Cisco UCS: Intel AMX vs NVIDIA L4](/docs/cisco-ucs-llm-serving)
+**Companion architectures:** [Cisco UCS: AWS-compatible cloud at the edge](/hardware/cisco/platform-benchmark) · [vLLM Serving on Cisco UCS: Intel AMX vs NVIDIA L4](/hardware/cisco/llm-serving)
 
 ### Platform
 
@@ -164,9 +164,9 @@ measures what that kernel difference is worth on YOLO11m:
 | GPU, TensorRT FP16 | 1 | 62.60 | 0.5067 |
 | GPU, TensorRT FP16 | 8 | 118.90 | — |
 
-<img src="../../../.github/assets/images/cisco-ucs-vision-pipeline/precision-throughput.png" alt="YOLO11m throughput by precision and engine — CPU FP32/BF16/INT8 versus GPU FP16, batch 1 and 8">
+<img src="../../../../.github/assets/images/cisco-ucs-vision-pipeline/precision-throughput.png" alt="YOLO11m throughput by precision and engine — CPU FP32/BF16/INT8 versus GPU FP16, batch 1 and 8">
 
-<img src="../../../.github/assets/images/cisco-ucs-vision-pipeline/precision-map.png" alt="COCO mAP50-95 by precision, axis zoomed to 0.49-0.502 to show the near-zero accuracy cost of BF16">
+<img src="../../../../.github/assets/images/cisco-ucs-vision-pipeline/precision-map.png" alt="COCO mAP50-95 by precision, axis zoomed to 0.49-0.502 to show the near-zero accuracy cost of BF16">
 
 **BF16/AMX gives a real 2.4–3.1x throughput gain over true FP32 on this hardware, at
 essentially zero accuracy cost** (Δ mAP50-95 = −0.0001). INT8 costs a small but real
@@ -189,7 +189,7 @@ the instance's own local Viperblock volume:
 | cpu1 (OpenVINO BF16) | 33.02 | 13.44 | −59% |
 | cpu2 (OpenVINO default) | ~34.79 | 13.44 | −61% |
 
-<img src="../../../.github/assets/images/cisco-ucs-vision-pipeline/local-vs-s3.png" alt="Local Viperblock volume versus Predastore-streamed throughput, by worker">
+<img src="../../../../.github/assets/images/cisco-ucs-vision-pipeline/local-vs-s3.png" alt="Local Viperblock volume versus Predastore-streamed throughput, by worker">
 
 A solo cpu1 S3 run (no concurrent workers) scored 12.53 img/s — essentially identical to
 its 3-worker-concurrent number (13.44). **Concurrency from the other two workers cost

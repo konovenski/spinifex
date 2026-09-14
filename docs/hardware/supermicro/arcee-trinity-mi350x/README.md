@@ -147,7 +147,7 @@ ssh -i ~/.ssh/spinifex-key ubuntu@$INSTANCE_IP 'lspci | grep -i amd'
 
 Or install and run `amd-smi` on the instance:
 
-<img src="../../../.github/assets/images/2gpus.png" alt="amd-smi inside the guest VM confirming two MI350Xs are directly attached, each with a unique UUID">
+<img src="../../../../.github/assets/images/2gpus.png" alt="amd-smi inside the guest VM confirming two MI350Xs are directly attached, each with a unique UUID">
 
 Two MI350X entries with distinct UUIDs confirm direct PCIe passthrough.
 
@@ -267,37 +267,37 @@ The lower avg utilisation in the chat session reflects idle gaps between convers
 
 ### Generation throughput
 
-<img src="../../../.github/assets/images/trinity/trinity-throughput.png" alt="Trinity generation throughput — scripted benchmark">
+<img src="../../../../.github/assets/images/trinity/trinity-throughput.png" alt="Trinity generation throughput — scripted benchmark">
 
 Generation and prompt-ingest tok/s over the 5-minute benchmark. The model sustains ~53 tok/s average at continuous load, peaking at 67 tok/s.
 
 ### Per-GPU compute utilisation
 
-<img src="../../../.github/assets/images/trinity/trinity-per-gpu-util.png" alt="Trinity per-GPU utilisation — scripted benchmark">
+<img src="../../../../.github/assets/images/trinity/trinity-per-gpu-util.png" alt="Trinity per-GPU utilisation — scripted benchmark">
 
 GPU 0 and GPU 1 track each other closely throughout the benchmark — TP=2 distributes attention and FFN layers symmetrically across both MI350Xs.
 
 ### Per-GPU VRAM
 
-<img src="../../../.github/assets/images/trinity/trinity-per-gpu-vram.png" alt="Trinity per-GPU VRAM — scripted benchmark">
+<img src="../../../../.github/assets/images/trinity/trinity-per-gpu-vram.png" alt="Trinity per-GPU VRAM — scripted benchmark">
 
 Both GPUs hold 259.6 GB — model weights sharded evenly, plus KV cache. 90.2% of HBM3e is occupied at rest, leaving ~26 GB headroom per GPU for active KV cache during generation.
 
 ### Per-GPU power
 
-<img src="../../../.github/assets/images/trinity/trinity-per-gpu-power.png" alt="Trinity per-GPU power — scripted benchmark">
+<img src="../../../../.github/assets/images/trinity/trinity-per-gpu-power.png" alt="Trinity per-GPU power — scripted benchmark">
 
 Power draw during active generation peaks at ~420 W per GPU, for a combined chassis draw well under the MI350X's 750 W TDP per card. Idle between prompts returns to ~300 W.
 
 ### Latency
 
-<img src="../../../.github/assets/images/trinity/trinity-latency.png" alt="Trinity latency — scripted benchmark">
+<img src="../../../../.github/assets/images/trinity/trinity-latency.png" alt="Trinity latency — scripted benchmark">
 
 Cumulative average TTFT and E2E latency over the benchmark. TTFT settles to ~758 ms avg once the KV cache is warm; E2E tracks request length as expected.
 
 ### KV cache utilisation
 
-<img src="../../../.github/assets/images/trinity/trinity-kv-cache.png" alt="Trinity KV cache utilisation — scripted benchmark">
+<img src="../../../../.github/assets/images/trinity/trinity-kv-cache.png" alt="Trinity KV cache utilisation — scripted benchmark">
 
 KV cache occupancy rises as requests pile up during the sustained load phase. The queue depth stays near zero — the model keeps pace with the 1.5 s prompt cadence.
 

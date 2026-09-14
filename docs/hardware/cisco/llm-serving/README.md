@@ -19,9 +19,9 @@ resources:
   - title: "GPU Passthrough"
     url: "/docs/gpu-passthrough"
   - title: "Cisco UCS: AWS-compatible cloud at the edge (companion document)"
-    url: "/docs/cisco-ucs-platform-benchmark"
+    url: "/hardware/cisco/platform-benchmark"
   - title: "Vision pipeline (companion document)"
-    url: "/docs/cisco-ucs-vision-pipeline"
+    url: "/hardware/cisco/vision-pipeline"
   - title: "Benchmark and workload materials (CISCO-refarch)"
     url: "https://github.com/tomnewton-mulga/CISCO-refarch"
   - title: "vLLM"
@@ -45,7 +45,7 @@ cluster, comparing Intel AMX-accelerated CPU serving on an `m8i.2xlarge`-class i
 against NVIDIA L4 GPU serving on a `g6.2xlarge`-class instance — a real,
 production-representative LLM-serving stack, with the two accelerators measured independently at matched model, version, and serving configuration.
 
-**Companion architectures:** [Cisco UCS: AWS-compatible cloud at the edge](/docs/cisco-ucs-platform-benchmark) · [Spinifex Vision Pipeline on Cisco UCS](/docs/cisco-ucs-vision-pipeline)
+**Companion architectures:** [Cisco UCS: AWS-compatible cloud at the edge](/hardware/cisco/platform-benchmark) · [Spinifex Vision Pipeline on Cisco UCS](/hardware/cisco/vision-pipeline)
 
 ### Platform
 
@@ -170,9 +170,9 @@ across the full matrix. Figures below are the mean of each cell's 3 repeats (med
 metric per run). Raw per-run JSON results are available in the
 [LLM serving repository](https://github.com/mulgadc/cisco-ucs-llm-serving).
 
-<img src="../../../.github/assets/images/cisco-ucs-llm-serving/tpot-vs-concurrency.png" alt="Median time per output token versus concurrency, CPU AMX versus GPU, by input length">
+<img src="../../../../.github/assets/images/cisco-ucs-llm-serving/tpot-vs-concurrency.png" alt="Median time per output token versus concurrency, CPU AMX versus GPU, by input length">
 
-<img src="../../../.github/assets/images/cisco-ucs-llm-serving/throughput-vs-concurrency.png" alt="Total token throughput versus concurrency, CPU AMX versus GPU, by input length">
+<img src="../../../../.github/assets/images/cisco-ucs-llm-serving/throughput-vs-concurrency.png" alt="Total token throughput versus concurrency, CPU AMX versus GPU, by input length">
 
 | Engine | Input tok | Concurrency | TTFT p50 (ms) | TPOT p50 (ms) | E2E p50 (ms) | Output tok/s | Total tok/s |
 |---|---:|---:|---:|---:|---:|---:|---:|

@@ -30,7 +30,7 @@ Spinifex is an open-source infrastructure platform that brings core AWS services
 
 This guide documents a full bare-metal AI deployment on a single [Supermicro X13](https://www.supermicro.com/en/products/x13) chassis using NVIDIA H200 SXM GPUs. These GPUs include the [NVIDIA Multi-Instance GPU](https://www.nvidia.com/en-au/technologies/multi-instance-gpu/) (MIG) capability, which allows a single GPU to be "sliced" into up to seven independent GPU partitions that are hardware isolated. Each partition is capable of running its own workloads with reserved resources from the "host" GPU.
 
-<p align="center"><img src="../../../.github/assets/images/h200/X13.png" alt="Supermicro X13 8U GPU System"></p>
+<p align="center"><img src="../../../../.github/assets/images/h200/X13.png" alt="Supermicro X13 8U GPU System"></p>
 
 In this setup, each EC2 instance receives an entire H200 via PCIe passthrough and manages its own MIG partitions. This gives each tenant full control over how they slice their GPU — including the ability to run heterogeneous workloads at different partition sizes on the same physical card.
 
@@ -72,7 +72,7 @@ Twelve concurrent inference endpoints in total: 7 fast 3B slots, 2 mid-tier 32B 
 ### 1. Verify GPU visibility on host
 Before making any changes, verify that the host can see its GPUs:
 
-<img src="../../../.github/assets/images/h200/nvidia-smi.png" alt="NVIDIA SMI">
+<img src="../../../../.github/assets/images/h200/nvidia-smi.png" alt="NVIDIA SMI">
 
 
 ## Instructions
@@ -183,7 +183,7 @@ aws s3 ls --endpoint-url https://localhost:8443
 ### 5. Enable GPU Passthrough
 Spinifex allows GPUs to be utilised by guest VMS via PCIe-passthrough. This can be enabled via `sudo spx admin gpu setup`. Then, after a reboot, run `sudo spx admin gpu enable`. The Spinifex banner should update to reflect GPU passthrough state after every step:
 
-<p align="center"><img src="../../../.github/assets/images/h200/spinifex-banner1.png" alt="GPU Enabled"></p>
+<p align="center"><img src="../../../../.github/assets/images/h200/spinifex-banner1.png" alt="GPU Enabled"></p>
 
 
 ### 6. Import the GPU AMI
@@ -281,7 +281,7 @@ nvidia-smi | grep "MIG M."
 
 With MIG enabled, we are now able to partition each VM's assigned H200 GPU into several separate GPU instances. This process assigns each GPU slice its own UUID, so each VM goes from seeing one whole GPU to seeing a number of "MIG devices":
 
-<p align="center"><img src="../../../.github/assets/images/h200/mig-activated.png" alt="NVIDIA SMI"></p>
+<p align="center"><img src="../../../../.github/assets/images/h200/mig-activated.png" alt="NVIDIA SMI"></p>
 
 This allows us to run several separate workloads, each assigned to its own GPU instance, on the same physical GPU, and thus utilise more of the overall GPU's resources.
 

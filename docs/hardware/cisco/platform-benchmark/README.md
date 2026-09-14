@@ -39,7 +39,7 @@ EBS, S3 and EKS-compatible APIs on the cluster, so the operational model is
 familiar: use the AWS CLI, SDKs, Terraform or OpenTofu, Kubernetes manifests and
 CI/CD systems already used for AWS. The change is the endpoint, not the workflow.
 
-**Companion architectures:** [Vision Pipeline on Cisco UCS](/docs/cisco-ucs-vision-pipeline) shows a local AI pipeline that streams inputs from S3; [vLLM Serving on Cisco UCS](/docs/cisco-ucs-llm-serving) shows CPU and GPU model serving on the same cluster.
+**Companion architectures:** [Vision Pipeline on Cisco UCS](/hardware/cisco/vision-pipeline) shows a local AI pipeline that streams inputs from S3; [vLLM Serving on Cisco UCS](/hardware/cisco/llm-serving) shows CPU and GPU model serving on the same cluster.
 
 ### Platform
 
@@ -63,7 +63,7 @@ launched an instance.
 
 ### Hardware Chassis
 
-<img src="../../../.github/assets/images/cisco-ucs-platform-benchmark/reference-architectures-cisco-ucs-platform-hardware1.png" alt="Cisco UCS x Spinifex">
+<img src="../../../../.github/assets/images/cisco-ucs-platform-benchmark/reference-architectures-cisco-ucs-platform-hardware1.png" alt="Cisco UCS x Spinifex">
 
 ## Architecture
 
@@ -219,8 +219,8 @@ kubectl get pods -n default
 ```
 
 Kubernetes pod rescheduling is the platform's primary answer to node failure for
-scheduled workloads. The companion [vision pipeline](/docs/cisco-ucs-vision-pipeline)
-and [vLLM serving](/docs/cisco-ucs-llm-serving) architectures use raw EC2 instances;
+scheduled workloads. The companion [vision pipeline](/hardware/cisco/vision-pipeline)
+and [vLLM serving](/hardware/cisco/llm-serving) architectures use raw EC2 instances;
 EKS is the pattern to reach for when automatic rescheduling matters over manual placement.
 
 ### 5. Storage benchmark

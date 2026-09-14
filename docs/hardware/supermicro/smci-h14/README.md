@@ -76,7 +76,7 @@ sudo spx admin gpu enable
 
 `spx admin gpu setup` blacklists the AMD driver on the host and binds each GPU to `vfio-pci`. After reboot, `spx admin gpu enable` verifies the binding and makes the GPU pool available to `RunInstances`.
 
-<img src="../../../.github/assets/images/gpu-enabled.png" alt="Spinifex console confirming PCIe passthrough is active for each GPU">
+<img src="../../../../.github/assets/images/gpu-enabled.png" alt="Spinifex console confirming PCIe passthrough is active for each GPU">
 
 To check available GPU instance types:
 
@@ -177,7 +177,7 @@ ssh -i ~/.ssh/spinifex-key ubuntu@$CHAT_IP \
      amd-smi list'
 ```
 
-<img src="../../../.github/assets/images/2gpus.png" alt="amd-smi inside vm-chat confirming two MI350Xs are directly attached, each with a unique UUID">
+<img src="../../../../.github/assets/images/2gpus.png" alt="amd-smi inside vm-chat confirming two MI350Xs are directly attached, each with a unique UUID">
 
 Two MI350X entries with distinct UUIDs confirm direct PCIe passthrough is working.
 
@@ -216,11 +216,11 @@ The only difference between the two runs was tensor parallelism:
 
 The charts below show the three independent workloads spiking activity on their associated GPUs, measured in GFX utilisation and power draw. YOLO average FPS stays at ~17 despite utilisation in the YOLO VM never exceeding 20%, indicating a bottleneck in networking or encoding rather than inference. Each chart highlights workload independence — pulses of GPU activity share no correlation across VMs.
 
-<img src="../../../.github/assets/images/smci/smci-demo1-gpu-utilisation.png" alt="GPU utilisation across all three VMs — Demo 1 TP=1">
+<img src="../../../../.github/assets/images/smci/smci-demo1-gpu-utilisation.png" alt="GPU utilisation across all three VMs — Demo 1 TP=1">
 
 GPU utilisation per VM across the full Demo 1 capture.
 
-<img src="../../../.github/assets/images/smci/smci-demo2-gpu-power.png" alt="GPU power draw per workload — Demo 2 TP=2">
+<img src="../../../../.github/assets/images/smci/smci-demo2-gpu-power.png" alt="GPU power draw per workload — Demo 2 TP=2">
 
 Power draw per VM during Demo 2.
 
@@ -228,11 +228,11 @@ Power draw per VM during Demo 2.
 
 When TP=2 is enabled, each VM shards its model symmetrically across both GPUs. Inside the chat VM, both GPUs pulse together on every request, each holding exactly **248 GB of VRAM** (weights split + KV cache shards). With TP=1, GPU 1 sat at 0% for the entire run.
 
-<img src="../../../.github/assets/images/smci/smci-demo2-per-gpu-chat.png" alt="Llama 3.3 70B per-GPU activity — TP=2">
+<img src="../../../../.github/assets/images/smci/smci-demo2-per-gpu-chat.png" alt="Llama 3.3 70B per-GPU activity — TP=2">
 
 Per-GPU utilisation inside `vm-chat` with TP=2.
 
-<img src="../../../.github/assets/images/smci/smci-demo1-per-gpu-chat.png" alt="Llama 3.3 70B per-GPU activity — TP=1">
+<img src="../../../../.github/assets/images/smci/smci-demo1-per-gpu-chat.png" alt="Llama 3.3 70B per-GPU activity — TP=1">
 
 Same VM with TP=1.
 
@@ -240,11 +240,11 @@ Same VM with TP=1.
 
 With TP=1, Qwen peaks at ~60 tok/s and Llama caps around 35 tok/s — both compute-bound on a single MI350X. Enabling TP=2 lifts Llama's peak to ~50 tok/s (+47%) as generation is distributed symmetrically across both GPUs. Qwen's throughput is slightly lower under TP=2 due to collective overhead on the shared-memory transport.
 
-<img src="../../../.github/assets/images/smci/smci-demo1-vllm-throughput.png" alt="vLLM generation throughput — TP=1">
+<img src="../../../../.github/assets/images/smci/smci-demo1-vllm-throughput.png" alt="vLLM generation throughput — TP=1">
 
 Generation throughput during Demo 1 (TP=1).
 
-<img src="../../../.github/assets/images/smci/smci-demo2-vllm-throughput.png" alt="vLLM generation throughput — TP=2">
+<img src="../../../../.github/assets/images/smci/smci-demo2-vllm-throughput.png" alt="vLLM generation throughput — TP=2">
 
 Generation throughput during Demo 2 (TP=2).
 
