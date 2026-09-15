@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mulgadc/spinifex/spinifex/awserrors"
 	handlers_ecr "github.com/mulgadc/spinifex/spinifex/handlers/ecr"
 	"github.com/mulgadc/spinifex/spinifex/testutil"
 	"github.com/nats-io/nats.go"
@@ -53,12 +54,18 @@ func deleteRepo(t *testing.T, gw *GatewayConfig, body string) (*httptest.Respons
 
 type repoOut struct {
 	Repository struct {
-		RepositoryName     string  `json:"repositoryName"`
-		RegistryID         string  `json:"registryId"`
-		RepositoryArn      string  `json:"repositoryArn"`
-		RepositoryURI      string  `json:"repositoryUri"`
-		ImageTagMutability string  `json:"imageTagMutability"`
-		CreatedAt          float64 `json:"createdAt"`
+		RepositoryName          string  `json:"repositoryName"`
+		RegistryID              string  `json:"registryId"`
+		RepositoryArn           string  `json:"repositoryArn"`
+		RepositoryURI           string  `json:"repositoryUri"`
+		ImageTagMutability      string  `json:"imageTagMutability"`
+		CreatedAt               float64 `json:"createdAt"`
+		EncryptionConfiguration struct {
+			EncryptionType string `json:"encryptionType"`
+		} `json:"encryptionConfiguration"`
+		ImageScanningConfiguration struct {
+			ScanOnPush bool `json:"scanOnPush"`
+		} `json:"imageScanningConfiguration"`
 	} `json:"repository"`
 }
 
@@ -76,6 +83,64 @@ func TestCreateRepository_Happy(t *testing.T) {
 	assert.Equal(t, ecrTestAccount+".dkr.ecr."+ecrTestRegion+"."+ecrTestSuffix+"/team/app", out.Repository.RepositoryURI)
 	assert.Equal(t, "MUTABLE", out.Repository.ImageTagMutability)
 	assert.Positive(t, out.Repository.CreatedAt)
+	assert.Equal(t, "AES256", out.Repository.EncryptionConfiguration.EncryptionType)
+	assert.False(t, out.Repository.ImageScanningConfiguration.ScanOnPush)
+}
+
+// TestCreateRepository_Tags pins create-time tags surviving to the stored
+// record. The wire keys are capitalized Key/Value because ecr.Tag carries no
+// locationName; a lowercase spelling decodes to empty strings and is rejected.
+func TestCreateRepository_Tags(t *testing.T) {
+	gw, nc := newRepoLifecycleGateway(t)
+
+	_, err := createRepo(t, gw, `{"repositoryName":"team/tagged","tags":[{"Key":"env","Value":"prod"},{"Key":"team","Value":""}]}`)
+	require.NoError(t, err)
+
+	meta, err := handlers_ecr.NewNATSMetaStore(nc).GetRepo(context.Background(), ecrTestAccount, "team/tagged")
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"env": "prod", "team": ""}, meta.Tags)
+
+	// An absent list must leave the map nil, so the record is byte-identical to
+	// one written before tags were accepted here.
+	_, err = createRepo(t, gw, `{"repositoryName":"team/untagged"}`)
+	require.NoError(t, err)
+	meta, err = handlers_ecr.NewNATSMetaStore(nc).GetRepo(context.Background(), ecrTestAccount, "team/untagged")
+	require.NoError(t, err)
+	assert.Nil(t, meta.Tags)
+
+	_, err = createRepo(t, gw, `{"repositoryName":"team/badtag","tags":[{"Key":"","Value":"x"}]}`)
+	require.Error(t, err)
+	assert.Equal(t, "InvalidParameterValue", err.Error())
+}
+
+func TestCreateRepository_EncryptionAndScanningConfiguration(t *testing.T) {
+	gw, _ := newRepoLifecycleGateway(t)
+
+	w, err := createRepo(t, gw, `{"repositoryName":"team/scanned","imageScanningConfiguration":{"scanOnPush":true}}`)
+	require.NoError(t, err)
+	var out repoOut
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &out))
+	assert.Equal(t, "AES256", out.Repository.EncryptionConfiguration.EncryptionType)
+	assert.True(t, out.Repository.ImageScanningConfiguration.ScanOnPush)
+
+	w, err = createRepo(t, gw, `{"repositoryName":"team/aes","encryptionConfiguration":{"encryptionType":"AES256"}}`)
+	require.NoError(t, err)
+	out = repoOut{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &out))
+	assert.Equal(t, "AES256", out.Repository.EncryptionConfiguration.EncryptionType)
+
+	// KMS carries a client-facing message (awserrors.Errorf), so the code is
+	// read via ResolveErrorDetail rather than a bare err.Error() comparison.
+	_, err = createRepo(t, gw, `{"repositoryName":"team/kms","encryptionConfiguration":{"encryptionType":"KMS"}}`)
+	require.Error(t, err)
+	code, message, ok := awserrors.ResolveErrorDetail(err)
+	require.True(t, ok)
+	assert.Equal(t, "InvalidParameterValue", code)
+	assert.NotEmpty(t, message)
+
+	_, err = createRepo(t, gw, `{"repositoryName":"team/bad","encryptionConfiguration":{"encryptionType":"bogus"}}`)
+	require.Error(t, err)
+	assert.Equal(t, "InvalidParameterValue", err.Error())
 }
 
 func TestCreateRepository_Errors(t *testing.T) {
@@ -141,6 +206,7 @@ func TestDeleteRepository_Happy(t *testing.T) {
 	var out repoOut
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &out))
 	assert.Equal(t, "team/app", out.Repository.RepositoryName)
+	assert.Equal(t, "AES256", out.Repository.EncryptionConfiguration.EncryptionType)
 
 	// Gone afterwards.
 	_, err = deleteRepo(t, gw, `{"repositoryName":"team/app"}`)

@@ -15,14 +15,29 @@ import (
 	handlers_ecr "github.com/mulgadc/spinifex/spinifex/handlers/ecr"
 )
 
-// createRepositoryRequest is the camelCase AWS JSON 1.1 input shape. The SDK
-// input struct carries locationName tags rather than json tags, so the subset
-// honored here is decoded explicitly. Tags, encryption, and scanning config are
-// accepted-and-ignored in v1.
+// createRepositoryRequest is the camelCase AWS JSON 1.1 input shape. ecr.Tag
+// carries no locationName, so its wire keys are Key/Value (capitalized);
+// reusing the SDK type keeps that spelling rather than a lowercase hand-roll.
 type createRepositoryRequest struct {
-	RepositoryName     string `json:"repositoryName"`
-	RegistryID         string `json:"registryId"`
-	ImageTagMutability string `json:"imageTagMutability"`
+	RepositoryName             string                           `json:"repositoryName"`
+	RegistryID                 string                           `json:"registryId"`
+	ImageTagMutability         string                           `json:"imageTagMutability"`
+	Tags                       []*ecr.Tag                       `json:"tags"`
+	EncryptionConfiguration    *encryptionConfigurationInput    `json:"encryptionConfiguration"`
+	ImageScanningConfiguration *imageScanningConfigurationInput `json:"imageScanningConfiguration"`
+}
+
+// encryptionConfigurationInput is the camelCase input shape for
+// encryptionConfiguration. kmsKey is not decoded: KMS is rejected outright, so
+// any key material supplied alongside it is never read.
+type encryptionConfigurationInput struct {
+	EncryptionType string `json:"encryptionType"`
+}
+
+// imageScanningConfigurationInput is the camelCase input shape for
+// imageScanningConfiguration.
+type imageScanningConfigurationInput struct {
+	ScanOnPush bool `json:"scanOnPush"`
 }
 
 // handleCreateRepository provisions an empty repository in the caller account.
@@ -56,6 +71,15 @@ func (gw *GatewayConfig) handleCreateRepository(w http.ResponseWriter, r *http.R
 	if err != nil {
 		return err
 	}
+	encryptionType, err := normalizeEncryptionType(req.EncryptionConfiguration)
+	if err != nil {
+		return err
+	}
+	scanOnPush := req.ImageScanningConfiguration != nil && req.ImageScanningConfiguration.ScanOnPush
+	tags, err := tagMapFromInput(req.Tags)
+	if err != nil {
+		return err
+	}
 
 	store := handlers_ecr.NewNATSMetaStore(gw.NATSConn)
 	if _, err := store.GetRepo(ctx, accountID, req.RepositoryName); err == nil {
@@ -69,6 +93,9 @@ func (gw *GatewayConfig) handleCreateRepository(w http.ResponseWriter, r *http.R
 		Name:               req.RepositoryName,
 		CreatedAt:          time.Now().UTC(),
 		ImageTagMutability: mutability,
+		EncryptionType:     encryptionType,
+		ScanOnPush:         scanOnPush,
+		Tags:               tags,
 	}
 	if err := store.PutRepo(ctx, accountID, meta); err != nil {
 		slog.ErrorContext(ctx, "CreateRepository: put repo failed", "repo", req.RepositoryName, "err", err)
@@ -76,16 +103,44 @@ func (gw *GatewayConfig) handleCreateRepository(w http.ResponseWriter, r *http.R
 	}
 
 	gateway_ecrapi.WriteJSONResponse(w, &ecr.CreateRepositoryOutput{
-		Repository: &ecr.Repository{
-			RegistryId:         aws.String(accountID),
-			RepositoryName:     aws.String(req.RepositoryName),
-			RepositoryArn:      aws.String(gw.ecrRepositoryArn(accountID, req.RepositoryName)),
-			RepositoryUri:      aws.String(gw.ecrRepositoryUri(accountID, req.RepositoryName)),
-			CreatedAt:          aws.Time(meta.CreatedAt),
-			ImageTagMutability: aws.String(meta.TagMutability()),
-		},
+		Repository: gw.buildRepository(accountID, req.RepositoryName, meta),
 	})
 	return nil
+}
+
+// tagMapFromInput folds the create-time tag list into the map RepoMeta stores,
+// rejecting an empty key exactly as TagResource does. An absent list yields a
+// nil map so the record round-trips identically to one created without tags.
+func tagMapFromInput(in []*ecr.Tag) (map[string]string, error) {
+	if len(in) == 0 {
+		return nil, nil
+	}
+	out := make(map[string]string, len(in))
+	for _, t := range in {
+		if t == nil || aws.StringValue(t.Key) == "" {
+			return nil, errors.New(awserrors.ErrorInvalidParameterValue)
+		}
+		out[aws.StringValue(t.Key)] = aws.StringValue(t.Value)
+	}
+	return out, nil
+}
+
+// normalizeEncryptionType validates the requested encryption configuration,
+// defaulting an absent one to AES256. KMS is rejected: no customer key
+// material is plumbed anywhere for it to honor.
+func normalizeEncryptionType(cfg *encryptionConfigurationInput) (string, error) {
+	if cfg == nil || cfg.EncryptionType == "" {
+		return handlers_ecr.EncryptionTypeAES256, nil
+	}
+	switch cfg.EncryptionType {
+	case handlers_ecr.EncryptionTypeAES256:
+		return cfg.EncryptionType, nil
+	case handlers_ecr.EncryptionTypeKMS:
+		return "", awserrors.Errorf(awserrors.ErrorInvalidParameterValue,
+			"encryptionType KMS is not supported: no customer-managed key is used, and repositories are already encrypted at rest under a server-managed AES-256 key")
+	default:
+		return "", errors.New(awserrors.ErrorInvalidParameterValue)
+	}
 }
 
 // normalizeTagMutability validates the requested mutability, defaulting an empty
