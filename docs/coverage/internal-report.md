@@ -924,7 +924,90 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 
 ## s3
 
-`2006-03-01` — not enumerable. Spinifex delegates the S3 REST surface to Predastore, which has no operation-name dispatch table to compare mechanically.
+`2006-03-01` — 19 of 99 modelled operations implemented (19.2%), 0 stubbed, 0 unsupported, 0 registered outside the pinned model.
+
+### Not implemented
+
+- `CreateSession`
+- `DeleteBucketAnalyticsConfiguration`
+- `DeleteBucketCors`
+- `DeleteBucketEncryption`
+- `DeleteBucketIntelligentTieringConfiguration`
+- `DeleteBucketInventoryConfiguration`
+- `DeleteBucketLifecycle`
+- `DeleteBucketMetricsConfiguration`
+- `DeleteBucketOwnershipControls`
+- `DeleteBucketPolicy`
+- `DeleteBucketReplication`
+- `DeleteBucketTagging`
+- `DeleteBucketWebsite`
+- `DeleteObjectTagging`
+- `DeletePublicAccessBlock`
+- `GetBucketAccelerateConfiguration`
+- `GetBucketAcl`
+- `GetBucketAnalyticsConfiguration`
+- `GetBucketCors`
+- `GetBucketEncryption`
+- `GetBucketIntelligentTieringConfiguration`
+- `GetBucketInventoryConfiguration`
+- `GetBucketLifecycle`
+- `GetBucketLifecycleConfiguration`
+- `GetBucketLocation`
+- `GetBucketLogging`
+- `GetBucketMetricsConfiguration`
+- `GetBucketNotification`
+- `GetBucketNotificationConfiguration`
+- `GetBucketOwnershipControls`
+- `GetBucketPolicy`
+- `GetBucketPolicyStatus`
+- `GetBucketReplication`
+- `GetBucketRequestPayment`
+- `GetBucketTagging`
+- `GetBucketVersioning`
+- `GetBucketWebsite`
+- `GetObjectAcl`
+- `GetObjectAttributes`
+- `GetObjectLegalHold`
+- `GetObjectLockConfiguration`
+- `GetObjectRetention`
+- `GetObjectTagging`
+- `GetObjectTorrent`
+- `GetPublicAccessBlock`
+- `ListBucketAnalyticsConfigurations`
+- `ListBucketIntelligentTieringConfigurations`
+- `ListBucketInventoryConfigurations`
+- `ListBucketMetricsConfigurations`
+- `ListDirectoryBuckets`
+- `ListObjectVersions`
+- `PutBucketAccelerateConfiguration`
+- `PutBucketAcl`
+- `PutBucketAnalyticsConfiguration`
+- `PutBucketCors`
+- `PutBucketEncryption`
+- `PutBucketIntelligentTieringConfiguration`
+- `PutBucketInventoryConfiguration`
+- `PutBucketLifecycle`
+- `PutBucketLifecycleConfiguration`
+- `PutBucketLogging`
+- `PutBucketMetricsConfiguration`
+- `PutBucketNotification`
+- `PutBucketNotificationConfiguration`
+- `PutBucketOwnershipControls`
+- `PutBucketPolicy`
+- `PutBucketReplication`
+- `PutBucketRequestPayment`
+- `PutBucketTagging`
+- `PutBucketVersioning`
+- `PutBucketWebsite`
+- `PutObjectAcl`
+- `PutObjectLegalHold`
+- `PutObjectLockConfiguration`
+- `PutObjectRetention`
+- `PutObjectTagging`
+- `PutPublicAccessBlock`
+- `RestoreObject`
+- `SelectObjectContent`
+- `WriteGetObjectResponse`
 
 ## sts
 

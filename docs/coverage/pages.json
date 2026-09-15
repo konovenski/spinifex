@@ -222,6 +222,60 @@
         "read-replicas": "Replication between instances is not offered, so there is no replica to create or promote."
       }
     },
+    "s3": {
+      "slug": "s3",
+      "name": "S3",
+      "title": "S3 API Coverage",
+      "seoTitle": "Amazon S3 API Coverage on Spinifex — Spinifex Docs",
+      "description": "The Amazon S3 API operations Predastore serves on the platform's S3 endpoint, alongside the AWS-hosted features it does not offer and why each is absent.",
+      "implementedBy": "Predastore",
+      "tags": [
+        "aws",
+        "compatibility",
+        "coverage",
+        "s3",
+        "storage",
+        "objects"
+      ],
+      "notApplicable": {
+        "CreateSession": "express-one-zone",
+        "DeleteBucketAnalyticsConfiguration": "analytics",
+        "DeleteBucketIntelligentTieringConfiguration": "tiering",
+        "DeleteBucketInventoryConfiguration": "inventory",
+        "DeleteBucketMetricsConfiguration": "analytics",
+        "DeleteBucketReplication": "replication",
+        "GetBucketAccelerateConfiguration": "accelerate",
+        "GetBucketAnalyticsConfiguration": "analytics",
+        "GetBucketIntelligentTieringConfiguration": "tiering",
+        "GetBucketInventoryConfiguration": "inventory",
+        "GetBucketMetricsConfiguration": "analytics",
+        "GetBucketReplication": "replication",
+        "GetBucketRequestPayment": "request-payment",
+        "ListBucketAnalyticsConfigurations": "analytics",
+        "ListBucketIntelligentTieringConfigurations": "tiering",
+        "ListBucketInventoryConfigurations": "inventory",
+        "ListBucketMetricsConfigurations": "analytics",
+        "PutBucketAccelerateConfiguration": "accelerate",
+        "PutBucketAnalyticsConfiguration": "analytics",
+        "PutBucketIntelligentTieringConfiguration": "tiering",
+        "PutBucketInventoryConfiguration": "inventory",
+        "PutBucketMetricsConfiguration": "analytics",
+        "PutBucketReplication": "replication",
+        "PutBucketRequestPayment": "request-payment",
+        "RestoreObject": "tiering",
+        "WriteGetObjectResponse": "object-lambda"
+      },
+      "notes": {
+        "accelerate": "Transfer acceleration routes uploads over AWS edge locations, which an on-premise deployment has none of.",
+        "analytics": "Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here.",
+        "express-one-zone": "Sessions authenticate S3 Express One Zone directory buckets, a storage class this platform does not offer.",
+        "inventory": "Inventory reports are an AWS-hosted scheduled export; a listing here is served live from the metadata store.",
+        "object-lambda": "S3 Object Lambda rewrites a response from a Lambda function, and Lambda is not offered.",
+        "replication": "Replication copies objects to a bucket in another region, and a deployment is a single region with no peer.",
+        "request-payment": "Requester Pays shifts transfer charges to the caller, which needs AWS billing behind it.",
+        "tiering": "Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media."
+      }
+    },
     "sts": {
       "slug": "sts",
       "name": "STS",

@@ -17,7 +17,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **358 operations** across the AWS APIs below. Every page names the operations Spinifex implements from the pinned `aws-sdk-go v1.55.8` `api-2.json` model for its service, alongside those the platform does not offer and why.
+The platform serves **377 operations** across the AWS APIs below. Every page names the operations implemented from the pinned model for its service, alongside those the platform does not offer and why.
 
 | Service | Operations |
 |---|---:|
@@ -29,5 +29,6 @@ Spinifex implements **358 operations** across the AWS APIs below. Every page nam
 | [ELBv2](/coverage/elbv2) | 34 |
 | [IAM](/coverage/iam) | 75 |
 | [RDS](/coverage/rds) | 26 |
+| [S3](/coverage/s3) | 19 |
 | [STS](/coverage/sts) | 5 |
-| **Total** | **358** |
+| **Total** | **377** |

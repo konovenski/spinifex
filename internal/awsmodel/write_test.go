@@ -1,6 +1,7 @@
 package awsmodel_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -109,11 +110,11 @@ func TestWritePagesIncludesAnIntroAndOverwritesTheGeneratedPage(t *testing.T) {
 	}
 }
 
-// S3 has no page metadata, so it must be skipped rather than crashing the run
-// or publishing a page with no honest number on it.
+// A service the page set does not describe is skipped rather than crashing the
+// run or publishing a page with no metadata on it.
 func TestWritePagesSkipsAServiceWithNoMetadata(t *testing.T) {
-	dir := stagePages(t)
-	coverage, err := CompareOperations(S3, DispatchInventory{Opaque: true, Note: "Served elsewhere."})
+	dir := stageWithout(t, S3)
+	coverage, err := CompareOperations(S3, DispatchInventory{Registered: []string{"ListBuckets"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,9 +123,40 @@ func TestWritePagesSkipsAServiceWithNoMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := os.Stat(filepath.Join(dir, "s3-api-coverage")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, "s3")); !os.IsNotExist(err) {
 		t.Errorf("a page was written for a service with no metadata: %v", err)
 	}
+}
+
+// stageWithout stages the checked-in metadata with one service dropped, for the
+// cases about a service the page set does not describe.
+func stageWithout(t *testing.T, service Service) string {
+	t.Helper()
+	dir := stagePages(t)
+	path := filepath.Join(dir, "pages.json")
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var pages map[string]any
+	if err := json.Unmarshal(contents, &pages); err != nil {
+		t.Fatal(err)
+	}
+	services, ok := pages["services"].(map[string]any)
+	if !ok {
+		t.Fatalf("staged metadata has no services: %s", contents)
+	}
+	delete(services, string(service))
+
+	reduced, err := json.Marshal(pages)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, reduced, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return dir
 }
 
 func TestWritePagesReportsMissingMetadata(t *testing.T) {

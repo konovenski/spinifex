@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mulgadc/predastore/s3api"
 	"github.com/mulgadc/spinifex/internal/awsmodel"
 	"github.com/mulgadc/spinifex/spinifex/gateway"
 
@@ -46,11 +47,10 @@ func compareAll() ([]awsmodel.OperationCoverage, error) {
 				Stubbed:     inventory.Stubbed,
 				Unsupported: inventory.Unsupported,
 			}
+		// Predastore serves the S3 REST surface, and names the operations each
+		// of its routes answers, so the comparison is the same one.
 		case service == awsmodel.S3:
-			modelInventory = awsmodel.DispatchInventory{
-				Opaque: true,
-				Note:   "Spinifex delegates the S3 REST surface to Predastore, which has no operation-name dispatch table to compare mechanically.",
-			}
+			modelInventory = awsmodel.DispatchInventory{Registered: s3api.Operations()}
 		default:
 			return nil, fmt.Errorf("no gateway inventory for %s", service)
 		}

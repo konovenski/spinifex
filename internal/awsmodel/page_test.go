@@ -29,10 +29,9 @@ func TestParsePageSetAcceptsTheCheckedInFile(t *testing.T) {
 	if len(pages.Services) == 0 {
 		t.Fatal("no service pages are configured")
 	}
-	// S3 is deliberately unpublished: Predastore serves that surface, so the
-	// gateway dispatch tables hold no honest number for it.
-	if _, ok := pages.Services[S3]; ok {
-		t.Error("S3 has page metadata but no enumerable coverage to publish")
+	// Predastore serves S3, so the page says so rather than crediting Spinifex.
+	if implementer := pages.Services[S3].ImplementedBy; implementer != "Predastore" {
+		t.Errorf("S3 is implemented by %q, want Predastore", implementer)
 	}
 }
 
@@ -370,17 +369,20 @@ func TestRenderIndexPageTotalsOnlyPublishedServices(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// A service the page set does not describe, so the index neither links nor
+	// counts it.
 	s3, err := CompareOperations(S3, DispatchInventory{Registered: []string{"ListBuckets"}})
 	if err != nil {
 		t.Fatal(err)
 	}
+	delete(pages.Services, S3)
 
 	index, err := RenderIndexPage([]OperationCoverage{sts, iam, s3}, pages, "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, want := range []string{
-		"Spinifex implements **3 operations** across the AWS APIs below.",
+		"The platform serves **3 operations** across the AWS APIs below.",
 		"| **Total** | **3** |",
 	} {
 		if !strings.Contains(index, want) {

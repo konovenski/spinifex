@@ -124,6 +124,10 @@ type PageMetadata struct {
 	Description string   `json:"description"`
 	Tags        []string `json:"tags"`
 
+	// ImplementedBy names the component that serves the surface, where it is
+	// not Spinifex itself. Predastore serves S3, and the page says so.
+	ImplementedBy string `json:"implementedBy,omitempty"`
+
 	// Notes are the shared explanations a page footnotes, keyed by a short
 	// name. One note covers every operation that shares a reason.
 	Notes map[string]string `json:"notes,omitempty"`
@@ -300,8 +304,12 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	if len(coverage.Implemented) == 1 {
 		noun = "operation"
 	}
-	fmt.Fprintf(&body, "Spinifex implements **%d %s** in the %s `%s` API model.\n\n",
-		len(coverage.Implemented), noun, page.Name, coverage.APIVersion)
+	implementer := page.ImplementedBy
+	if implementer == "" {
+		implementer = "Spinifex"
+	}
+	fmt.Fprintf(&body, "%s implements **%d %s** in the %s `%s` API model.\n\n",
+		implementer, len(coverage.Implemented), noun, page.Name, coverage.APIVersion)
 
 	if intro != "" {
 		body.WriteString(strings.TrimSpace(intro) + "\n\n")
@@ -380,7 +388,7 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 		}
 	}
 
-	fmt.Fprintf(&body, "Spinifex implements **%d operations** across the AWS APIs below. Every page names the operations Spinifex implements from the pinned model for its service, alongside those the platform does not offer and why.\n\n", total)
+	fmt.Fprintf(&body, "The platform serves **%d operations** across the AWS APIs below. Every page names the operations implemented from the pinned model for its service, alongside those the platform does not offer and why.\n\n", total)
 	body.WriteString("| Service | Operations |\n|---|---:|\n")
 	for _, coverage := range sortedCoverages(coverages) {
 		page, ok := pages.Services[coverage.Service]
