@@ -1,7 +1,7 @@
 ---
 title: "S3 API Coverage"
 seoTitle: "Amazon S3 API Coverage on Spinifex — Spinifex Docs"
-description: "The Amazon S3 API operations Predastore serves on the platform's S3 endpoint, alongside the AWS-hosted features it does not offer and why each is absent."
+description: "The Amazon S3 API operations Predastore serves on the platform's S3 endpoint, covering buckets, objects, multipart uploads and the policies that guard them."
 category: "Coverage"
 sections:
   - overview
@@ -32,37 +32,24 @@ That behaviour is measured separately, against the `ceph/s3-tests` suite Ceph RG
 
 ### Operations
 
-| Operation | Status |
-|---|---|
-| `AbortMultipartUpload` | ✅ Implemented |
-| `CompleteMultipartUpload` | ✅ Implemented |
-| `CopyObject` | ✅ Implemented |
-| `CreateBucket` | ✅ Implemented |
-| `CreateMultipartUpload` | ✅ Implemented |
-| `CreateSession` | ⛔ Not applicable [2](#notes) |
-| `DeleteBucket` | ✅ Implemented |
-| `DeleteObject` | ✅ Implemented |
-| `DeleteObjects` | ✅ Implemented |
-| `GetBucketAccelerateConfiguration` | ⛔ Not applicable [1](#notes) |
-| `GetBucketRequestPayment` | ⛔ Not applicable [4](#notes) |
-| `GetObject` | ✅ Implemented |
-| `HeadBucket` | ✅ Implemented |
-| `HeadObject` | ✅ Implemented |
-| `ListBuckets` | ✅ Implemented |
-| `ListMultipartUploads` | ✅ Implemented |
-| `ListObjects` | ✅ Implemented |
-| `ListObjectsV2` | ✅ Implemented |
-| `ListParts` | ✅ Implemented |
-| `PutBucketAccelerateConfiguration` | ⛔ Not applicable [1](#notes) |
-| `PutBucketRequestPayment` | ⛔ Not applicable [4](#notes) |
-| `PutObject` | ✅ Implemented |
-| `UploadPart` | ✅ Implemented |
-| `UploadPartCopy` | ✅ Implemented |
-| `WriteGetObjectResponse` | ⛔ Not applicable [3](#notes) |
-
-### Notes
-
-1. Transfer acceleration routes uploads over AWS edge locations, which an on-premise deployment has none of.
-2. Sessions authenticate S3 Express One Zone directory buckets, a storage class this platform does not offer.
-3. S3 Object Lambda rewrites a response from a Lambda function, and Lambda is not offered.
-4. Requester Pays shifts transfer charges to the caller, which needs AWS billing behind it.
+| Operation |
+|---|
+| `AbortMultipartUpload` |
+| `CompleteMultipartUpload` |
+| `CopyObject` |
+| `CreateBucket` |
+| `CreateMultipartUpload` |
+| `DeleteBucket` |
+| `DeleteObject` |
+| `DeleteObjects` |
+| `GetObject` |
+| `HeadBucket` |
+| `HeadObject` |
+| `ListBuckets` |
+| `ListMultipartUploads` |
+| `ListObjects` |
+| `ListObjectsV2` |
+| `ListParts` |
+| `PutObject` |
+| `UploadPart` |
+| `UploadPartCopy` |

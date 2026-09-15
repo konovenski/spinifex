@@ -1,7 +1,7 @@
 ---
 title: "ECR API Coverage"
 seoTitle: "Elastic Container Registry API Coverage — Spinifex Docs"
-description: "The Amazon ECR API operations Spinifex implements, alongside the OCI distribution endpoint that carries the image layers, and those the platform will not."
+description: "The Amazon ECR API operations Spinifex implements, alongside the OCI distribution endpoint that carries the image layers for every repository it serves."
 category: "Coverage"
 sections:
   - overview

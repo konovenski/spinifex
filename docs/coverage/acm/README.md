@@ -1,7 +1,7 @@
 ---
 title: "ACM API Coverage"
 seoTitle: "AWS Certificate Manager API Coverage — Spinifex Docs"
-description: "The AWS Certificate Manager API operations Spinifex implements, generated from the gateway dispatch tables on each build, with those it does not offer and why."
+description: "The AWS Certificate Manager API operations Spinifex implements, generated from the gateway dispatch tables and the pinned AWS service model on each build."
 category: "Coverage"
 sections:
   - overview

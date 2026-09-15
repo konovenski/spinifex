@@ -1,7 +1,7 @@
 ---
 title: "EKS API Coverage"
 seoTitle: "Elastic Kubernetes Service API Coverage — Spinifex Docs"
-description: "The Amazon EKS API operations Spinifex implements, covering clusters, nodegroups, add-ons and access entries, with those the platform does not offer and why."
+description: "The Amazon EKS API operations Spinifex implements, covering clusters, nodegroups, add-ons, access entries and the identity providers they authenticate."
 category: "Coverage"
 sections:
   - overview

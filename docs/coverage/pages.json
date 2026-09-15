@@ -20,7 +20,7 @@
       "name": "ACM",
       "title": "ACM API Coverage",
       "seoTitle": "AWS Certificate Manager API Coverage — Spinifex Docs",
-      "description": "The AWS Certificate Manager API operations Spinifex implements, generated from the gateway dispatch tables on each build, with those it does not offer and why.",
+      "description": "The AWS Certificate Manager API operations Spinifex implements, generated from the gateway dispatch tables and the pinned AWS service model on each build.",
       "tags": [
         "aws",
         "compatibility",
@@ -35,7 +35,7 @@
       "name": "EC2",
       "title": "EC2 API Coverage",
       "seoTitle": "Amazon EC2 API Coverage on Spinifex — Spinifex Docs",
-      "description": "The Amazon EC2 API operations Spinifex implements, covering instances, EBS volumes, VPC networking, tags and security groups, with those it does not offer.",
+      "description": "The Amazon EC2 API operations Spinifex implements, covering instances, EBS volumes, VPC networking, tags, security groups and the rest of the compute surface.",
       "tags": [
         "aws",
         "compatibility",
@@ -103,7 +103,7 @@
       "name": "ECR",
       "title": "ECR API Coverage",
       "seoTitle": "Elastic Container Registry API Coverage — Spinifex Docs",
-      "description": "The Amazon ECR API operations Spinifex implements, alongside the OCI distribution endpoint that carries the image layers, and those the platform will not.",
+      "description": "The Amazon ECR API operations Spinifex implements, alongside the OCI distribution endpoint that carries the image layers for every repository it serves.",
       "tags": [
         "aws",
         "compatibility",
@@ -118,7 +118,7 @@
       "name": "ECS",
       "title": "ECS API Coverage",
       "seoTitle": "Elastic Container Service API Coverage — Spinifex Docs",
-      "description": "The Amazon ECS API operations Spinifex implements, covering clusters, services, tasks and container instances, with those the platform does not offer.",
+      "description": "The Amazon ECS API operations Spinifex implements, covering clusters, services, tasks, container instances and the task definitions they are launched from.",
       "tags": [
         "aws",
         "compatibility",
@@ -138,7 +138,7 @@
       "name": "EKS",
       "title": "EKS API Coverage",
       "seoTitle": "Elastic Kubernetes Service API Coverage — Spinifex Docs",
-      "description": "The Amazon EKS API operations Spinifex implements, covering clusters, nodegroups, add-ons and access entries, with those the platform does not offer and why.",
+      "description": "The Amazon EKS API operations Spinifex implements, covering clusters, nodegroups, add-ons, access entries and the identity providers they authenticate.",
       "tags": [
         "aws",
         "compatibility",
@@ -159,7 +159,7 @@
       "name": "ELBv2",
       "title": "ELBv2 API Coverage",
       "seoTitle": "Elastic Load Balancing v2 API Coverage — Spinifex Docs",
-      "description": "The Elastic Load Balancing v2 API operations Spinifex implements, for both the Application and Network Load Balancers it serves, with those it does not.",
+      "description": "The Elastic Load Balancing v2 API operations Spinifex implements, for both the Application and Network Load Balancers it serves, listeners and target groups.",
       "tags": [
         "aws",
         "compatibility",
@@ -178,7 +178,7 @@
       "name": "IAM",
       "title": "IAM API Coverage",
       "seoTitle": "AWS IAM API Operation Coverage on Spinifex — Spinifex Docs",
-      "description": "The AWS IAM API operations Spinifex implements, covering users, roles, policies, groups and instance profiles, with those the platform does not offer.",
+      "description": "The AWS IAM API operations Spinifex implements, covering users, roles, policies, groups, instance profiles and the access keys that authenticate them.",
       "tags": [
         "aws",
         "compatibility",
@@ -220,7 +220,7 @@
       "name": "RDS",
       "title": "RDS API Coverage",
       "seoTitle": "Relational Database Service API Coverage — Spinifex Docs",
-      "description": "The Amazon RDS API operations Spinifex implements, for the managed PostgreSQL and MariaDB engines it offers, with those the platform does not offer and why.",
+      "description": "The Amazon RDS API operations Spinifex implements, for the managed PostgreSQL and MariaDB engines it offers, covering instances, snapshots and parameters.",
       "tags": [
         "aws",
         "compatibility",
@@ -252,7 +252,7 @@
       "name": "S3",
       "title": "S3 API Coverage",
       "seoTitle": "Amazon S3 API Coverage on Spinifex — Spinifex Docs",
-      "description": "The Amazon S3 API operations Predastore serves on the platform's S3 endpoint, alongside the AWS-hosted features it does not offer and why each is absent.",
+      "description": "The Amazon S3 API operations Predastore serves on the platform's S3 endpoint, covering buckets, objects, multipart uploads and the policies that guard them.",
       "implementedBy": "Predastore",
       "tags": [
         "aws",

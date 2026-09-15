@@ -1,7 +1,7 @@
 ---
 title: "RDS API Coverage"
 seoTitle: "Relational Database Service API Coverage — Spinifex Docs"
-description: "The Amazon RDS API operations Spinifex implements, for the managed PostgreSQL and MariaDB engines it offers, with those the platform does not offer and why."
+description: "The Amazon RDS API operations Spinifex implements, for the managed PostgreSQL and MariaDB engines it offers, covering instances, snapshots and parameters."
 category: "Coverage"
 sections:
   - overview
@@ -70,39 +70,31 @@ A parameter whose omission would create a false safety, security or availability
 
 ### Operations
 
-| Operation | Status |
-|---|---|
-| `AddTagsToResource` | ✅ Implemented |
-| `CreateDBInstance` | ✅ Implemented |
-| `CreateDBParameterGroup` | ✅ Implemented |
-| `CreateDBSnapshot` | ✅ Implemented |
-| `CreateDBSubnetGroup` | ✅ Implemented |
-| `CreateOptionGroup` | ⛔ Not applicable [1](#notes) |
-| `DeleteDBInstance` | ✅ Implemented |
-| `DeleteDBParameterGroup` | ✅ Implemented |
-| `DeleteDBSnapshot` | ✅ Implemented |
-| `DeleteDBSubnetGroup` | ✅ Implemented |
-| `DeleteOptionGroup` | ⛔ Not applicable [1](#notes) |
-| `DescribeDBEngineVersions` | ✅ Implemented |
-| `DescribeDBInstanceAutomatedBackups` | ✅ Implemented |
-| `DescribeDBInstances` | ✅ Implemented |
-| `DescribeDBParameterGroups` | ✅ Implemented |
-| `DescribeDBParameters` | ✅ Implemented |
-| `DescribeDBSnapshots` | ✅ Implemented |
-| `DescribeDBSubnetGroups` | ✅ Implemented |
-| `DescribeEvents` | ✅ Implemented |
-| `DescribeOptionGroups` | ⛔ Not applicable [1](#notes) |
-| `DescribeOrderableDBInstanceOptions` | ✅ Implemented |
-| `ListTagsForResource` | ✅ Implemented |
-| `ModifyDBInstance` | ✅ Implemented |
-| `ModifyDBParameterGroup` | ✅ Implemented |
-| `ModifyOptionGroup` | ⛔ Not applicable [1](#notes) |
-| `RebootDBInstance` | ✅ Implemented |
-| `RemoveTagsFromResource` | ✅ Implemented |
-| `RestoreDBInstanceFromDBSnapshot` | ✅ Implemented |
-| `StartDBInstance` | ✅ Implemented |
-| `StopDBInstance` | ✅ Implemented |
-
-### Notes
-
-1. Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server.
+| Operation |
+|---|
+| `AddTagsToResource` |
+| `CreateDBInstance` |
+| `CreateDBParameterGroup` |
+| `CreateDBSnapshot` |
+| `CreateDBSubnetGroup` |
+| `DeleteDBInstance` |
+| `DeleteDBParameterGroup` |
+| `DeleteDBSnapshot` |
+| `DeleteDBSubnetGroup` |
+| `DescribeDBEngineVersions` |
+| `DescribeDBInstanceAutomatedBackups` |
+| `DescribeDBInstances` |
+| `DescribeDBParameterGroups` |
+| `DescribeDBParameters` |
+| `DescribeDBSnapshots` |
+| `DescribeDBSubnetGroups` |
+| `DescribeEvents` |
+| `DescribeOrderableDBInstanceOptions` |
+| `ListTagsForResource` |
+| `ModifyDBInstance` |
+| `ModifyDBParameterGroup` |
+| `RebootDBInstance` |
+| `RemoveTagsFromResource` |
+| `RestoreDBInstanceFromDBSnapshot` |
+| `StartDBInstance` |
+| `StopDBInstance` |

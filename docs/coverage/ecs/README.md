@@ -1,7 +1,7 @@
 ---
 title: "ECS API Coverage"
 seoTitle: "Elastic Container Service API Coverage — Spinifex Docs"
-description: "The Amazon ECS API operations Spinifex implements, covering clusters, services, tasks and container instances, with those the platform does not offer."
+description: "The Amazon ECS API operations Spinifex implements, covering clusters, services, tasks, container instances and the task definitions they are launched from."
 category: "Coverage"
 sections:
   - overview

@@ -1,7 +1,7 @@
 ---
 title: "ELBv2 API Coverage"
 seoTitle: "Elastic Load Balancing v2 API Coverage — Spinifex Docs"
-description: "The Elastic Load Balancing v2 API operations Spinifex implements, for both the Application and Network Load Balancers it serves, with those it does not."
+description: "The Elastic Load Balancing v2 API operations Spinifex implements, for both the Application and Network Load Balancers it serves, listeners and target groups."
 category: "Coverage"
 sections:
   - overview

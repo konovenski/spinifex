@@ -258,13 +258,14 @@ func TestOperationStatusesRejectsAnInternalRouteThatIsModelled(t *testing.T) {
 	}
 }
 
-// A footnote reused across operations is written once, and both directions of
-// the reference are checked so neither side can rot.
-func TestRenderServicePageFootnotesSharedNotes(t *testing.T) {
+// A page says what the platform serves. An operation it will never serve is not
+// that, so neither the row nor the reason behind it reaches the page: both are
+// the internal report's to carry.
+func TestRenderServicePagePublishesNoDeclaredAbsence(t *testing.T) {
 	pages := testPageSet(t)
 	iam := pages.Services[IAM]
-	if len(iam.Notes) == 0 {
-		t.Skip("no notes are declared for IAM")
+	if len(iam.NotApplicable) == 0 {
+		t.Skip("no operations are declared not applicable for IAM")
 	}
 	coverage, err := CompareOperations(IAM, DispatchInventory{Registered: []string{"CreateUser"}})
 	if err != nil {
@@ -275,15 +276,17 @@ func TestRenderServicePageFootnotesSharedNotes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(page, "\n### Notes\n\n1. ") {
-		t.Errorf("page has no numbered notes section:\n%s", page)
+	if strings.Contains(page, StatusNotApplicable) || strings.Contains(page, "### Notes") {
+		t.Errorf("page publishes a declared absence:\n%s", page)
 	}
-	if !strings.Contains(page, "| `UploadSSHPublicKey` | "+StatusNotApplicable+" [") {
-		t.Errorf("a declared operation carries no footnote reference:\n%s", page)
+	for operation := range iam.NotApplicable {
+		if strings.Contains(page, "`"+operation+"`") {
+			t.Errorf("declared operation %q is published", operation)
+		}
 	}
 	for _, text := range iam.Notes {
-		if strings.Count(page, text) != 1 {
-			t.Errorf("note %q is not written exactly once", text)
+		if strings.Contains(page, text) {
+			t.Errorf("note %q is published", text)
 		}
 	}
 }

@@ -17,7 +17,7 @@ tags:
 
 ## Overview
 
-The platform serves **377 operations** across the AWS APIs below. Every page names the operations implemented from the pinned model for its service, alongside those the platform does not offer and why.
+The platform serves **377 operations** across the AWS APIs below. Every page names the operations its service implements from the pinned model, generated from the dispatch tables on each build rather than written by hand.
 
 | Service | Operations |
 |---|---:|

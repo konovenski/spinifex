@@ -54,9 +54,10 @@ func (c OperationCoverage) ImplementedPercent() float64 {
 // less the internal routes the page declares.
 //
 // The page's NotApplicable declares operations the platform will never serve,
-// mapped to the note key explaining why, and is the only thing that publishes
-// that claim. A handler that refuses today may be implemented tomorrow, so a
-// refusal on its own is a gap like any other rather than a "never".
+// mapped to the note key explaining why. Nothing published carries that claim:
+// it separates a permanent absence from candidate work in the internal report.
+// A handler that refuses today may be implemented tomorrow, so a refusal on its
+// own is a gap like any other rather than a "never".
 func (c OperationCoverage) OperationStatuses(page PageMetadata) ([]OperationStatus, error) {
 	registered := toSet(c.Registered)
 	stubbed := toSet(c.Stubbed)
@@ -249,28 +250,27 @@ func noteOrder(notes map[string]string) []string {
 	return keys
 }
 
-// numberNotes assigns each note its published footnote number, rejecting a note
-// nothing references and a reference to a note that does not exist.
-func numberNotes(page PageMetadata) (map[string]int, error) {
+// checkNotes rejects a note nothing references and a reference to a note that
+// does not exist. The notes reach the internal report rather than a page, and
+// the check keeps them honest wherever they are read.
+func checkNotes(page PageMetadata) error {
 	referenced := map[string]bool{}
 	for operation, key := range page.NotApplicable {
 		if _, ok := page.Notes[key]; !ok {
-			return nil, fmt.Errorf("awsmodel: coverage page %s: operation %q references undefined note %q", page.Slug, operation, key)
+			return fmt.Errorf("awsmodel: coverage page %s: operation %q references undefined note %q", page.Slug, operation, key)
 		}
 		referenced[key] = true
 	}
 
-	numbering := make(map[string]int, len(page.Notes))
-	for index, key := range noteOrder(page.Notes) {
+	for _, key := range noteOrder(page.Notes) {
 		if !referenced[key] {
-			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is never referenced", page.Slug, key)
+			return fmt.Errorf("awsmodel: coverage page %s: note %q is never referenced", page.Slug, key)
 		}
 		if page.Notes[key] == "" {
-			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is empty", page.Slug, key)
+			return fmt.Errorf("awsmodel: coverage page %s: note %q is empty", page.Slug, key)
 		}
-		numbering[key] = index + 1
 	}
-	return numbering, nil
+	return nil
 }
 
 // RenderServicePage renders one publishable coverage page. intro is optional
@@ -300,8 +300,7 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	if err != nil {
 		return "", err
 	}
-	numbering, err := numberNotes(page)
-	if err != nil {
+	if err := checkNotes(page); err != nil {
 		return "", err
 	}
 
@@ -324,20 +323,20 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 		body.WriteString(strings.TrimSpace(intro) + "\n\n")
 	}
 
-	writeOperations(&body, statuses, numbering)
-	writeNotes(&body, page, numbering)
+	writeOperations(&body, statuses)
 	return body.String(), nil
 }
 
-// writeOperations publishes one row per operation the platform answers, served
-// or deliberately refused. The status column is written only where a row needs
-// it: a table whose every cell reads "Implemented" says nothing the heading has
-// not.
-func writeOperations(body *strings.Builder, statuses []OperationStatus, numbering map[string]int) {
+// writeOperations publishes one row per operation the platform serves. A gap is
+// left out, and so is an operation the platform will never offer: the page says
+// what is there, and the internal report carries everything that is not. The
+// status column is written only where a row needs it, because a table whose
+// every cell reads "Implemented" says nothing the heading has not.
+func writeOperations(body *strings.Builder, statuses []OperationStatus) {
 	rows := make([]OperationStatus, 0, len(statuses))
 	uniform := true
 	for _, status := range statuses {
-		if status.Status == StatusNotImplemented {
+		if status.Status == StatusNotImplemented || status.Status == StatusNotApplicable {
 			continue
 		}
 		uniform = uniform && status.Status == StatusImplemented
@@ -353,23 +352,7 @@ func writeOperations(body *strings.Builder, statuses []OperationStatus, numberin
 	}
 	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
 	for _, row := range rows {
-		if number, ok := numbering[row.NoteKey]; ok {
-			fmt.Fprintf(body, "| `%s` | %s [%d](#notes) |\n", row.Operation, row.Status, number)
-			continue
-		}
 		fmt.Fprintf(body, "| `%s` | %s |\n", row.Operation, row.Status)
-	}
-}
-
-// writeNotes publishes the reasons the table footnotes, numbered as the rows
-// reference them.
-func writeNotes(body *strings.Builder, page PageMetadata, numbering map[string]int) {
-	if len(numbering) == 0 {
-		return
-	}
-	body.WriteString("\n### Notes\n\n")
-	for index, key := range noteOrder(page.Notes) {
-		fmt.Fprintf(body, "%d. %s\n", index+1, page.Notes[key])
 	}
 }
 
@@ -389,7 +372,7 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 		}
 	}
 
-	fmt.Fprintf(&body, "The platform serves **%d operations** across the AWS APIs below. Every page names the operations implemented from the pinned model for its service, alongside those the platform does not offer and why.\n\n", total)
+	fmt.Fprintf(&body, "The platform serves **%d operations** across the AWS APIs below. Every page names the operations its service implements from the pinned model, generated from the dispatch tables on each build rather than written by hand.\n\n", total)
 	body.WriteString("| Service | Operations |\n|---|---:|\n")
 	for _, coverage := range sortedCoverages(coverages) {
 		page, ok := pages.Services[coverage.Service]
