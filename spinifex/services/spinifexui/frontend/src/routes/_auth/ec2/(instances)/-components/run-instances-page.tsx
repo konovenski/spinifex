@@ -537,6 +537,7 @@ export function RunInstancesPage({
                       <input
                         aria-label="Create new security group"
                         checked={field.value === "create"}
+                        name={field.name}
                         onChange={() => {
                           field.onChange("create")
                         }}
@@ -548,6 +549,7 @@ export function RunInstancesPage({
                       <input
                         aria-label="Select existing security group"
                         checked={field.value === "existing"}
+                        name={field.name}
                         onChange={() => {
                           field.onChange("existing")
                         }}
@@ -653,6 +655,7 @@ export function RunInstancesPage({
                             <input
                               aria-label="Source anywhere"
                               checked={field.value === "anywhere"}
+                              name={field.name}
                               onChange={() => {
                                 field.onChange("anywhere")
                               }}
@@ -664,6 +667,7 @@ export function RunInstancesPage({
                             <input
                               aria-label="Source custom CIDR"
                               checked={field.value === "custom"}
+                              name={field.name}
                               onChange={() => {
                                 field.onChange("custom")
                               }}
