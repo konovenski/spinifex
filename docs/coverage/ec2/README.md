@@ -28,44 +28,37 @@ Spot Instance Requests are a mock over the on-demand `RunInstances` path. A requ
 
 | Operation | Status |
 |---|---|
-| `AcceptReservedInstancesExchangeQuote` | ⛔ Not applicable [10](#notes) |
-| `AdvertiseByoipCidr` | ⛔ Not applicable [5](#notes) |
+| `AcceptReservedInstancesExchangeQuote` | ⛔ Not applicable [9](#notes) |
 | `AllocateAddress` | ✅ Implemented |
 | `AssociateAddress` | ✅ Implemented |
 | `AssociateIamInstanceProfile` | ✅ Implemented |
 | `AssociateRouteTable` | ✅ Implemented |
-| `AttachClassicLinkVpc` | ⛔ Not applicable [6](#notes) |
+| `AttachClassicLinkVpc` | ⛔ Not applicable [5](#notes) |
 | `AttachInternetGateway` | ✅ Implemented |
 | `AttachNetworkInterface` | ✅ Implemented |
 | `AttachVolume` | ✅ Implemented |
 | `AuthorizeSecurityGroupEgress` | ✅ Implemented |
 | `AuthorizeSecurityGroupIngress` | ✅ Implemented |
 | `CancelCapacityReservation` | ✅ Implemented |
-| `CancelReservedInstancesListing` | ⛔ Not applicable [10](#notes) |
+| `CancelReservedInstancesListing` | ⛔ Not applicable [9](#notes) |
 | `CancelSpotInstanceRequests` | ✅ Implemented |
-| `ConfirmProductInstance` | ⛔ Not applicable [9](#notes) |
-| `CopyFpgaImage` | ⛔ Not applicable [7](#notes) |
+| `ConfirmProductInstance` | ⛔ Not applicable [8](#notes) |
+| `CopyFpgaImage` | ⛔ Not applicable [6](#notes) |
 | `CopyImage` | ✅ Implemented |
 | `CopySnapshot` | ✅ Implemented |
 | `CreateCapacityReservation` | ✅ Implemented |
 | `CreateCarrierGateway` | ⛔ Not applicable [3](#notes) |
-| `CreateCoipCidr` | ⛔ Not applicable [3](#notes) |
-| `CreateCoipPool` | ⛔ Not applicable [3](#notes) |
 | `CreateEgressOnlyInternetGateway` | ✅ Implemented |
-| `CreateFpgaImage` | ⛔ Not applicable [7](#notes) |
+| `CreateFpgaImage` | ⛔ Not applicable [6](#notes) |
 | `CreateImage` | ✅ Implemented |
 | `CreateInternetGateway` | ✅ Implemented |
 | `CreateKeyPair` | ✅ Implemented |
 | `CreateLaunchTemplate` | ✅ Implemented |
 | `CreateLaunchTemplateVersion` | ✅ Implemented |
-| `CreateLocalGatewayRoute` | ⛔ Not applicable [3](#notes) |
-| `CreateLocalGatewayRouteTable` | ⛔ Not applicable [3](#notes) |
-| `CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation` | ⛔ Not applicable [3](#notes) |
-| `CreateLocalGatewayRouteTableVpcAssociation` | ⛔ Not applicable [3](#notes) |
 | `CreateNatGateway` | ✅ Implemented |
 | `CreateNetworkInterface` | ✅ Implemented |
 | `CreatePlacementGroup` | ✅ Implemented |
-| `CreateReservedInstancesListing` | ⛔ Not applicable [10](#notes) |
+| `CreateReservedInstancesListing` | ⛔ Not applicable [9](#notes) |
 | `CreateRoute` | ✅ Implemented |
 | `CreateRouteTable` | ✅ Implemented |
 | `CreateSecurityGroup` | ✅ Implemented |
@@ -75,22 +68,16 @@ Spot Instance Requests are a mock over the on-demand `RunInstances` path. A requ
 | `CreateVolume` | ✅ Implemented |
 | `CreateVpc` | ✅ Implemented |
 | `DeleteCarrierGateway` | ⛔ Not applicable [3](#notes) |
-| `DeleteCoipCidr` | ⛔ Not applicable [3](#notes) |
-| `DeleteCoipPool` | ⛔ Not applicable [3](#notes) |
 | `DeleteEgressOnlyInternetGateway` | ✅ Implemented |
-| `DeleteFpgaImage` | ⛔ Not applicable [7](#notes) |
+| `DeleteFpgaImage` | ⛔ Not applicable [6](#notes) |
 | `DeleteInternetGateway` | ✅ Implemented |
 | `DeleteKeyPair` | ✅ Implemented |
 | `DeleteLaunchTemplate` | ✅ Implemented |
 | `DeleteLaunchTemplateVersions` | ✅ Implemented |
-| `DeleteLocalGatewayRoute` | ⛔ Not applicable [3](#notes) |
-| `DeleteLocalGatewayRouteTable` | ⛔ Not applicable [3](#notes) |
-| `DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation` | ⛔ Not applicable [3](#notes) |
-| `DeleteLocalGatewayRouteTableVpcAssociation` | ⛔ Not applicable [3](#notes) |
 | `DeleteNatGateway` | ✅ Implemented |
 | `DeleteNetworkInterface` | ✅ Implemented |
 | `DeletePlacementGroup` | ✅ Implemented |
-| `DeleteQueuedReservedInstances` | ⛔ Not applicable [10](#notes) |
+| `DeleteQueuedReservedInstances` | ⛔ Not applicable [9](#notes) |
 | `DeleteRoute` | ✅ Implemented |
 | `DeleteRouteTable` | ✅ Implemented |
 | `DeleteSecurityGroup` | ✅ Implemented |
@@ -99,29 +86,26 @@ Spot Instance Requests are a mock over the on-demand `RunInstances` path. A requ
 | `DeleteTags` | ✅ Implemented |
 | `DeleteVolume` | ✅ Implemented |
 | `DeleteVpc` | ✅ Implemented |
-| `DeprovisionByoipCidr` | ⛔ Not applicable [5](#notes) |
 | `DeregisterImage` | ✅ Implemented |
 | `DescribeAccountAttributes` | ✅ Implemented |
 | `DescribeAddresses` | ✅ Implemented |
 | `DescribeAddressesAttribute` | ✅ Implemented |
-| `DescribeAggregateIdFormat` | ⛔ Not applicable [8](#notes) |
+| `DescribeAggregateIdFormat` | ⛔ Not applicable [7](#notes) |
 | `DescribeAvailabilityZones` | ✅ Implemented |
 | `DescribeAwsNetworkPerformanceMetricSubscriptions` | ⛔ Not applicable [2](#notes) |
-| `DescribeByoipCidrs` | ⛔ Not applicable [5](#notes) |
-| `DescribeCapacityBlockOfferings` | ⛔ Not applicable [10](#notes) |
+| `DescribeCapacityBlockOfferings` | ⛔ Not applicable [9](#notes) |
 | `DescribeCapacityReservations` | ✅ Implemented |
 | `DescribeCarrierGateways` | ⛔ Not applicable [3](#notes) |
-| `DescribeClassicLinkInstances` | ⛔ Not applicable [6](#notes) |
-| `DescribeCoipPools` | ⛔ Not applicable [3](#notes) |
+| `DescribeClassicLinkInstances` | ⛔ Not applicable [5](#notes) |
 | `DescribeEgressOnlyInternetGateways` | ✅ Implemented |
-| `DescribeElasticGpus` | ⛔ Not applicable [11](#notes) |
-| `DescribeFpgaImageAttribute` | ⛔ Not applicable [7](#notes) |
-| `DescribeFpgaImages` | ⛔ Not applicable [7](#notes) |
-| `DescribeHostReservationOfferings` | ⛔ Not applicable [10](#notes) |
-| `DescribeHostReservations` | ⛔ Not applicable [10](#notes) |
+| `DescribeElasticGpus` | ⛔ Not applicable [10](#notes) |
+| `DescribeFpgaImageAttribute` | ⛔ Not applicable [6](#notes) |
+| `DescribeFpgaImages` | ⛔ Not applicable [6](#notes) |
+| `DescribeHostReservationOfferings` | ⛔ Not applicable [9](#notes) |
+| `DescribeHostReservations` | ⛔ Not applicable [9](#notes) |
 | `DescribeIamInstanceProfileAssociations` | ✅ Implemented |
-| `DescribeIdFormat` | ⛔ Not applicable [8](#notes) |
-| `DescribeIdentityIdFormat` | ⛔ Not applicable [8](#notes) |
+| `DescribeIdFormat` | ⛔ Not applicable [7](#notes) |
+| `DescribeIdentityIdFormat` | ⛔ Not applicable [7](#notes) |
 | `DescribeImageAttribute` | ✅ Implemented |
 | `DescribeImages` | ✅ Implemented |
 | `DescribeInstanceAttribute` | ✅ Implemented |
@@ -134,89 +118,78 @@ Spot Instance Requests are a mock over the on-demand `RunInstances` path. A requ
 | `DescribeKeyPairs` | ✅ Implemented |
 | `DescribeLaunchTemplateVersions` | ✅ Implemented |
 | `DescribeLaunchTemplates` | ✅ Implemented |
-| `DescribeLocalGatewayRouteTableVirtualInterfaceGroupAssociations` | ⛔ Not applicable [3](#notes) |
-| `DescribeLocalGatewayRouteTableVpcAssociations` | ⛔ Not applicable [3](#notes) |
-| `DescribeLocalGatewayRouteTables` | ⛔ Not applicable [3](#notes) |
-| `DescribeLocalGatewayVirtualInterfaceGroups` | ⛔ Not applicable [3](#notes) |
-| `DescribeLocalGatewayVirtualInterfaces` | ⛔ Not applicable [3](#notes) |
-| `DescribeLocalGateways` | ⛔ Not applicable [3](#notes) |
-| `DescribeMovingAddresses` | ⛔ Not applicable [6](#notes) |
+| `DescribeMovingAddresses` | ⛔ Not applicable [5](#notes) |
 | `DescribeNatGateways` | ✅ Implemented |
 | `DescribeNetworkInterfaces` | ✅ Implemented |
 | `DescribePlacementGroups` | ✅ Implemented |
-| `DescribePrincipalIdFormat` | ⛔ Not applicable [8](#notes) |
+| `DescribePrincipalIdFormat` | ⛔ Not applicable [7](#notes) |
 | `DescribeRegions` | ✅ Implemented |
-| `DescribeReservedInstances` | ⛔ Not applicable [10](#notes) |
-| `DescribeReservedInstancesListings` | ⛔ Not applicable [10](#notes) |
-| `DescribeReservedInstancesModifications` | ⛔ Not applicable [10](#notes) |
-| `DescribeReservedInstancesOfferings` | ⛔ Not applicable [10](#notes) |
+| `DescribeReservedInstances` | ⛔ Not applicable [9](#notes) |
+| `DescribeReservedInstancesListings` | ⛔ Not applicable [9](#notes) |
+| `DescribeReservedInstancesModifications` | ⛔ Not applicable [9](#notes) |
+| `DescribeReservedInstancesOfferings` | ⛔ Not applicable [9](#notes) |
 | `DescribeRouteTables` | ✅ Implemented |
-| `DescribeScheduledInstanceAvailability` | ⛔ Not applicable [10](#notes) |
-| `DescribeScheduledInstances` | ⛔ Not applicable [10](#notes) |
+| `DescribeScheduledInstanceAvailability` | ⛔ Not applicable [9](#notes) |
+| `DescribeScheduledInstances` | ⛔ Not applicable [9](#notes) |
 | `DescribeSecurityGroupRules` | ✅ Implemented |
 | `DescribeSecurityGroups` | ✅ Implemented |
 | `DescribeSnapshots` | ✅ Implemented |
 | `DescribeSpotInstanceRequests` | ✅ Implemented |
-| `DescribeSpotPriceHistory` | ⛔ Not applicable [12](#notes) |
+| `DescribeSpotPriceHistory` | ⛔ Not applicable [11](#notes) |
 | `DescribeSubnets` | ✅ Implemented |
 | `DescribeTags` | ✅ Implemented |
 | `DescribeVolumeStatus` | ✅ Implemented |
 | `DescribeVolumes` | ✅ Implemented |
 | `DescribeVolumesModifications` | ✅ Implemented |
 | `DescribeVpcAttribute` | ✅ Implemented |
-| `DescribeVpcClassicLink` | ⛔ Not applicable [6](#notes) |
-| `DescribeVpcClassicLinkDnsSupport` | ⛔ Not applicable [6](#notes) |
+| `DescribeVpcClassicLink` | ⛔ Not applicable [5](#notes) |
+| `DescribeVpcClassicLinkDnsSupport` | ⛔ Not applicable [5](#notes) |
 | `DescribeVpcs` | ✅ Implemented |
-| `DetachClassicLinkVpc` | ⛔ Not applicable [6](#notes) |
+| `DetachClassicLinkVpc` | ⛔ Not applicable [5](#notes) |
 | `DetachInternetGateway` | ✅ Implemented |
 | `DetachNetworkInterface` | ✅ Implemented |
 | `DetachVolume` | ✅ Implemented |
 | `DisableAwsNetworkPerformanceMetricSubscription` | ⛔ Not applicable [2](#notes) |
 | `DisableEbsEncryptionByDefault` | ✅ Implemented |
 | `DisableSerialConsoleAccess` | ✅ Implemented |
-| `DisableVpcClassicLink` | ⛔ Not applicable [6](#notes) |
-| `DisableVpcClassicLinkDnsSupport` | ⛔ Not applicable [6](#notes) |
+| `DisableVpcClassicLink` | ⛔ Not applicable [5](#notes) |
+| `DisableVpcClassicLinkDnsSupport` | ⛔ Not applicable [5](#notes) |
 | `DisassociateAddress` | ✅ Implemented |
 | `DisassociateIamInstanceProfile` | ✅ Implemented |
 | `DisassociateRouteTable` | ✅ Implemented |
 | `EnableAwsNetworkPerformanceMetricSubscription` | ⛔ Not applicable [2](#notes) |
 | `EnableEbsEncryptionByDefault` | ✅ Implemented |
 | `EnableSerialConsoleAccess` | ✅ Implemented |
-| `EnableVpcClassicLink` | ⛔ Not applicable [6](#notes) |
-| `EnableVpcClassicLinkDnsSupport` | ⛔ Not applicable [6](#notes) |
+| `EnableVpcClassicLink` | ⛔ Not applicable [5](#notes) |
+| `EnableVpcClassicLinkDnsSupport` | ⛔ Not applicable [5](#notes) |
 | `GetAwsNetworkPerformanceData` | ⛔ Not applicable [2](#notes) |
-| `GetCoipPoolUsage` | ⛔ Not applicable [3](#notes) |
 | `GetConsoleOutput` | ✅ Implemented |
 | `GetEbsEncryptionByDefault` | ✅ Implemented |
 | `GetFlowLogsIntegrationTemplate` | ⛔ Not applicable [1](#notes) |
-| `GetHostReservationPurchasePreview` | ⛔ Not applicable [10](#notes) |
+| `GetHostReservationPurchasePreview` | ⛔ Not applicable [9](#notes) |
 | `GetPasswordData` | ✅ Implemented |
-| `GetReservedInstancesExchangeQuote` | ⛔ Not applicable [10](#notes) |
+| `GetReservedInstancesExchangeQuote` | ⛔ Not applicable [9](#notes) |
 | `GetSecurityGroupsForVpc` | ✅ Implemented |
 | `GetSerialConsoleAccessStatus` | ✅ Implemented |
 | `ImportKeyPair` | ✅ Implemented |
-| `ModifyAvailabilityZoneGroup` | ⛔ Not applicable [3](#notes) |
-| `ModifyFpgaImageAttribute` | ⛔ Not applicable [7](#notes) |
-| `ModifyIdFormat` | ⛔ Not applicable [8](#notes) |
-| `ModifyIdentityIdFormat` | ⛔ Not applicable [8](#notes) |
+| `ModifyFpgaImageAttribute` | ⛔ Not applicable [6](#notes) |
+| `ModifyIdFormat` | ⛔ Not applicable [7](#notes) |
+| `ModifyIdentityIdFormat` | ⛔ Not applicable [7](#notes) |
 | `ModifyImageAttribute` | ✅ Implemented |
 | `ModifyInstanceAttribute` | ✅ Implemented |
 | `ModifyInstanceMetadataOptions` | ✅ Implemented |
 | `ModifyLaunchTemplate` | ✅ Implemented |
-| `ModifyLocalGatewayRoute` | ⛔ Not applicable [3](#notes) |
 | `ModifyNetworkInterfaceAttribute` | ✅ Implemented |
-| `ModifyReservedInstances` | ⛔ Not applicable [10](#notes) |
+| `ModifyReservedInstances` | ⛔ Not applicable [9](#notes) |
 | `ModifySubnetAttribute` | ✅ Implemented |
 | `ModifyVolume` | ✅ Implemented |
 | `ModifyVpcAttribute` | ✅ Implemented |
 | `MonitorInstances` | ✅ Implemented |
-| `MoveAddressToVpc` | ⛔ Not applicable [6](#notes) |
-| `MoveByoipCidrToIpam` | ⛔ Not applicable [5](#notes) |
-| `ProvisionByoipCidr` | ⛔ Not applicable [5](#notes) |
-| `PurchaseCapacityBlock` | ⛔ Not applicable [10](#notes) |
-| `PurchaseHostReservation` | ⛔ Not applicable [10](#notes) |
-| `PurchaseReservedInstancesOffering` | ⛔ Not applicable [10](#notes) |
-| `PurchaseScheduledInstances` | ⛔ Not applicable [10](#notes) |
+| `MoveAddressToVpc` | ⛔ Not applicable [5](#notes) |
+| `PurchaseCapacityBlock` | ⛔ Not applicable [9](#notes) |
+| `PurchaseHostReservation` | ⛔ Not applicable [9](#notes) |
+| `PurchaseReservedInstancesOffering` | ⛔ Not applicable [9](#notes) |
+| `PurchaseScheduledInstances` | ⛔ Not applicable [9](#notes) |
 | `RebootInstances` | ✅ Implemented |
 | `RegisterImage` | ✅ Implemented |
 | `ReleaseAddress` | ✅ Implemented |
@@ -225,33 +198,30 @@ Spot Instance Requests are a mock over the on-demand `RunInstances` path. A requ
 | `ReplaceRouteTableAssociation` | ✅ Implemented |
 | `ReportInstanceStatus` | ⛔ Not applicable [4](#notes) |
 | `RequestSpotInstances` | ✅ Implemented |
-| `ResetFpgaImageAttribute` | ⛔ Not applicable [7](#notes) |
+| `ResetFpgaImageAttribute` | ⛔ Not applicable [6](#notes) |
 | `ResetImageAttribute` | ✅ Implemented |
-| `RestoreAddressToClassic` | ⛔ Not applicable [6](#notes) |
+| `RestoreAddressToClassic` | ⛔ Not applicable [5](#notes) |
 | `RevokeSecurityGroupEgress` | ✅ Implemented |
 | `RevokeSecurityGroupIngress` | ✅ Implemented |
 | `RunInstances` | ✅ Implemented |
-| `RunScheduledInstances` | ⛔ Not applicable [10](#notes) |
-| `SearchLocalGatewayRoutes` | ⛔ Not applicable [3](#notes) |
+| `RunScheduledInstances` | ⛔ Not applicable [9](#notes) |
 | `StartInstances` | ✅ Implemented |
 | `StopInstances` | ✅ Implemented |
 | `TerminateInstances` | ✅ Implemented |
 | `UnmonitorInstances` | ✅ Implemented |
 | `UpdateSecurityGroupRuleDescriptionsEgress` | ✅ Implemented |
 | `UpdateSecurityGroupRuleDescriptionsIngress` | ✅ Implemented |
-| `WithdrawByoipCidr` | ⛔ Not applicable [5](#notes) |
 
 ### Notes
 
 1. The integration template wires flow logs into Athena and CloudFormation, neither of which this platform offers.
 2. These report performance across AWS's own global network between its regions and zones.
-3. Outposts, Local Zones and Wavelength extend an AWS region into another site; a deployment here is the site.
+3. Carrier gateways route to a telecommunications carrier's 5G network in an AWS Wavelength Zone.
 4. Reporting an instance as impaired files a report with AWS support about AWS hardware.
-5. Bringing your own IP range means advertising it from AWS's network. The operator already owns the addresses here.
-6. EC2-Classic is the pre-VPC network AWS retired in 2022. Every instance here is in a VPC.
-7. FPGA images are built and ingested through AWS's own AFI pipeline for its F1 instances.
-8. These switched resource IDs between the short and long forms during AWS's 2016 migration, which has long since finished.
-9. Product codes belong to AWS Marketplace, which has no equivalent here.
-10. Reserved Instances, Scheduled Instances, Capacity Blocks and host reservations buy AWS capacity at an AWS price. Hardware here is already bought.
-11. Elastic Graphics was retired by AWS, and attached nothing but an AWS-hosted accelerator while it existed.
-12. On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented.
+5. EC2-Classic is the pre-VPC network AWS retired in 2022. Every instance here is in a VPC.
+6. FPGA images are built and ingested through AWS's own AFI pipeline for its F1 instances.
+7. These switched resource IDs between the short and long forms during AWS's 2016 migration, which has long since finished.
+8. Product codes belong to AWS Marketplace, which has no equivalent here.
+9. Reserved Instances, Scheduled Instances, Capacity Blocks and host reservations buy AWS capacity at an AWS price. Hardware here is already bought.
+10. Elastic Graphics was retired by AWS, and attached nothing but an AWS-hosted accelerator while it existed.
+11. On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented.

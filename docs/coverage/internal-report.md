@@ -21,7 +21,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 
 ## ec2
 
-`2016-11-15` — 125 of 625 modelled operations implemented (20.0%), 0 stubbed, 87 not applicable, 0 registered outside the pinned model.
+`2016-11-15` — 125 of 625 modelled operations implemented (20.0%), 0 stubbed, 58 not applicable, 0 registered outside the pinned model.
 
 ### Not implemented
 
@@ -31,6 +31,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `AcceptTransitGatewayVpcAttachment`
 - `AcceptVpcEndpointConnections`
 - `AcceptVpcPeeringConnection`
+- `AdvertiseByoipCidr`
 - `AllocateHosts`
 - `AllocateIpamPoolCidr`
 - `ApplySecurityGroupsToClientVpnTargetNetwork`
@@ -64,6 +65,8 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `CreateCapacityReservationFleet`
 - `CreateClientVpnEndpoint`
 - `CreateClientVpnRoute`
+- `CreateCoipCidr`
+- `CreateCoipPool`
 - `CreateCustomerGateway`
 - `CreateDefaultSubnet`
 - `CreateDefaultVpc`
@@ -78,6 +81,10 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `CreateIpamPool`
 - `CreateIpamResourceDiscovery`
 - `CreateIpamScope`
+- `CreateLocalGatewayRoute`
+- `CreateLocalGatewayRouteTable`
+- `CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation`
+- `CreateLocalGatewayRouteTableVpcAssociation`
 - `CreateManagedPrefixList`
 - `CreateNetworkAcl`
 - `CreateNetworkAclEntry`
@@ -119,6 +126,8 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `CreateVpnGateway`
 - `DeleteClientVpnEndpoint`
 - `DeleteClientVpnRoute`
+- `DeleteCoipCidr`
+- `DeleteCoipPool`
 - `DeleteCustomerGateway`
 - `DeleteDhcpOptions`
 - `DeleteFleets`
@@ -130,6 +139,10 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DeleteIpamPool`
 - `DeleteIpamResourceDiscovery`
 - `DeleteIpamScope`
+- `DeleteLocalGatewayRoute`
+- `DeleteLocalGatewayRouteTable`
+- `DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation`
+- `DeleteLocalGatewayRouteTableVpcAssociation`
 - `DeleteManagedPrefixList`
 - `DeleteNetworkAcl`
 - `DeleteNetworkAclEntry`
@@ -167,6 +180,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DeleteVpnConnection`
 - `DeleteVpnConnectionRoute`
 - `DeleteVpnGateway`
+- `DeprovisionByoipCidr`
 - `DeprovisionIpamByoasn`
 - `DeprovisionIpamPoolCidr`
 - `DeprovisionPublicIpv4PoolCidr`
@@ -175,12 +189,14 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DeregisterTransitGatewayMulticastGroupSources`
 - `DescribeAddressTransfers`
 - `DescribeBundleTasks`
+- `DescribeByoipCidrs`
 - `DescribeCapacityReservationFleets`
 - `DescribeClientVpnAuthorizationRules`
 - `DescribeClientVpnConnections`
 - `DescribeClientVpnEndpoints`
 - `DescribeClientVpnRoutes`
 - `DescribeClientVpnTargetNetworks`
+- `DescribeCoipPools`
 - `DescribeConversionTasks`
 - `DescribeCustomerGateways`
 - `DescribeDhcpOptions`
@@ -207,6 +223,12 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DescribeIpamScopes`
 - `DescribeIpams`
 - `DescribeIpv6Pools`
+- `DescribeLocalGatewayRouteTableVirtualInterfaceGroupAssociations`
+- `DescribeLocalGatewayRouteTableVpcAssociations`
+- `DescribeLocalGatewayRouteTables`
+- `DescribeLocalGatewayVirtualInterfaceGroups`
+- `DescribeLocalGatewayVirtualInterfaces`
+- `DescribeLocalGateways`
 - `DescribeLockedSnapshots`
 - `DescribeMacHosts`
 - `DescribeManagedPrefixLists`
@@ -304,6 +326,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `GetAssociatedEnclaveCertificateIamRoles`
 - `GetAssociatedIpv6PoolCidrs`
 - `GetCapacityReservationUsage`
+- `GetCoipPoolUsage`
 - `GetConsoleScreenshot`
 - `GetDefaultCreditSpecification`
 - `GetEbsDefaultKmsKeyId`
@@ -349,6 +372,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `ListSnapshotsInRecycleBin`
 - `LockSnapshot`
 - `ModifyAddressAttribute`
+- `ModifyAvailabilityZoneGroup`
 - `ModifyCapacityReservation`
 - `ModifyCapacityReservationFleet`
 - `ModifyClientVpnEndpoint`
@@ -368,6 +392,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `ModifyIpamResourceCidr`
 - `ModifyIpamResourceDiscovery`
 - `ModifyIpamScope`
+- `ModifyLocalGatewayRoute`
 - `ModifyManagedPrefixList`
 - `ModifyPrivateDnsNameOptions`
 - `ModifySecurityGroupRules`
@@ -399,6 +424,8 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `ModifyVpnConnectionOptions`
 - `ModifyVpnTunnelCertificate`
 - `ModifyVpnTunnelOptions`
+- `MoveByoipCidrToIpam`
+- `ProvisionByoipCidr`
 - `ProvisionIpamByoasn`
 - `ProvisionIpamPoolCidr`
 - `ProvisionPublicIpv4PoolCidr`
@@ -427,6 +454,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `RestoreSnapshotFromRecycleBin`
 - `RestoreSnapshotTier`
 - `RevokeClientVpnIngress`
+- `SearchLocalGatewayRoutes`
 - `SearchTransitGatewayMulticastGroups`
 - `SearchTransitGatewayRoutes`
 - `SendDiagnosticInterrupt`
@@ -438,6 +466,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `UnassignPrivateIpAddresses`
 - `UnassignPrivateNatGatewayAddress`
 - `UnlockSnapshot`
+- `WithdrawByoipCidr`
 
 ### Not applicable — do not build
 
@@ -452,47 +481,15 @@ aws-backbone: These report performance across AWS's own global network between i
 - `EnableAwsNetworkPerformanceMetricSubscription`
 - `GetAwsNetworkPerformanceData`
 
-aws-edge: Outposts, Local Zones and Wavelength extend an AWS region into another site; a deployment here is the site.
+aws-edge: Carrier gateways route to a telecommunications carrier's 5G network in an AWS Wavelength Zone.
 
 - `CreateCarrierGateway`
-- `CreateCoipCidr`
-- `CreateCoipPool`
-- `CreateLocalGatewayRoute`
-- `CreateLocalGatewayRouteTable`
-- `CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation`
-- `CreateLocalGatewayRouteTableVpcAssociation`
 - `DeleteCarrierGateway`
-- `DeleteCoipCidr`
-- `DeleteCoipPool`
-- `DeleteLocalGatewayRoute`
-- `DeleteLocalGatewayRouteTable`
-- `DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation`
-- `DeleteLocalGatewayRouteTableVpcAssociation`
 - `DescribeCarrierGateways`
-- `DescribeCoipPools`
-- `DescribeLocalGatewayRouteTableVirtualInterfaceGroupAssociations`
-- `DescribeLocalGatewayRouteTableVpcAssociations`
-- `DescribeLocalGatewayRouteTables`
-- `DescribeLocalGatewayVirtualInterfaceGroups`
-- `DescribeLocalGatewayVirtualInterfaces`
-- `DescribeLocalGateways`
-- `GetCoipPoolUsage`
-- `ModifyAvailabilityZoneGroup`
-- `ModifyLocalGatewayRoute`
-- `SearchLocalGatewayRoutes`
 
 aws-support: Reporting an instance as impaired files a report with AWS support about AWS hardware.
 
 - `ReportInstanceStatus`
-
-byoip: Bringing your own IP range means advertising it from AWS's network. The operator already owns the addresses here.
-
-- `AdvertiseByoipCidr`
-- `DeprovisionByoipCidr`
-- `DescribeByoipCidrs`
-- `MoveByoipCidrToIpam`
-- `ProvisionByoipCidr`
-- `WithdrawByoipCidr`
 
 ec2-classic: EC2-Classic is the pre-VPC network AWS retired in 2022. Every instance here is in a VPC.
 
@@ -988,13 +985,15 @@ option-groups: Option groups configure engine add-ons for engines this platform 
 
 ## s3
 
-`2006-03-01` — 19 of 99 modelled operations implemented (19.2%), 0 stubbed, 15 not applicable, 0 registered outside the pinned model.
+`2006-03-01` — 19 of 99 modelled operations implemented (19.2%), 0 stubbed, 6 not applicable, 0 registered outside the pinned model.
 
 ### Not implemented
 
 - `DeleteBucketAnalyticsConfiguration`
 - `DeleteBucketCors`
 - `DeleteBucketEncryption`
+- `DeleteBucketIntelligentTieringConfiguration`
+- `DeleteBucketInventoryConfiguration`
 - `DeleteBucketLifecycle`
 - `DeleteBucketMetricsConfiguration`
 - `DeleteBucketOwnershipControls`
@@ -1008,6 +1007,8 @@ option-groups: Option groups configure engine add-ons for engines this platform 
 - `GetBucketAnalyticsConfiguration`
 - `GetBucketCors`
 - `GetBucketEncryption`
+- `GetBucketIntelligentTieringConfiguration`
+- `GetBucketInventoryConfiguration`
 - `GetBucketLifecycle`
 - `GetBucketLifecycleConfiguration`
 - `GetBucketLocation`
@@ -1031,6 +1032,8 @@ option-groups: Option groups configure engine add-ons for engines this platform 
 - `GetObjectTorrent`
 - `GetPublicAccessBlock`
 - `ListBucketAnalyticsConfigurations`
+- `ListBucketIntelligentTieringConfigurations`
+- `ListBucketInventoryConfigurations`
 - `ListBucketMetricsConfigurations`
 - `ListDirectoryBuckets`
 - `ListObjectVersions`
@@ -1038,6 +1041,8 @@ option-groups: Option groups configure engine add-ons for engines this platform 
 - `PutBucketAnalyticsConfiguration`
 - `PutBucketCors`
 - `PutBucketEncryption`
+- `PutBucketIntelligentTieringConfiguration`
+- `PutBucketInventoryConfiguration`
 - `PutBucketLifecycle`
 - `PutBucketLifecycleConfiguration`
 - `PutBucketLogging`
@@ -1056,6 +1061,7 @@ option-groups: Option groups configure engine add-ons for engines this platform 
 - `PutObjectRetention`
 - `PutObjectTagging`
 - `PutPublicAccessBlock`
+- `RestoreObject`
 - `SelectObjectContent`
 
 ### Not applicable — do not build
@@ -1069,13 +1075,6 @@ express-one-zone: Sessions authenticate S3 Express One Zone directory buckets, a
 
 - `CreateSession`
 
-inventory: Inventory reports are an AWS-hosted scheduled export; a listing here is served live from the metadata store.
-
-- `DeleteBucketInventoryConfiguration`
-- `GetBucketInventoryConfiguration`
-- `ListBucketInventoryConfigurations`
-- `PutBucketInventoryConfiguration`
-
 object-lambda: S3 Object Lambda rewrites a response from a Lambda function, and Lambda is not offered.
 
 - `WriteGetObjectResponse`
@@ -1084,14 +1083,6 @@ request-payment: Requester Pays shifts transfer charges to the caller, which nee
 
 - `GetBucketRequestPayment`
 - `PutBucketRequestPayment`
-
-tiering: Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media.
-
-- `DeleteBucketIntelligentTieringConfiguration`
-- `GetBucketIntelligentTieringConfiguration`
-- `ListBucketIntelligentTieringConfigurations`
-- `PutBucketIntelligentTieringConfiguration`
-- `RestoreObject`
 
 ## sts
 
