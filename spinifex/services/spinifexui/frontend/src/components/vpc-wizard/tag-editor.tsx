@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
-import { useWatch } from "react-hook-form"
+import { useFieldArray } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,23 +11,18 @@ interface TagEditorProps {
 }
 
 export function TagEditor({ form }: TagEditorProps) {
-  const tags = useWatch({ control: form.control, name: "tags" })
-
-  function addTag() {
-    form.setValue("tags", [...tags, { key: "", value: "" }])
-  }
-
-  function removeTag(index: number) {
-    form.setValue(
-      "tags",
-      tags.filter((_, i) => i !== index),
-    )
-  }
+  // The rows are keyed by the field array's own id rather than the index so
+  // removing a row does not leave the inputs below it showing the previous
+  // row's registered values.
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "tags",
+  })
 
   return (
     <div className="space-y-2">
-      {tags.map((_, index) => (
-        <div className="flex items-center gap-2" key={index}>
+      {fields.map((field, index) => (
+        <div className="flex items-center gap-2" key={field.id}>
           <Input placeholder="Key" {...form.register(`tags.${index}.key`)} />
           <Input
             placeholder="Value"
@@ -35,7 +30,7 @@ export function TagEditor({ form }: TagEditorProps) {
           />
           <Button
             onClick={() => {
-              removeTag(index)
+              remove(index)
             }}
             size="icon"
             type="button"
@@ -46,7 +41,14 @@ export function TagEditor({ form }: TagEditorProps) {
           </Button>
         </div>
       ))}
-      <Button onClick={addTag} size="sm" type="button" variant="outline">
+      <Button
+        onClick={() => {
+          append({ key: "", value: "" })
+        }}
+        size="sm"
+        type="button"
+        variant="outline"
+      >
         <Plus className="size-3.5" />
         Add tag
       </Button>
