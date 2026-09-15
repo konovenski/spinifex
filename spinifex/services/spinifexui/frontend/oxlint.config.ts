@@ -45,6 +45,7 @@ export default defineConfig({
       "error",
       { namedComponents: "function-declaration" },
     ],
+    "react/no-array-index-key": "error",
     "react/jsx-handler-names": "off",
     "react/todo": "off",
     "react-you-might-not-need-an-effect/no-event-handler": "error",

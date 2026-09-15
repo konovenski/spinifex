@@ -381,6 +381,7 @@ export function CreateClusterPage() {
                 <span className="font-mono">0.0.0.0/0</span>.
               </p>
               {publicCidrs.map((cidr, index) => (
+                // oxlint-disable-next-line no-array-index-key -- controlled inputs; a stable key needs publicAccessCidrs off string[]
                 <div className="flex items-center gap-2" key={index}>
                   <Input
                     aria-label={`Public access CIDR ${index + 1}`}

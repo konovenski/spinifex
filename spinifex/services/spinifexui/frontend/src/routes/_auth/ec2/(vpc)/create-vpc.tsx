@@ -162,6 +162,7 @@ function CreateVpc() {
               </p>
               <ul className="mt-1 list-inside list-disc text-xs text-destructive">
                 {wizardResult.created.map((r, i) => (
+                  // oxlint-disable-next-line no-array-index-key -- static failure summary, never reordered or filtered
                   <li key={i}>
                     {r.type}: {r.id}
                   </li>

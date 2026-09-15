@@ -127,6 +127,7 @@ export function CliCommandPanel({ commands }: CliCommandPanelProps) {
                 <pre className="font-mono text-xs/relaxed">
                   <code>
                     {cmd.parts.map((part, j) => (
+                      // oxlint-disable-next-line no-array-index-key -- positional tokens of one command, never reordered
                       <span key={j} className={partStyles[part.type]}>
                         {part.value}
                       </span>
