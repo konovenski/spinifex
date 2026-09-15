@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **19 operations** in the ECR `2015-09-21` API model.
+Spinifex implements **22 operations** in the ECR `2015-09-21` API model.
 
 ### Two endpoints, one registry
 
@@ -47,7 +47,10 @@ Registry replication is a stub for the same kind of reason: a deployment is a si
 | `ListImages` |
 | `ListTagsForResource` |
 | `PutImage` |
+| `PutImageScanningConfiguration` |
 | `PutImageTagMutability` |
 | `PutLifecyclePolicy` |
 | `SetRepositoryPolicy` |
 | `StartLifecyclePolicyPreview` |
+| `TagResource` |
+| `UntagResource` |

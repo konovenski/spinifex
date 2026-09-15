@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **75 operations** in the IAM `2010-05-08` API model.
+Spinifex implements **76 operations** in the IAM `2010-05-08` API model.
 
 ### Scope
 
@@ -68,6 +68,7 @@ All IAM operations are account-scoped. The root user of an account bypasses poli
 | `ListAttachedGroupPolicies` |
 | `ListAttachedRolePolicies` |
 | `ListAttachedUserPolicies` |
+| `ListEntitiesForPolicy` |
 | `ListGroupPolicies` |
 | `ListGroups` |
 | `ListGroupsForUser` |

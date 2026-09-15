@@ -560,7 +560,7 @@ spot-price: On owned hardware there is no spot-to-on-demand price differential, 
 
 ## ecr
 
-`2015-09-21` — 19 of 47 modelled operations implemented (40.4%), 13 stubbed, 0 not applicable, 3 registered outside the pinned model.
+`2015-09-21` — 22 of 47 modelled operations implemented (46.8%), 11 stubbed, 0 not applicable, 3 registered outside the pinned model.
 
 ### Not implemented
 
@@ -588,8 +588,6 @@ spot-price: On owned hardware there is no spot-to-on-demand price differential, 
 - `PutRegistryPolicy`
 - `PutReplicationConfiguration`
 - `ReplicateImage`
-- `TagResource`
-- `UntagResource`
 - `UploadLayerPart`
 
 ### Registered and refused
@@ -598,7 +596,6 @@ spot-price: On owned hardware there is no spot-to-on-demand price differential, 
 - `DescribeImageScanFindings`
 - `GetImageScanningConfiguration`
 - `GetRegistryScanningConfiguration`
-- `PutImageScanningConfiguration`
 - `PutRegistryScanningConfiguration`
 - `StartImageScan`
 
@@ -713,7 +710,7 @@ spot-price: On owned hardware there is no spot-to-on-demand price differential, 
 
 ## iam
 
-`2010-05-08` — 75 of 159 modelled operations implemented (47.2%), 0 stubbed, 19 not applicable, 0 registered outside the pinned model.
+`2010-05-08` — 76 of 159 modelled operations implemented (47.8%), 0 stubbed, 19 not applicable, 0 registered outside the pinned model.
 
 ### Not implemented
 
@@ -750,7 +747,6 @@ spot-price: On owned hardware there is no spot-to-on-demand price differential, 
 - `GetServiceLastAccessedDetails`
 - `GetServiceLastAccessedDetailsWithEntities`
 - `ListAccountAliases`
-- `ListEntitiesForPolicy`
 - `ListMFADeviceTags`
 - `ListMFADevices`
 - `ListPoliciesGrantingServiceAccess`
