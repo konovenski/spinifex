@@ -337,6 +337,7 @@ function RuleRow({ rule, source, groupId, direction }: RuleRowProps) {
           variant="ghost"
         >
           <X className="size-3" />
+          <span className="sr-only">Remove rule</span>
         </Button>
       </div>
       {mutation.error && (

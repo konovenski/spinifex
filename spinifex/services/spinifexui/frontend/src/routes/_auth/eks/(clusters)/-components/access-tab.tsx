@@ -75,6 +75,7 @@ function AccessEntryRow({
             variant="ghost"
           >
             <Trash2 className="size-4" />
+            <span className="sr-only">Delete access entry</span>
           </Button>
         </div>
       </DetailCard.Header>

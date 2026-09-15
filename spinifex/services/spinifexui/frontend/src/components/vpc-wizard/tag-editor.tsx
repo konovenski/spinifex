@@ -42,6 +42,7 @@ export function TagEditor({ form }: TagEditorProps) {
             variant="ghost"
           >
             <Trash2 className="size-3.5" />
+            <span className="sr-only">Remove tag</span>
           </Button>
         </div>
       ))}
