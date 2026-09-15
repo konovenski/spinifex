@@ -54,8 +54,9 @@ func (c OperationCoverage) ImplementedPercent() float64 {
 // less the internal routes the page declares.
 //
 // The page's NotApplicable declares operations the platform will never serve,
-// mapped to the note key explaining why. A refusing handler is the same fact
-// reached mechanically, so both publish as StatusNotApplicable.
+// mapped to the note key explaining why, and is the only thing that publishes
+// that claim. A handler that refuses today may be implemented tomorrow, so a
+// refusal on its own is a gap like any other rather than a "never".
 func (c OperationCoverage) OperationStatuses(page PageMetadata) ([]OperationStatus, error) {
 	registered := toSet(c.Registered)
 	stubbed := toSet(c.Stubbed)
@@ -89,8 +90,10 @@ func (c OperationCoverage) OperationStatuses(page PageMetadata) ([]OperationStat
 		switch {
 		case stubbed[operation]:
 			status = StatusStub
+		// A registered handler that refuses serves nothing, so it reads as the
+		// gap it is unless the page declares why it is permanent.
 		case unsupported[operation]:
-			status = StatusNotApplicable
+			status = StatusNotImplemented
 		case registered[operation]:
 			status = StatusImplemented
 		}

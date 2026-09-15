@@ -90,7 +90,6 @@ func TestRenderServicePageCarriesEveryPublishedStatus(t *testing.T) {
 		"| `AssumeRole` | " + StatusImplemented + " |",
 		"| `GetSessionToken` | " + StatusStub + " |",
 		"| `PublishInternal` | " + StatusOutsideModel + " |",
-		"| `GetCallerIdentity` | " + StatusNotApplicable + " |",
 	} {
 		if !strings.Contains(page, want) {
 			t.Errorf("page does not contain %q:\n%s", want, page)
@@ -289,9 +288,10 @@ func TestRenderServicePageFootnotesSharedNotes(t *testing.T) {
 	}
 }
 
-// A refusal the dispatch tables report is published as a row whether or not the
-// page declares a reason for it.
-func TestRenderServicePageRowsAnUndeclaredRefusal(t *testing.T) {
+// "Not applicable" says the platform will never serve an operation, which a
+// handler refusing it today does not establish. Only the page's declaration
+// publishes that claim; an undeclared refusal is a gap like any other.
+func TestRenderServicePageDoesNotPublishAnUndeclaredRefusalAsPermanent(t *testing.T) {
 	pages := testPageSet(t)
 	coverage, err := CompareOperations(STS, DispatchInventory{
 		Registered:  []string{"AssumeRole", "GetFederationToken"},
@@ -305,8 +305,8 @@ func TestRenderServicePageRowsAnUndeclaredRefusal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(page, "| `GetFederationToken` | "+StatusNotApplicable+" |") {
-		t.Errorf("an undeclared refusal is not published:\n%s", page)
+	if strings.Contains(page, "| `GetFederationToken` |") {
+		t.Errorf("an undeclared refusal is published as a permanent claim:\n%s", page)
 	}
 }
 

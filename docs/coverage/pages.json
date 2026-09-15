@@ -202,24 +202,13 @@
         "SubmitDBStateChange"
       ],
       "notApplicable": {
-        "CreateDBCluster": "clusters",
-        "CreateDBInstanceReadReplica": "read-replicas",
         "CreateOptionGroup": "option-groups",
-        "DeleteDBCluster": "clusters",
         "DeleteOptionGroup": "option-groups",
-        "DescribeDBClusters": "clusters",
         "DescribeOptionGroups": "option-groups",
-        "FailoverDBCluster": "clusters",
-        "ModifyDBCluster": "clusters",
-        "ModifyOptionGroup": "option-groups",
-        "PromoteReadReplica": "read-replicas",
-        "RestoreDBInstanceToPointInTime": "point-in-time-restore"
+        "ModifyOptionGroup": "option-groups"
       },
       "notes": {
-        "clusters": "Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly.",
-        "option-groups": "Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server.",
-        "point-in-time-restore": "Point-in-time restore needs continuous transaction-log archival, which the backup path does not keep.",
-        "read-replicas": "Replication between instances is not offered, so there is no replica to create or promote."
+        "option-groups": "Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server."
       }
     },
     "s3": {
