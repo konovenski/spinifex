@@ -10,7 +10,7 @@ import { DetailRow } from "@/components/detail-row"
 import { ErrorBanner } from "@/components/error-banner"
 import { PageHeading } from "@/components/page-heading"
 import { Button } from "@/components/ui/button"
-import { formatDateTime } from "@/lib/utils"
+import { formatDateTime, safeDecodeURIComponent } from "@/lib/utils"
 import { useDeletePolicy } from "@/mutations/iam"
 import {
   iamPolicyQueryOptions,
@@ -23,7 +23,7 @@ export const Route = createFileRoute(
   "/_auth/iam/(policies)/list-policies/$policyArn",
 )({
   loader: async ({ context, params }) => {
-    const policyArn = decodeURIComponent(params.policyArn)
+    const policyArn = safeDecodeURIComponent(params.policyArn)
     const policyData = await context.queryClient.query({
       ...iamPolicyQueryOptions(policyArn),
       staleTime: "static",
@@ -49,7 +49,7 @@ export const Route = createFileRoute(
 
 function PolicyDetail() {
   const { policyArn: encodedArn } = Route.useParams()
-  const policyArn = decodeURIComponent(encodedArn)
+  const policyArn = safeDecodeURIComponent(encodedArn)
   const navigate = useNavigate()
   const { data: policyData } = useSuspenseQuery(
     iamPolicyQueryOptions(policyArn),
@@ -64,7 +64,7 @@ function PolicyDetail() {
   )
 
   const policyDocument = versionData?.PolicyVersion?.Document
-    ? decodeURIComponent(versionData.PolicyVersion.Document)
+    ? safeDecodeURIComponent(versionData.PolicyVersion.Document)
     : null
 
   const handleDelete = async () => {

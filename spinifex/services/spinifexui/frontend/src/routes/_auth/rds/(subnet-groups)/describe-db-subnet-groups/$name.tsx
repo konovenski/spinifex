@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import { rdsSubnetGroupQueryOptions, rdsTagsQueryOptions } from "@/queries/rds"
 
 import { DBSubnetGroupDetailPage } from "../-components/db-subnet-group-detail-page"
@@ -8,7 +9,7 @@ export const Route = createFileRoute(
   "/_auth/rds/(subnet-groups)/describe-db-subnet-groups/$name",
 )({
   loader: async ({ context, params }) => {
-    const name = decodeURIComponent(params.name)
+    const name = safeDecodeURIComponent(params.name)
     // The tags query keys off the ARN, which only the describe knows, so it is
     // warmed after the group rather than alongside it.
     const group = await context.queryClient.query({
@@ -26,7 +27,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `${decodeURIComponent(params.name)} | RDS | Mulga`,
+        title: `${safeDecodeURIComponent(params.name)} | RDS | Mulga`,
       },
     ],
   }),
@@ -36,6 +37,6 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const { name } = Route.useParams()
   return (
-    <DBSubnetGroupDetailPage dbSubnetGroupName={decodeURIComponent(name)} />
+    <DBSubnetGroupDetailPage dbSubnetGroupName={safeDecodeURIComponent(name)} />
   )
 }

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import {
   rdsDBSnapshotQueryOptions,
   rdsSnapshotEventsQueryOptions,
@@ -12,7 +13,7 @@ export const Route = createFileRoute(
   "/_auth/rds/(snapshots)/describe-db-snapshots/$id",
 )({
   loader: async ({ context, params }) => {
-    const id = decodeURIComponent(params.id)
+    const id = safeDecodeURIComponent(params.id)
     // The tags query keys off the ARN, which only the describe knows, so it is
     // warmed after the snapshot rather than alongside it.
     const [snapshot] = await Promise.all([
@@ -36,7 +37,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `${decodeURIComponent(params.id)} | RDS | Mulga`,
+        title: `${safeDecodeURIComponent(params.id)} | RDS | Mulga`,
       },
     ],
   }),
@@ -45,5 +46,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { id } = Route.useParams()
-  return <DBSnapshotDetailPage dbSnapshotIdentifier={decodeURIComponent(id)} />
+  return (
+    <DBSnapshotDetailPage dbSnapshotIdentifier={safeDecodeURIComponent(id)} />
+  )
 }

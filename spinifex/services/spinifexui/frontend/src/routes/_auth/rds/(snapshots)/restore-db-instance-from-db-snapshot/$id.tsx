@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import {
   ec2ImagesQueryOptions,
   ec2SecurityGroupsQueryOptions,
@@ -19,7 +20,7 @@ export const Route = createFileRoute(
   loader: async ({ context, params }) => {
     await Promise.all([
       context.queryClient.query({
-        ...rdsDBSnapshotQueryOptions(decodeURIComponent(params.id)),
+        ...rdsDBSnapshotQueryOptions(safeDecodeURIComponent(params.id)),
         staleTime: "static",
       }),
       context.queryClient.query({
@@ -47,7 +48,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `Restore ${decodeURIComponent(params.id)} | RDS | Mulga`,
+        title: `Restore ${safeDecodeURIComponent(params.id)} | RDS | Mulga`,
       },
     ],
   }),
@@ -56,5 +57,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { id } = Route.useParams()
-  return <RestoreDBSnapshotPage dbSnapshotIdentifier={decodeURIComponent(id)} />
+  return (
+    <RestoreDBSnapshotPage dbSnapshotIdentifier={safeDecodeURIComponent(id)} />
+  )
 }

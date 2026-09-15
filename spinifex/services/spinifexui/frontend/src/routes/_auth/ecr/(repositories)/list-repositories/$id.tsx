@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import {
   ecrRepositoriesQueryOptions,
   ecrRepositoryImagesQueryOptions,
@@ -12,7 +13,7 @@ export const Route = createFileRoute(
   "/_auth/ecr/(repositories)/list-repositories/$id",
 )({
   loader: async ({ context, params }) => {
-    const name = decodeURIComponent(params.id)
+    const name = safeDecodeURIComponent(params.id)
     await Promise.all([
       context.queryClient.query({
         ...ecrRepositoriesQueryOptions,
@@ -31,7 +32,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `${decodeURIComponent(params.id)} | Repository | Mulga`,
+        title: `${safeDecodeURIComponent(params.id)} | Repository | Mulga`,
       },
     ],
   }),
@@ -40,5 +41,5 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { id } = Route.useParams()
-  return <RepositoryDetailPage repositoryName={decodeURIComponent(id)} />
+  return <RepositoryDetailPage repositoryName={safeDecodeURIComponent(id)} />
 }

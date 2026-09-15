@@ -1,1 +1,0 @@
-import{It as e,_t as t}from"./cluster-config-CVTN_vqH.js";import{un as n}from"./awsClient-L0LwpVhd.js";var r=e(n,`AWSIdentityManagementV20100508`,`IAMClient`,t),i={},a=(e,t,n,r)=>[];export{a as n,r,i as t};

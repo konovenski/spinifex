@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import { ec2InstancesQueryOptions } from "@/queries/ec2"
 import {
   elbv2TagsQueryOptions,
@@ -13,7 +14,7 @@ export const Route = createFileRoute(
   "/_auth/ec2/(target-groups)/describe-target-groups/$id",
 )({
   loader: async ({ context, params }) => {
-    const arn = decodeURIComponent(params.id)
+    const arn = safeDecodeURIComponent(params.id)
     await Promise.all([
       context.queryClient.query({
         ...elbv2TargetGroupQueryOptions(arn),
@@ -36,7 +37,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `${decodeURIComponent(params.id)} | Target Group | Mulga`,
+        title: `${safeDecodeURIComponent(params.id)} | Target Group | Mulga`,
       },
     ],
   }),
@@ -45,5 +46,5 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { id } = Route.useParams()
-  return <TargetGroupDetailPage arn={decodeURIComponent(id)} />
+  return <TargetGroupDetailPage arn={safeDecodeURIComponent(id)} />
 }

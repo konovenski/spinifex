@@ -9,6 +9,7 @@ import {
   formatSize,
   getNameTag,
   removeTrailingSlash,
+  safeDecodeURIComponent,
 } from "./utils"
 
 describe("cn", () => {
@@ -166,5 +167,25 @@ describe("extractDisplayName", () => {
 
   it("handles nested prefixes", () => {
     expect(extractDisplayName("a/b/c/file.txt", "a/b/")).toBe("c/file.txt")
+  })
+})
+
+describe("safeDecodeURIComponent", () => {
+  it("decodes a well-formed value", () => {
+    expect(safeDecodeURIComponent("arn%3Aaws%3Ards%3Adb%2Fmine")).toBe(
+      "arn:aws:rds:db/mine",
+    )
+  })
+
+  it("returns the raw value on a lone percent", () => {
+    expect(safeDecodeURIComponent("100%off")).toBe("100%off")
+  })
+
+  it("returns the raw value on a truncated escape", () => {
+    expect(safeDecodeURIComponent("db-%E0%A4%A")).toBe("db-%E0%A4%A")
+  })
+
+  it("leaves an undecorated value untouched", () => {
+    expect(safeDecodeURIComponent("my-db-instance")).toBe("my-db-instance")
   })
 })

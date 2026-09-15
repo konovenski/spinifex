@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import {
   rdsParameterGroupQueryOptions,
   rdsParametersQueryOptions,
@@ -13,7 +14,7 @@ export const Route = createFileRoute(
   "/_auth/rds/(parameter-groups)/describe-db-parameter-groups/$name",
 )({
   loader: async ({ context, params }) => {
-    const name = decodeURIComponent(params.name)
+    const name = safeDecodeURIComponent(params.name)
     // The tags query keys off the ARN, which only the describe knows, so it is
     // warmed after the group rather than alongside it. A default group has no
     // stored record for tags to live on, so it is skipped entirely.
@@ -40,7 +41,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `${decodeURIComponent(params.name)} | RDS | Mulga`,
+        title: `${safeDecodeURIComponent(params.name)} | RDS | Mulga`,
       },
     ],
   }),
@@ -51,7 +52,7 @@ function RouteComponent() {
   const { name } = Route.useParams()
   return (
     <DBParameterGroupDetailPage
-      dbParameterGroupName={decodeURIComponent(name)}
+      dbParameterGroupName={safeDecodeURIComponent(name)}
     />
   )
 }

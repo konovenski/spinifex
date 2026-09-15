@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import {
   rdsAutomatedBackupsQueryOptions,
   rdsDBInstanceQueryOptions,
@@ -14,7 +15,7 @@ export const Route = createFileRoute(
   "/_auth/rds/(db-instances)/describe-db-instances/$id",
 )({
   loader: async ({ context, params }) => {
-    const id = decodeURIComponent(params.id)
+    const id = safeDecodeURIComponent(params.id)
     // The tags query keys off the ARN, which only the describe knows, so it is
     // warmed after the instance rather than alongside it.
     const [instance] = await Promise.all([
@@ -44,7 +45,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `${decodeURIComponent(params.id)} | RDS | Mulga`,
+        title: `${safeDecodeURIComponent(params.id)} | RDS | Mulga`,
       },
     ],
   }),
@@ -53,5 +54,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { id } = Route.useParams()
-  return <DBInstanceDetailPage dbInstanceIdentifier={decodeURIComponent(id)} />
+  return (
+    <DBInstanceDetailPage dbInstanceIdentifier={safeDecodeURIComponent(id)} />
+  )
 }

@@ -52,6 +52,17 @@ export function securityGroupLabel(group: {
   return group.GroupName ? `${id} (${group.GroupName})` : id
 }
 
+// Route params reach us straight from the URL, so a malformed percent-escape
+// like "100%off" makes decodeURIComponent throw and unwind the render. The raw
+// value is the useful fallback: it still identifies the resource to the API.
+export function safeDecodeURIComponent(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
 const TRAILING_SLASH_REGEX = /\/$/
 
 export function removeTrailingSlash(path: string): string {

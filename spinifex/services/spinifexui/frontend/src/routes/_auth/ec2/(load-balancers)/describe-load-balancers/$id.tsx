@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { safeDecodeURIComponent } from "@/lib/utils"
 import { ec2SubnetsQueryOptions } from "@/queries/ec2"
 import {
   elbv2ListenersQueryOptions,
@@ -15,7 +16,7 @@ export const Route = createFileRoute(
   "/_auth/ec2/(load-balancers)/describe-load-balancers/$id",
 )({
   loader: async ({ context, params }) => {
-    const arn = decodeURIComponent(params.id)
+    const arn = safeDecodeURIComponent(params.id)
     await Promise.all([
       context.queryClient.query({
         ...elbv2LoadBalancerQueryOptions(arn),
@@ -46,7 +47,7 @@ export const Route = createFileRoute(
   head: ({ params }) => ({
     meta: [
       {
-        title: `${decodeURIComponent(params.id)} | Load Balancer | Mulga`,
+        title: `${safeDecodeURIComponent(params.id)} | Load Balancer | Mulga`,
       },
     ],
   }),
@@ -55,5 +56,5 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { id } = Route.useParams()
-  return <LoadBalancerDetailPage arn={decodeURIComponent(id)} />
+  return <LoadBalancerDetailPage arn={safeDecodeURIComponent(id)} />
 }
