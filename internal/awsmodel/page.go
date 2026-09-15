@@ -373,7 +373,14 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 	var body strings.Builder
 	writeFrontmatter(&body, pages.Index, pages.Category)
 	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", pages.Index.Title)
-	fmt.Fprintf(&body, "Spinifex serves the AWS APIs below. Every page names the operations Spinifex implements from the pinned `aws-sdk-go %s` `api-2.json` model for its service, alongside those the platform does not offer and why.\n\n", SourceSDKVersion)
+	total := 0
+	for _, coverage := range coverages {
+		if _, ok := pages.Services[coverage.Service]; ok {
+			total += len(coverage.Implemented)
+		}
+	}
+
+	fmt.Fprintf(&body, "Spinifex implements **%d operations** across the AWS APIs below. Every page names the operations Spinifex implements from the pinned `aws-sdk-go %s` `api-2.json` model for its service, alongside those the platform does not offer and why.\n\n", total, SourceSDKVersion)
 	body.WriteString("| Service | Operations |\n|---|---:|\n")
 	for _, coverage := range sortedCoverages(coverages) {
 		page, ok := pages.Services[coverage.Service]
@@ -383,6 +390,7 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 		fmt.Fprintf(&body, "| [%s](%s/%s) | %d |\n",
 			page.Name, pages.BasePath, page.Slug, len(coverage.Implemented))
 	}
+	fmt.Fprintf(&body, "| **Total** | **%d** |\n", total)
 
 	if intro != "" {
 		body.WriteString("\n" + strings.TrimSpace(intro) + "\n")

@@ -358,6 +358,37 @@ func TestRenderServicePageRefusesOpaqueCoverage(t *testing.T) {
 	}
 }
 
+// The total counts the pages it links and nothing else, so a service with no
+// page of its own is not folded into the headline figure.
+func TestRenderIndexPageTotalsOnlyPublishedServices(t *testing.T) {
+	pages := testPageSet(t)
+	sts, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole", "GetSessionToken"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	iam, err := CompareOperations(IAM, DispatchInventory{Registered: []string{"CreateUser"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s3, err := CompareOperations(S3, DispatchInventory{Registered: []string{"ListBuckets"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	index, err := RenderIndexPage([]OperationCoverage{sts, iam, s3}, pages, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"Spinifex implements **3 operations** across the AWS APIs below.",
+		"| **Total** | **3** |",
+	} {
+		if !strings.Contains(index, want) {
+			t.Errorf("index does not contain %q:\n%s", want, index)
+		}
+	}
+}
+
 func TestRenderIndexPageLinksEveryPublishedService(t *testing.T) {
 	pages := testPageSet(t)
 	coverages := make([]OperationCoverage, 0, len(Services()))
@@ -375,6 +406,9 @@ func TestRenderIndexPageLinksEveryPublishedService(t *testing.T) {
 	}
 	if strings.Contains(index, "%") {
 		t.Errorf("index publishes a coverage score:\n%s", index)
+	}
+	if !strings.Contains(index, "| **Total** |") {
+		t.Errorf("index does not total the operations it lists:\n%s", index)
 	}
 	for _, service := range Services() {
 		page, published := pages.Services[service]
