@@ -80,7 +80,7 @@ Spinifex speaks the AWS API surface. The AWS SDKs, AWS CLI, and Terraform all wo
 | **ECR** | Container Registry | Available |
 | **ECS** | Container Service | Available |
 | **RDS** | Databases | Available |
-| **Bedrock** | AI Deployment | Q3 2026 |
+| **Bedrock** | AI Deployment | Q4 2026 |
 
 Roadmap items ship under the same AWS API surface. Code written for AWS today keeps working the moment they land. [Track what's shipped in the release notes](https://github.com/mulgadc/spinifex/releases).
 
