@@ -380,7 +380,7 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 		}
 	}
 
-	fmt.Fprintf(&body, "Spinifex implements **%d operations** across the AWS APIs below. Every page names the operations Spinifex implements from the pinned `aws-sdk-go %s` `api-2.json` model for its service, alongside those the platform does not offer and why.\n\n", total, SourceSDKVersion)
+	fmt.Fprintf(&body, "Spinifex implements **%d operations** across the AWS APIs below. Every page names the operations Spinifex implements from the pinned model for its service, alongside those the platform does not offer and why.\n\n", total)
 	body.WriteString("| Service | Operations |\n|---|---:|\n")
 	for _, coverage := range sortedCoverages(coverages) {
 		page, ok := pages.Services[coverage.Service]
