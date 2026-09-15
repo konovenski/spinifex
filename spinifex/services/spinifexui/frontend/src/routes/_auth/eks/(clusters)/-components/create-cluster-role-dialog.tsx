@@ -39,7 +39,7 @@ export function CreateClusterRoleDialog({
 }: CreateClusterRoleDialogProps) {
   const createRole = useCreateRole()
   const attachPolicy = useAttachRolePolicy()
-  const [roleName, setRoleName] = useState(defaultRoleName(clusterName))
+  const [roleName, setRoleName] = useState(() => defaultRoleName(clusterName))
   const [formError, setFormError] = useState<string | null>(null)
 
   // Seed the role name from the cluster name each time the dialog opens.
