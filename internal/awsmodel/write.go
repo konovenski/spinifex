@@ -59,7 +59,7 @@ func WritePages(outputDir string, coverages []OperationCoverage) error {
 		return err
 	}
 
-	report := RenderInternalReport(coverages)
+	report := RenderInternalReport(coverages, pages)
 	if err := os.WriteFile(filepath.Join(outputDir, internalFile), []byte(report), 0o600); err != nil {
 		return fmt.Errorf("awsmodel: write internal coverage report: %w", err)
 	}
