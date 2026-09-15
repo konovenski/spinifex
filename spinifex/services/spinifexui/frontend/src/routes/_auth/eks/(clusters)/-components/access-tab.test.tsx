@@ -67,13 +67,7 @@ describe("AccessTab", () => {
 
   it("opens the delete confirmation for an access entry", () => {
     renderWithClient(<AccessTab clusterName={CLUSTER} />, seed())
-    const deleteButton = screen
-      .getAllByRole("button")
-      .find((b) => b.textContent === "")
-    if (!deleteButton) {
-      throw new Error("delete button not found")
-    }
-    fireEvent.click(deleteButton)
+    fireEvent.click(screen.getByRole("button", { name: "Delete access entry" }))
     expect(
       screen.getByText(`Delete access entry for "${PRINCIPAL}"?`),
     ).toBeInTheDocument()
