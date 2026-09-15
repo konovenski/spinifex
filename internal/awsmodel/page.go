@@ -11,8 +11,9 @@ import (
 	"unicode/utf8"
 )
 
-// Published operation states. The symbol carries the status at a glance and the
-// label disambiguates it; the docs site escapes inline SVG, so these are runes.
+// Operation states. Only Implemented reaches a published page; the rest sort
+// the internal report. The symbol carries the status at a glance and the label
+// disambiguates it; the docs site escapes inline SVG, so these are runes.
 const (
 	StatusImplemented    = "✅ Implemented"
 	StatusStub           = "🟡 Stub"
@@ -104,11 +105,21 @@ func (c OperationCoverage) OperationStatuses(page PageMetadata) ([]OperationStat
 		}
 		statuses = append(statuses, OperationStatus{Operation: operation, Status: status})
 	}
+	// A route outside the pinned model is still only as real as its handler, so
+	// its dispatch state wins: being absent from the model says nothing about
+	// whether the platform answers it.
 	for _, operation := range c.Extra {
 		if internal[operation] {
 			continue
 		}
-		statuses = append(statuses, OperationStatus{Operation: operation, Status: StatusOutsideModel})
+		status := StatusOutsideModel
+		switch {
+		case stubbed[operation]:
+			status = StatusStub
+		case unsupported[operation]:
+			status = StatusNotImplemented
+		}
+		statuses = append(statuses, OperationStatus{Operation: operation, Status: status})
 	}
 	return statuses, nil
 }
@@ -327,32 +338,18 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	return body.String(), nil
 }
 
-// writeOperations publishes one row per operation the platform serves. A gap is
-// left out, and so is an operation the platform will never offer: the page says
-// what is there, and the internal report carries everything that is not. The
-// status column is written only where a row needs it, because a table whose
-// every cell reads "Implemented" says nothing the heading has not.
+// writeOperations publishes one row per operation the platform implements from
+// the pinned model, and nothing else. There is no status column because every
+// row carries the same status: a gap, a stub, a route the model does not
+// describe and an operation the platform will never offer are all the internal
+// report's to carry.
 func writeOperations(body *strings.Builder, statuses []OperationStatus) {
-	rows := make([]OperationStatus, 0, len(statuses))
-	uniform := true
+	body.WriteString("### Operations\n\n| Operation |\n|---|\n")
 	for _, status := range statuses {
-		if status.Status == StatusNotImplemented || status.Status == StatusNotApplicable {
+		if status.Status != StatusImplemented {
 			continue
 		}
-		uniform = uniform && status.Status == StatusImplemented
-		rows = append(rows, status)
-	}
-
-	if uniform {
-		body.WriteString("### Operations\n\n| Operation |\n|---|\n")
-		for _, row := range rows {
-			fmt.Fprintf(body, "| `%s` |\n", row.Operation)
-		}
-		return
-	}
-	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
-	for _, row := range rows {
-		fmt.Fprintf(body, "| `%s` | %s |\n", row.Operation, row.Status)
+		fmt.Fprintf(body, "| `%s` |\n", status.Operation)
 	}
 }
 

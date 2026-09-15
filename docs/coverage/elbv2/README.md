@@ -26,41 +26,39 @@ The data plane is a system-managed load balancer VM, launched automatically duri
 
 ### Operations
 
-| Operation | Status |
-|---|---|
-| `AddListenerCertificates` | ✅ Implemented |
-| `AddTags` | ✅ Implemented |
-| `CreateListener` | ✅ Implemented |
-| `CreateLoadBalancer` | ✅ Implemented |
-| `CreateRule` | ✅ Implemented |
-| `CreateTargetGroup` | ✅ Implemented |
-| `DeleteListener` | ✅ Implemented |
-| `DeleteLoadBalancer` | ✅ Implemented |
-| `DeleteRule` | ✅ Implemented |
-| `DeleteTargetGroup` | ✅ Implemented |
-| `DeregisterTargets` | ✅ Implemented |
-| `DescribeAccountLimits` | ✅ Implemented |
-| `DescribeListenerCertificates` | ✅ Implemented |
-| `DescribeListeners` | ✅ Implemented |
-| `DescribeLoadBalancerAttributes` | ✅ Implemented |
-| `DescribeLoadBalancers` | ✅ Implemented |
-| `DescribeRules` | ✅ Implemented |
-| `DescribeSSLPolicies` | ✅ Implemented |
-| `DescribeTags` | ✅ Implemented |
-| `DescribeTargetGroupAttributes` | ✅ Implemented |
-| `DescribeTargetGroups` | ✅ Implemented |
-| `DescribeTargetHealth` | ✅ Implemented |
-| `ModifyListener` | ✅ Implemented |
-| `ModifyLoadBalancerAttributes` | ✅ Implemented |
-| `ModifyRule` | ✅ Implemented |
-| `ModifyTargetGroup` | ✅ Implemented |
-| `ModifyTargetGroupAttributes` | ✅ Implemented |
-| `RegisterTargets` | ✅ Implemented |
-| `RemoveListenerCertificates` | ✅ Implemented |
-| `RemoveTags` | ✅ Implemented |
-| `SetIpAddressType` | ✅ Implemented |
-| `SetRulePriorities` | ✅ Implemented |
-| `SetSecurityGroups` | ✅ Implemented |
-| `SetSubnets` | ✅ Implemented |
-| `DescribeListenerAttributes` | 🔒 Outside the pinned model |
-| `ModifyListenerAttributes` | 🔒 Outside the pinned model |
+| Operation |
+|---|
+| `AddListenerCertificates` |
+| `AddTags` |
+| `CreateListener` |
+| `CreateLoadBalancer` |
+| `CreateRule` |
+| `CreateTargetGroup` |
+| `DeleteListener` |
+| `DeleteLoadBalancer` |
+| `DeleteRule` |
+| `DeleteTargetGroup` |
+| `DeregisterTargets` |
+| `DescribeAccountLimits` |
+| `DescribeListenerCertificates` |
+| `DescribeListeners` |
+| `DescribeLoadBalancerAttributes` |
+| `DescribeLoadBalancers` |
+| `DescribeRules` |
+| `DescribeSSLPolicies` |
+| `DescribeTags` |
+| `DescribeTargetGroupAttributes` |
+| `DescribeTargetGroups` |
+| `DescribeTargetHealth` |
+| `ModifyListener` |
+| `ModifyLoadBalancerAttributes` |
+| `ModifyRule` |
+| `ModifyTargetGroup` |
+| `ModifyTargetGroupAttributes` |
+| `RegisterTargets` |
+| `RemoveListenerCertificates` |
+| `RemoveTags` |
+| `SetIpAddressType` |
+| `SetRulePriorities` |
+| `SetSecurityGroups` |
+| `SetSubnets` |

@@ -65,7 +65,7 @@ func TestParsePageSetRejectsUnpublishableMetadata(t *testing.T) {
 	}
 }
 
-func TestRenderServicePageCarriesEveryPublishedStatus(t *testing.T) {
+func TestRenderServicePagePublishesOnlyImplementedOperations(t *testing.T) {
 	pages := testPageSet(t)
 	coverage, err := CompareOperations(STS, DispatchInventory{
 		Registered:  []string{"AssumeRole", "GetCallerIdentity", "GetSessionToken", "PublishInternal"},
@@ -87,12 +87,21 @@ func TestRenderServicePageCarriesEveryPublishedStatus(t *testing.T) {
 		"# STS API Coverage\n\n## Overview\n",
 		"Spinifex implements **1 operation** in the STS `2011-06-15` API model.",
 		"### Scope\n\nHand-written prose.",
-		"| `AssumeRole` | " + StatusImplemented + " |",
-		"| `GetSessionToken` | " + StatusStub + " |",
-		"| `PublishInternal` | " + StatusOutsideModel + " |",
+		"### Operations\n\n| Operation |\n|---|\n| `AssumeRole` |\n",
 	} {
 		if !strings.Contains(page, want) {
 			t.Errorf("page does not contain %q:\n%s", want, page)
+		}
+	}
+	// Everything other than an implemented operation from the pinned model is
+	// the internal report's: a stub answers with an error, a refusal serves
+	// nothing, and a route the model does not describe has no page to sit on.
+	for _, absent := range []string{
+		"GetSessionToken", "GetCallerIdentity", "PublishInternal",
+		StatusStub, StatusOutsideModel, StatusNotImplemented, "Status",
+	} {
+		if strings.Contains(page, absent) {
+			t.Errorf("page publishes %q:\n%s", absent, page)
 		}
 	}
 	if strings.Contains(page, "<details") || strings.Contains(page, "<summary") {

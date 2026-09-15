@@ -26,41 +26,36 @@ Clusters, services and tasks run on EC2 container instances. There is no Fargate
 
 ### Operations
 
-| Operation | Status |
-|---|---|
-| `CreateCapacityProvider` | ✅ Implemented |
-| `CreateCluster` | ✅ Implemented |
-| `CreateService` | ✅ Implemented |
-| `DeleteCapacityProvider` | ✅ Implemented |
-| `DeleteCluster` | ✅ Implemented |
-| `DeleteService` | ✅ Implemented |
-| `DeregisterContainerInstance` | ✅ Implemented |
-| `DeregisterTaskDefinition` | ✅ Implemented |
-| `DescribeCapacityProviders` | ✅ Implemented |
-| `DescribeClusters` | ✅ Implemented |
-| `DescribeContainerInstances` | ✅ Implemented |
-| `DescribeServices` | ✅ Implemented |
-| `DescribeTaskDefinition` | ✅ Implemented |
-| `DescribeTasks` | ✅ Implemented |
-| `ListAccountSettings` | 🟡 Stub |
-| `ListClusters` | ✅ Implemented |
-| `ListContainerInstances` | ✅ Implemented |
-| `ListServices` | ✅ Implemented |
-| `ListServicesByNamespace` | 🟡 Stub |
-| `ListTagsForResource` | ✅ Implemented |
-| `ListTaskDefinitionFamilies` | 🟡 Stub |
-| `ListTaskDefinitions` | ✅ Implemented |
-| `ListTasks` | ✅ Implemented |
-| `PutAccountSetting` | 🟡 Stub |
-| `PutClusterCapacityProviders` | ✅ Implemented |
-| `RegisterContainerInstance` | ✅ Implemented |
-| `RegisterTaskDefinition` | ✅ Implemented |
-| `RunTask` | ✅ Implemented |
-| `StartTask` | ✅ Implemented |
-| `StopTask` | ✅ Implemented |
-| `SubmitTaskStateChange` | ✅ Implemented |
-| `TagResource` | ✅ Implemented |
-| `UntagResource` | ✅ Implemented |
-| `UpdateCluster` | 🟡 Stub |
-| `UpdateContainerInstancesState` | ✅ Implemented |
-| `UpdateService` | ✅ Implemented |
+| Operation |
+|---|
+| `CreateCapacityProvider` |
+| `CreateCluster` |
+| `CreateService` |
+| `DeleteCapacityProvider` |
+| `DeleteCluster` |
+| `DeleteService` |
+| `DeregisterContainerInstance` |
+| `DeregisterTaskDefinition` |
+| `DescribeCapacityProviders` |
+| `DescribeClusters` |
+| `DescribeContainerInstances` |
+| `DescribeServices` |
+| `DescribeTaskDefinition` |
+| `DescribeTasks` |
+| `ListClusters` |
+| `ListContainerInstances` |
+| `ListServices` |
+| `ListTagsForResource` |
+| `ListTaskDefinitions` |
+| `ListTasks` |
+| `PutClusterCapacityProviders` |
+| `RegisterContainerInstance` |
+| `RegisterTaskDefinition` |
+| `RunTask` |
+| `StartTask` |
+| `StopTask` |
+| `SubmitTaskStateChange` |
+| `TagResource` |
+| `UntagResource` |
+| `UpdateContainerInstancesState` |
+| `UpdateService` |

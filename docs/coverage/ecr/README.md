@@ -30,38 +30,24 @@ Registry replication is a stub for the same kind of reason: a deployment is a si
 
 ### Operations
 
-| Operation | Status |
-|---|---|
-| `BatchCheckLayerAvailability` | 🟡 Stub |
-| `BatchDeleteImage` | ✅ Implemented |
-| `BatchGetImage` | ✅ Implemented |
-| `CompleteLayerUpload` | 🟡 Stub |
-| `CreateRepository` | ✅ Implemented |
-| `DeleteLifecyclePolicy` | ✅ Implemented |
-| `DeleteRepository` | ✅ Implemented |
-| `DeleteRepositoryPolicy` | ✅ Implemented |
-| `DescribeImages` | ✅ Implemented |
-| `DescribeRegistry` | 🟡 Stub |
-| `DescribeRepositories` | ✅ Implemented |
-| `GetAuthorizationToken` | ✅ Implemented |
-| `GetDownloadUrlForLayer` | 🟡 Stub |
-| `GetLifecyclePolicy` | ✅ Implemented |
-| `GetLifecyclePolicyPreview` | ✅ Implemented |
-| `GetRegistryPolicy` | 🟡 Stub |
-| `GetRepositoryPolicy` | ✅ Implemented |
-| `InitiateLayerUpload` | 🟡 Stub |
-| `ListImages` | ✅ Implemented |
-| `ListTagsForResource` | ✅ Implemented |
-| `PutImage` | ✅ Implemented |
-| `PutImageTagMutability` | ✅ Implemented |
-| `PutLifecyclePolicy` | ✅ Implemented |
-| `PutRegistryPolicy` | 🟡 Stub |
-| `PutReplicationConfiguration` | 🟡 Stub |
-| `SetRepositoryPolicy` | ✅ Implemented |
-| `StartLifecyclePolicyPreview` | ✅ Implemented |
-| `TagResource` | 🟡 Stub |
-| `UntagResource` | 🟡 Stub |
-| `UploadLayerPart` | 🟡 Stub |
-| `GetImageScanningConfiguration` | 🔒 Outside the pinned model |
-| `ListRepositories` | 🔒 Outside the pinned model |
-| `ReplicateImage` | 🔒 Outside the pinned model |
+| Operation |
+|---|
+| `BatchDeleteImage` |
+| `BatchGetImage` |
+| `CreateRepository` |
+| `DeleteLifecyclePolicy` |
+| `DeleteRepository` |
+| `DeleteRepositoryPolicy` |
+| `DescribeImages` |
+| `DescribeRepositories` |
+| `GetAuthorizationToken` |
+| `GetLifecyclePolicy` |
+| `GetLifecyclePolicyPreview` |
+| `GetRepositoryPolicy` |
+| `ListImages` |
+| `ListTagsForResource` |
+| `PutImage` |
+| `PutImageTagMutability` |
+| `PutLifecyclePolicy` |
+| `SetRepositoryPolicy` |
+| `StartLifecyclePolicyPreview` |
