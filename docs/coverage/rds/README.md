@@ -1,7 +1,7 @@
 ---
 title: "RDS API Coverage"
 seoTitle: "Relational Database Service API Coverage — Spinifex Docs"
-description: "Every operation in the Amazon RDS API model and whether Spinifex implements it, for the managed PostgreSQL and MariaDB engines it offers on each build."
+description: "The Amazon RDS API operations Spinifex implements, for the managed PostgreSQL and MariaDB engines it offers, with those the platform does not offer and why."
 category: "Coverage"
 sections:
   - overview
@@ -19,7 +19,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **26 of the 162** operations (**16.0%**) in the RDS `2014-10-31` API model.
+Spinifex implements **26 operations** in the RDS `2014-10-31` API model.
 
 ### Engines
 
@@ -70,174 +70,50 @@ A parameter whose omission would create a false safety, security or availability
 
 ### Operations
 
-| Operation | Status |
+| Operation |
+|---|
+| `AddTagsToResource` |
+| `CreateDBInstance` |
+| `CreateDBParameterGroup` |
+| `CreateDBSnapshot` |
+| `CreateDBSubnetGroup` |
+| `DeleteDBInstance` |
+| `DeleteDBParameterGroup` |
+| `DeleteDBSnapshot` |
+| `DeleteDBSubnetGroup` |
+| `DescribeDBEngineVersions` |
+| `DescribeDBInstanceAutomatedBackups` |
+| `DescribeDBInstances` |
+| `DescribeDBParameterGroups` |
+| `DescribeDBParameters` |
+| `DescribeDBSnapshots` |
+| `DescribeDBSubnetGroups` |
+| `DescribeEvents` |
+| `DescribeOrderableDBInstanceOptions` |
+| `ListTagsForResource` |
+| `ModifyDBInstance` |
+| `ModifyDBParameterGroup` |
+| `RebootDBInstance` |
+| `RemoveTagsFromResource` |
+| `RestoreDBInstanceFromDBSnapshot` |
+| `StartDBInstance` |
+| `StopDBInstance` |
+
+### Not applicable
+
+These operations describe AWS-hosted features this platform does not offer.
+
+| Operation | Reason |
 |---|---|
-| `AddRoleToDBCluster` | ❌ Not implemented |
-| `AddRoleToDBInstance` | ❌ Not implemented |
-| `AddSourceIdentifierToSubscription` | ❌ Not implemented |
-| `AddTagsToResource` | ✅ Implemented |
-| `ApplyPendingMaintenanceAction` | ❌ Not implemented |
-| `AuthorizeDBSecurityGroupIngress` | ❌ Not implemented |
-| `BacktrackDBCluster` | ❌ Not implemented |
-| `CancelExportTask` | ❌ Not implemented |
-| `CopyDBClusterParameterGroup` | ❌ Not implemented |
-| `CopyDBClusterSnapshot` | ❌ Not implemented |
-| `CopyDBParameterGroup` | ❌ Not implemented |
-| `CopyDBSnapshot` | ❌ Not implemented |
-| `CopyOptionGroup` | ❌ Not implemented |
-| `CreateBlueGreenDeployment` | ❌ Not implemented |
-| `CreateCustomDBEngineVersion` | ❌ Not implemented |
-| `CreateDBCluster` | ⛔ Not applicable [1](#notes) |
-| `CreateDBClusterEndpoint` | ❌ Not implemented |
-| `CreateDBClusterParameterGroup` | ❌ Not implemented |
-| `CreateDBClusterSnapshot` | ❌ Not implemented |
-| `CreateDBInstance` | ✅ Implemented |
-| `CreateDBInstanceReadReplica` | ⛔ Not applicable [4](#notes) |
-| `CreateDBParameterGroup` | ✅ Implemented |
-| `CreateDBProxy` | ❌ Not implemented |
-| `CreateDBProxyEndpoint` | ❌ Not implemented |
-| `CreateDBSecurityGroup` | ❌ Not implemented |
-| `CreateDBShardGroup` | ❌ Not implemented |
-| `CreateDBSnapshot` | ✅ Implemented |
-| `CreateDBSubnetGroup` | ✅ Implemented |
-| `CreateEventSubscription` | ❌ Not implemented |
-| `CreateGlobalCluster` | ❌ Not implemented |
-| `CreateIntegration` | ❌ Not implemented |
-| `CreateOptionGroup` | ⛔ Not applicable [2](#notes) |
-| `CreateTenantDatabase` | ❌ Not implemented |
-| `DeleteBlueGreenDeployment` | ❌ Not implemented |
-| `DeleteCustomDBEngineVersion` | ❌ Not implemented |
-| `DeleteDBCluster` | ⛔ Not applicable [1](#notes) |
-| `DeleteDBClusterAutomatedBackup` | ❌ Not implemented |
-| `DeleteDBClusterEndpoint` | ❌ Not implemented |
-| `DeleteDBClusterParameterGroup` | ❌ Not implemented |
-| `DeleteDBClusterSnapshot` | ❌ Not implemented |
-| `DeleteDBInstance` | ✅ Implemented |
-| `DeleteDBInstanceAutomatedBackup` | ❌ Not implemented |
-| `DeleteDBParameterGroup` | ✅ Implemented |
-| `DeleteDBProxy` | ❌ Not implemented |
-| `DeleteDBProxyEndpoint` | ❌ Not implemented |
-| `DeleteDBSecurityGroup` | ❌ Not implemented |
-| `DeleteDBShardGroup` | ❌ Not implemented |
-| `DeleteDBSnapshot` | ✅ Implemented |
-| `DeleteDBSubnetGroup` | ✅ Implemented |
-| `DeleteEventSubscription` | ❌ Not implemented |
-| `DeleteGlobalCluster` | ❌ Not implemented |
-| `DeleteIntegration` | ❌ Not implemented |
-| `DeleteOptionGroup` | ⛔ Not applicable [2](#notes) |
-| `DeleteTenantDatabase` | ❌ Not implemented |
-| `DeregisterDBProxyTargets` | ❌ Not implemented |
-| `DescribeAccountAttributes` | ❌ Not implemented |
-| `DescribeBlueGreenDeployments` | ❌ Not implemented |
-| `DescribeCertificates` | ❌ Not implemented |
-| `DescribeDBClusterAutomatedBackups` | ❌ Not implemented |
-| `DescribeDBClusterBacktracks` | ❌ Not implemented |
-| `DescribeDBClusterEndpoints` | ❌ Not implemented |
-| `DescribeDBClusterParameterGroups` | ❌ Not implemented |
-| `DescribeDBClusterParameters` | ❌ Not implemented |
-| `DescribeDBClusterSnapshotAttributes` | ❌ Not implemented |
-| `DescribeDBClusterSnapshots` | ❌ Not implemented |
-| `DescribeDBClusters` | ⛔ Not applicable [1](#notes) |
-| `DescribeDBEngineVersions` | ✅ Implemented |
-| `DescribeDBInstanceAutomatedBackups` | ✅ Implemented |
-| `DescribeDBInstances` | ✅ Implemented |
-| `DescribeDBLogFiles` | ❌ Not implemented |
-| `DescribeDBParameterGroups` | ✅ Implemented |
-| `DescribeDBParameters` | ✅ Implemented |
-| `DescribeDBProxies` | ❌ Not implemented |
-| `DescribeDBProxyEndpoints` | ❌ Not implemented |
-| `DescribeDBProxyTargetGroups` | ❌ Not implemented |
-| `DescribeDBProxyTargets` | ❌ Not implemented |
-| `DescribeDBRecommendations` | ❌ Not implemented |
-| `DescribeDBSecurityGroups` | ❌ Not implemented |
-| `DescribeDBShardGroups` | ❌ Not implemented |
-| `DescribeDBSnapshotAttributes` | ❌ Not implemented |
-| `DescribeDBSnapshotTenantDatabases` | ❌ Not implemented |
-| `DescribeDBSnapshots` | ✅ Implemented |
-| `DescribeDBSubnetGroups` | ✅ Implemented |
-| `DescribeEngineDefaultClusterParameters` | ❌ Not implemented |
-| `DescribeEngineDefaultParameters` | ❌ Not implemented |
-| `DescribeEventCategories` | ❌ Not implemented |
-| `DescribeEventSubscriptions` | ❌ Not implemented |
-| `DescribeEvents` | ✅ Implemented |
-| `DescribeExportTasks` | ❌ Not implemented |
-| `DescribeGlobalClusters` | ❌ Not implemented |
-| `DescribeIntegrations` | ❌ Not implemented |
-| `DescribeOptionGroupOptions` | ❌ Not implemented |
-| `DescribeOptionGroups` | ⛔ Not applicable [2](#notes) |
-| `DescribeOrderableDBInstanceOptions` | ✅ Implemented |
-| `DescribePendingMaintenanceActions` | ❌ Not implemented |
-| `DescribeReservedDBInstances` | ❌ Not implemented |
-| `DescribeReservedDBInstancesOfferings` | ❌ Not implemented |
-| `DescribeSourceRegions` | ❌ Not implemented |
-| `DescribeTenantDatabases` | ❌ Not implemented |
-| `DescribeValidDBInstanceModifications` | ❌ Not implemented |
-| `DisableHttpEndpoint` | ❌ Not implemented |
-| `DownloadDBLogFilePortion` | ❌ Not implemented |
-| `EnableHttpEndpoint` | ❌ Not implemented |
-| `FailoverDBCluster` | ⛔ Not applicable [1](#notes) |
-| `FailoverGlobalCluster` | ❌ Not implemented |
-| `ListTagsForResource` | ✅ Implemented |
-| `ModifyActivityStream` | ❌ Not implemented |
-| `ModifyCertificates` | ❌ Not implemented |
-| `ModifyCurrentDBClusterCapacity` | ❌ Not implemented |
-| `ModifyCustomDBEngineVersion` | ❌ Not implemented |
-| `ModifyDBCluster` | ⛔ Not applicable [1](#notes) |
-| `ModifyDBClusterEndpoint` | ❌ Not implemented |
-| `ModifyDBClusterParameterGroup` | ❌ Not implemented |
-| `ModifyDBClusterSnapshotAttribute` | ❌ Not implemented |
-| `ModifyDBInstance` | ✅ Implemented |
-| `ModifyDBParameterGroup` | ✅ Implemented |
-| `ModifyDBProxy` | ❌ Not implemented |
-| `ModifyDBProxyEndpoint` | ❌ Not implemented |
-| `ModifyDBProxyTargetGroup` | ❌ Not implemented |
-| `ModifyDBRecommendation` | ❌ Not implemented |
-| `ModifyDBShardGroup` | ❌ Not implemented |
-| `ModifyDBSnapshot` | ❌ Not implemented |
-| `ModifyDBSnapshotAttribute` | ❌ Not implemented |
-| `ModifyDBSubnetGroup` | ❌ Not implemented |
-| `ModifyEventSubscription` | ❌ Not implemented |
-| `ModifyGlobalCluster` | ❌ Not implemented |
-| `ModifyIntegration` | ❌ Not implemented |
-| `ModifyOptionGroup` | ⛔ Not applicable [2](#notes) |
-| `ModifyTenantDatabase` | ❌ Not implemented |
-| `PromoteReadReplica` | ⛔ Not applicable [4](#notes) |
-| `PromoteReadReplicaDBCluster` | ❌ Not implemented |
-| `PurchaseReservedDBInstancesOffering` | ❌ Not implemented |
-| `RebootDBCluster` | ❌ Not implemented |
-| `RebootDBInstance` | ✅ Implemented |
-| `RebootDBShardGroup` | ❌ Not implemented |
-| `RegisterDBProxyTargets` | ❌ Not implemented |
-| `RemoveFromGlobalCluster` | ❌ Not implemented |
-| `RemoveRoleFromDBCluster` | ❌ Not implemented |
-| `RemoveRoleFromDBInstance` | ❌ Not implemented |
-| `RemoveSourceIdentifierFromSubscription` | ❌ Not implemented |
-| `RemoveTagsFromResource` | ✅ Implemented |
-| `ResetDBClusterParameterGroup` | ❌ Not implemented |
-| `ResetDBParameterGroup` | ❌ Not implemented |
-| `RestoreDBClusterFromS3` | ❌ Not implemented |
-| `RestoreDBClusterFromSnapshot` | ❌ Not implemented |
-| `RestoreDBClusterToPointInTime` | ❌ Not implemented |
-| `RestoreDBInstanceFromDBSnapshot` | ✅ Implemented |
-| `RestoreDBInstanceFromS3` | ❌ Not implemented |
-| `RestoreDBInstanceToPointInTime` | ⛔ Not applicable [3](#notes) |
-| `RevokeDBSecurityGroupIngress` | ❌ Not implemented |
-| `StartActivityStream` | ❌ Not implemented |
-| `StartDBCluster` | ❌ Not implemented |
-| `StartDBInstance` | ✅ Implemented |
-| `StartDBInstanceAutomatedBackupsReplication` | ❌ Not implemented |
-| `StartExportTask` | ❌ Not implemented |
-| `StopActivityStream` | ❌ Not implemented |
-| `StopDBCluster` | ❌ Not implemented |
-| `StopDBInstance` | ✅ Implemented |
-| `StopDBInstanceAutomatedBackupsReplication` | ❌ Not implemented |
-| `SwitchoverBlueGreenDeployment` | ❌ Not implemented |
-| `SwitchoverGlobalCluster` | ❌ Not implemented |
-| `SwitchoverReadReplica` | ❌ Not implemented |
-
-### Notes
-
-1. Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly.
-2. Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server.
-3. Point-in-time restore needs continuous transaction-log archival, which the backup path does not keep.
-4. Replication between instances is not offered, so there is no replica to create or promote.
+| `CreateDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
+| `CreateDBInstanceReadReplica` | Replication between instances is not offered, so there is no replica to create or promote. |
+| `CreateOptionGroup` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
+| `DeleteDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
+| `DeleteOptionGroup` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
+| `DescribeDBClusters` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
+| `DescribeOptionGroups` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
+| `FailoverDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
+| `ModifyDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
+| `ModifyOptionGroup` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
+| `PromoteReadReplica` | Replication between instances is not offered, so there is no replica to create or promote. |
+| `RestoreDBInstanceToPointInTime` | Point-in-time restore needs continuous transaction-log archival, which the backup path does not keep. |

@@ -1,7 +1,7 @@
 ---
 title: "STS API Coverage"
 seoTitle: "AWS Security Token Service API Coverage — Spinifex Docs"
-description: "Every operation in the AWS STS API model and whether Spinifex implements it, covering role assumption, session tokens and web identity federation (IRSA)."
+description: "The AWS STS API operations Spinifex implements, covering role assumption, session tokens and web identity federation (IRSA), with those it does not offer."
 category: "Coverage"
 sections:
   - overview
@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **5 of the 8** operations (**62.5%**) in the STS `2011-06-15` API model.
+Spinifex implements **5 operations** in the STS `2011-06-15` API model.
 
 ### Trust policies
 
@@ -32,13 +32,10 @@ Several inputs the model describes are deliberately rejected rather than accepte
 
 ### Operations
 
-| Operation | Status |
-|---|---|
-| `AssumeRole` | ✅ Implemented |
-| `AssumeRoleWithSAML` | ❌ Not implemented |
-| `AssumeRoleWithWebIdentity` | ✅ Implemented |
-| `DecodeAuthorizationMessage` | ❌ Not implemented |
-| `GetAccessKeyInfo` | ✅ Implemented |
-| `GetCallerIdentity` | ✅ Implemented |
-| `GetFederationToken` | ❌ Not implemented |
-| `GetSessionToken` | ✅ Implemented |
+| Operation |
+|---|
+| `AssumeRole` |
+| `AssumeRoleWithWebIdentity` |
+| `GetAccessKeyInfo` |
+| `GetCallerIdentity` |
+| `GetSessionToken` |

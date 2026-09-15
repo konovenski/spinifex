@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	pagesFile = "pages.json"
-	introFile = "intro.md"
-	pageFile  = "README.md"
+	pagesFile    = "pages.json"
+	introFile    = "intro.md"
+	pageFile     = "README.md"
+	internalFile = "internal-report.md"
 )
 
 // WritePages renders the publishable coverage pages into outputDir, which must
@@ -54,7 +55,15 @@ func WritePages(outputDir string, coverages []OperationCoverage) error {
 	if err != nil {
 		return err
 	}
-	return writePage(outputDir, pages.Index.Slug, body)
+	if err := writePage(outputDir, pages.Index.Slug, body); err != nil {
+		return err
+	}
+
+	report := RenderInternalReport(coverages)
+	if err := os.WriteFile(filepath.Join(outputDir, internalFile), []byte(report), 0o600); err != nil {
+		return fmt.Errorf("awsmodel: write internal coverage report: %w", err)
+	}
+	return nil
 }
 
 // readIntro returns the hand-written prose for a page, or "" where the page has

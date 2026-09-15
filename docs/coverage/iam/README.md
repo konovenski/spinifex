@@ -1,7 +1,7 @@
 ---
 title: "IAM API Coverage"
 seoTitle: "AWS IAM API Operation Coverage on Spinifex — Spinifex Docs"
-description: "Every operation in the AWS IAM API model and whether Spinifex implements it, covering users, roles, policies, groups and instance profiles on each build."
+description: "The AWS IAM API operations Spinifex implements, covering users, roles, policies, groups and instance profiles, with those the platform does not offer."
 category: "Coverage"
 sections:
   - overview
@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **75 of the 159** operations (**47.2%**) in the IAM `2010-05-08` API model.
+Spinifex implements **75 operations** in the IAM `2010-05-08` API model.
 
 ### Scope
 
@@ -26,171 +26,106 @@ All IAM operations are account-scoped. The root user of an account bypasses poli
 
 ### Operations
 
-| Operation | Status |
+| Operation |
+|---|
+| `AddRoleToInstanceProfile` |
+| `AddUserToGroup` |
+| `AttachGroupPolicy` |
+| `AttachRolePolicy` |
+| `AttachUserPolicy` |
+| `CreateAccessKey` |
+| `CreateGroup` |
+| `CreateInstanceProfile` |
+| `CreateOpenIDConnectProvider` |
+| `CreatePolicy` |
+| `CreateRole` |
+| `CreateUser` |
+| `DeleteAccessKey` |
+| `DeleteGroup` |
+| `DeleteGroupPolicy` |
+| `DeleteInstanceProfile` |
+| `DeleteOpenIDConnectProvider` |
+| `DeletePolicy` |
+| `DeleteRole` |
+| `DeleteRolePolicy` |
+| `DeleteUser` |
+| `DeleteUserPolicy` |
+| `DetachGroupPolicy` |
+| `DetachRolePolicy` |
+| `DetachUserPolicy` |
+| `GetAccountSummary` |
+| `GetGroup` |
+| `GetGroupPolicy` |
+| `GetInstanceProfile` |
+| `GetOpenIDConnectProvider` |
+| `GetPolicy` |
+| `GetPolicyVersion` |
+| `GetRole` |
+| `GetRolePolicy` |
+| `GetUser` |
+| `GetUserPolicy` |
+| `ListAccessKeys` |
+| `ListAttachedGroupPolicies` |
+| `ListAttachedRolePolicies` |
+| `ListAttachedUserPolicies` |
+| `ListGroupPolicies` |
+| `ListGroups` |
+| `ListGroupsForUser` |
+| `ListInstanceProfileTags` |
+| `ListInstanceProfiles` |
+| `ListInstanceProfilesForRole` |
+| `ListOpenIDConnectProviderTags` |
+| `ListOpenIDConnectProviders` |
+| `ListPolicies` |
+| `ListPolicyTags` |
+| `ListPolicyVersions` |
+| `ListRolePolicies` |
+| `ListRoleTags` |
+| `ListRoles` |
+| `ListUserPolicies` |
+| `ListUserTags` |
+| `ListUsers` |
+| `PutGroupPolicy` |
+| `PutRolePolicy` |
+| `PutUserPolicy` |
+| `RemoveRoleFromInstanceProfile` |
+| `RemoveUserFromGroup` |
+| `TagInstanceProfile` |
+| `TagOpenIDConnectProvider` |
+| `TagPolicy` |
+| `TagRole` |
+| `TagUser` |
+| `UntagInstanceProfile` |
+| `UntagOpenIDConnectProvider` |
+| `UntagPolicy` |
+| `UntagRole` |
+| `UntagUser` |
+| `UpdateAccessKey` |
+| `UpdateAssumeRolePolicy` |
+| `UpdateRole` |
+
+### Not applicable
+
+These operations describe AWS-hosted features this platform does not offer.
+
+| Operation | Reason |
 |---|---|
-| `AddClientIDToOpenIDConnectProvider` | ❌ Not implemented |
-| `AddRoleToInstanceProfile` | ✅ Implemented |
-| `AddUserToGroup` | ✅ Implemented |
-| `AttachGroupPolicy` | ✅ Implemented |
-| `AttachRolePolicy` | ✅ Implemented |
-| `AttachUserPolicy` | ✅ Implemented |
-| `ChangePassword` | ❌ Not implemented |
-| `CreateAccessKey` | ✅ Implemented |
-| `CreateAccountAlias` | ❌ Not implemented |
-| `CreateGroup` | ✅ Implemented |
-| `CreateInstanceProfile` | ✅ Implemented |
-| `CreateLoginProfile` | ❌ Not implemented |
-| `CreateOpenIDConnectProvider` | ✅ Implemented |
-| `CreatePolicy` | ✅ Implemented |
-| `CreatePolicyVersion` | ❌ Not implemented |
-| `CreateRole` | ✅ Implemented |
-| `CreateSAMLProvider` | ❌ Not implemented |
-| `CreateServiceLinkedRole` | ⛔ Not applicable [3](#notes) |
-| `CreateServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
-| `CreateUser` | ✅ Implemented |
-| `CreateVirtualMFADevice` | ❌ Not implemented |
-| `DeactivateMFADevice` | ❌ Not implemented |
-| `DeleteAccessKey` | ✅ Implemented |
-| `DeleteAccountAlias` | ❌ Not implemented |
-| `DeleteAccountPasswordPolicy` | ❌ Not implemented |
-| `DeleteGroup` | ✅ Implemented |
-| `DeleteGroupPolicy` | ✅ Implemented |
-| `DeleteInstanceProfile` | ✅ Implemented |
-| `DeleteLoginProfile` | ❌ Not implemented |
-| `DeleteOpenIDConnectProvider` | ✅ Implemented |
-| `DeletePolicy` | ✅ Implemented |
-| `DeletePolicyVersion` | ❌ Not implemented |
-| `DeleteRole` | ✅ Implemented |
-| `DeleteRolePermissionsBoundary` | ❌ Not implemented |
-| `DeleteRolePolicy` | ✅ Implemented |
-| `DeleteSAMLProvider` | ❌ Not implemented |
-| `DeleteSSHPublicKey` | ⛔ Not applicable [1](#notes) |
-| `DeleteServerCertificate` | ❌ Not implemented |
-| `DeleteServiceLinkedRole` | ⛔ Not applicable [3](#notes) |
-| `DeleteServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
-| `DeleteSigningCertificate` | ⛔ Not applicable [4](#notes) |
-| `DeleteUser` | ✅ Implemented |
-| `DeleteUserPermissionsBoundary` | ❌ Not implemented |
-| `DeleteUserPolicy` | ✅ Implemented |
-| `DeleteVirtualMFADevice` | ❌ Not implemented |
-| `DetachGroupPolicy` | ✅ Implemented |
-| `DetachRolePolicy` | ✅ Implemented |
-| `DetachUserPolicy` | ✅ Implemented |
-| `EnableMFADevice` | ❌ Not implemented |
-| `GenerateCredentialReport` | ❌ Not implemented |
-| `GenerateOrganizationsAccessReport` | ⛔ Not applicable [2](#notes) |
-| `GenerateServiceLastAccessedDetails` | ❌ Not implemented |
-| `GetAccessKeyLastUsed` | ❌ Not implemented |
-| `GetAccountAuthorizationDetails` | ❌ Not implemented |
-| `GetAccountPasswordPolicy` | ❌ Not implemented |
-| `GetAccountSummary` | ✅ Implemented |
-| `GetContextKeysForCustomPolicy` | ❌ Not implemented |
-| `GetContextKeysForPrincipalPolicy` | ❌ Not implemented |
-| `GetCredentialReport` | ❌ Not implemented |
-| `GetGroup` | ✅ Implemented |
-| `GetGroupPolicy` | ✅ Implemented |
-| `GetInstanceProfile` | ✅ Implemented |
-| `GetLoginProfile` | ❌ Not implemented |
-| `GetMFADevice` | ❌ Not implemented |
-| `GetOpenIDConnectProvider` | ✅ Implemented |
-| `GetOrganizationsAccessReport` | ⛔ Not applicable [2](#notes) |
-| `GetPolicy` | ✅ Implemented |
-| `GetPolicyVersion` | ✅ Implemented |
-| `GetRole` | ✅ Implemented |
-| `GetRolePolicy` | ✅ Implemented |
-| `GetSAMLProvider` | ❌ Not implemented |
-| `GetSSHPublicKey` | ⛔ Not applicable [1](#notes) |
-| `GetServerCertificate` | ❌ Not implemented |
-| `GetServiceLastAccessedDetails` | ❌ Not implemented |
-| `GetServiceLastAccessedDetailsWithEntities` | ❌ Not implemented |
-| `GetServiceLinkedRoleDeletionStatus` | ⛔ Not applicable [3](#notes) |
-| `GetUser` | ✅ Implemented |
-| `GetUserPolicy` | ✅ Implemented |
-| `ListAccessKeys` | ✅ Implemented |
-| `ListAccountAliases` | ❌ Not implemented |
-| `ListAttachedGroupPolicies` | ✅ Implemented |
-| `ListAttachedRolePolicies` | ✅ Implemented |
-| `ListAttachedUserPolicies` | ✅ Implemented |
-| `ListEntitiesForPolicy` | ❌ Not implemented |
-| `ListGroupPolicies` | ✅ Implemented |
-| `ListGroups` | ✅ Implemented |
-| `ListGroupsForUser` | ✅ Implemented |
-| `ListInstanceProfileTags` | ✅ Implemented |
-| `ListInstanceProfiles` | ✅ Implemented |
-| `ListInstanceProfilesForRole` | ✅ Implemented |
-| `ListMFADeviceTags` | ❌ Not implemented |
-| `ListMFADevices` | ❌ Not implemented |
-| `ListOpenIDConnectProviderTags` | ✅ Implemented |
-| `ListOpenIDConnectProviders` | ✅ Implemented |
-| `ListPolicies` | ✅ Implemented |
-| `ListPoliciesGrantingServiceAccess` | ❌ Not implemented |
-| `ListPolicyTags` | ✅ Implemented |
-| `ListPolicyVersions` | ✅ Implemented |
-| `ListRolePolicies` | ✅ Implemented |
-| `ListRoleTags` | ✅ Implemented |
-| `ListRoles` | ✅ Implemented |
-| `ListSAMLProviderTags` | ❌ Not implemented |
-| `ListSAMLProviders` | ❌ Not implemented |
-| `ListSSHPublicKeys` | ⛔ Not applicable [1](#notes) |
-| `ListServerCertificateTags` | ❌ Not implemented |
-| `ListServerCertificates` | ❌ Not implemented |
-| `ListServiceSpecificCredentials` | ⛔ Not applicable [1](#notes) |
-| `ListSigningCertificates` | ⛔ Not applicable [4](#notes) |
-| `ListUserPolicies` | ✅ Implemented |
-| `ListUserTags` | ✅ Implemented |
-| `ListUsers` | ✅ Implemented |
-| `ListVirtualMFADevices` | ❌ Not implemented |
-| `PutGroupPolicy` | ✅ Implemented |
-| `PutRolePermissionsBoundary` | ❌ Not implemented |
-| `PutRolePolicy` | ✅ Implemented |
-| `PutUserPermissionsBoundary` | ❌ Not implemented |
-| `PutUserPolicy` | ✅ Implemented |
-| `RemoveClientIDFromOpenIDConnectProvider` | ❌ Not implemented |
-| `RemoveRoleFromInstanceProfile` | ✅ Implemented |
-| `RemoveUserFromGroup` | ✅ Implemented |
-| `ResetServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
-| `ResyncMFADevice` | ❌ Not implemented |
-| `SetDefaultPolicyVersion` | ❌ Not implemented |
-| `SetSecurityTokenServicePreferences` | ❌ Not implemented |
-| `SimulateCustomPolicy` | ❌ Not implemented |
-| `SimulatePrincipalPolicy` | ❌ Not implemented |
-| `TagInstanceProfile` | ✅ Implemented |
-| `TagMFADevice` | ❌ Not implemented |
-| `TagOpenIDConnectProvider` | ✅ Implemented |
-| `TagPolicy` | ✅ Implemented |
-| `TagRole` | ✅ Implemented |
-| `TagSAMLProvider` | ❌ Not implemented |
-| `TagServerCertificate` | ❌ Not implemented |
-| `TagUser` | ✅ Implemented |
-| `UntagInstanceProfile` | ✅ Implemented |
-| `UntagMFADevice` | ❌ Not implemented |
-| `UntagOpenIDConnectProvider` | ✅ Implemented |
-| `UntagPolicy` | ✅ Implemented |
-| `UntagRole` | ✅ Implemented |
-| `UntagSAMLProvider` | ❌ Not implemented |
-| `UntagServerCertificate` | ❌ Not implemented |
-| `UntagUser` | ✅ Implemented |
-| `UpdateAccessKey` | ✅ Implemented |
-| `UpdateAccountPasswordPolicy` | ❌ Not implemented |
-| `UpdateAssumeRolePolicy` | ✅ Implemented |
-| `UpdateGroup` | ❌ Not implemented |
-| `UpdateLoginProfile` | ❌ Not implemented |
-| `UpdateOpenIDConnectProviderThumbprint` | ❌ Not implemented |
-| `UpdateRole` | ✅ Implemented |
-| `UpdateRoleDescription` | ❌ Not implemented |
-| `UpdateSAMLProvider` | ❌ Not implemented |
-| `UpdateSSHPublicKey` | ⛔ Not applicable [1](#notes) |
-| `UpdateServerCertificate` | ❌ Not implemented |
-| `UpdateServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
-| `UpdateSigningCertificate` | ⛔ Not applicable [4](#notes) |
-| `UpdateUser` | ❌ Not implemented |
-| `UploadSSHPublicKey` | ⛔ Not applicable [1](#notes) |
-| `UploadServerCertificate` | ❌ Not implemented |
-| `UploadSigningCertificate` | ⛔ Not applicable [4](#notes) |
-
-### Notes
-
-1. CodeCommit credentials and SSH keys; the service does not exist here.
-2. AWS Organizations is not offered, so there is no organization to report on.
-3. Service-linked roles exist for AWS service principals, which this platform has none of.
-4. X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.
+| `CreateServiceLinkedRole` | Service-linked roles exist for AWS service principals, which this platform has none of. |
+| `CreateServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `DeleteSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `DeleteServiceLinkedRole` | Service-linked roles exist for AWS service principals, which this platform has none of. |
+| `DeleteServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `DeleteSigningCertificate` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |
+| `GenerateOrganizationsAccessReport` | AWS Organizations is not offered, so there is no organization to report on. |
+| `GetOrganizationsAccessReport` | AWS Organizations is not offered, so there is no organization to report on. |
+| `GetSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `GetServiceLinkedRoleDeletionStatus` | Service-linked roles exist for AWS service principals, which this platform has none of. |
+| `ListSSHPublicKeys` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `ListServiceSpecificCredentials` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `ListSigningCertificates` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |
+| `ResetServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `UpdateSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `UpdateServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `UpdateSigningCertificate` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |
+| `UploadSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
+| `UploadSigningCertificate` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |

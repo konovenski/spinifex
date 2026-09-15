@@ -4,6 +4,8 @@ This directory contains the Spinifex documentation. This is available in individ
 
 The [AWS API coverage](coverage/README.md) pages are generated from Spinifex's dispatch tables and the pinned AWS API models, one page per service. Run `make aws-model-coverage` to regenerate them and print a summary. Only `pages.json` and the `intro.md` files under `coverage/` are hand-written; every `README.md` there is generated and will be overwritten.
 
+A published page names the operations Spinifex serves and the ones the platform will never serve, with the reason for each. It carries no percentage and no unimplemented operation: the same run writes those to [`coverage/internal-report.md`](coverage/internal-report.md), which no slug in the docs site's configuration points at, so it stays internal.
+
 ## Frontmatter
 
 Each published page lives at `<category>/<slug>/README.md` and carries YAML frontmatter that the docs site turns into page metadata. Three fields have length rules, because search engines flag a title tag or meta description that falls outside them:

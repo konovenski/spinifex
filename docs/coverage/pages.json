@@ -5,7 +5,7 @@
     "name": "All services",
     "title": "AWS API Coverage",
     "seoTitle": "Which AWS API Operations Spinifex Implements — Spinifex Docs",
-    "description": "Operation-level coverage of every AWS API Spinifex serves, generated from its gateway dispatch tables and the pinned AWS SDK service models on each build.",
+    "description": "The AWS API operations Spinifex serves, generated from its gateway dispatch tables and the pinned AWS SDK service models on each build, service by service.",
     "tags": [
       "aws",
       "compatibility",
@@ -20,7 +20,7 @@
       "name": "ACM",
       "title": "ACM API Coverage",
       "seoTitle": "AWS Certificate Manager API Coverage — Spinifex Docs",
-      "description": "Every operation in the AWS Certificate Manager API model and whether Spinifex implements it, generated from the gateway dispatch tables on each build.",
+      "description": "The AWS Certificate Manager API operations Spinifex implements, generated from the gateway dispatch tables on each build, with those it does not offer and why.",
       "tags": [
         "aws",
         "compatibility",
@@ -35,7 +35,7 @@
       "name": "EC2",
       "title": "EC2 API Coverage",
       "seoTitle": "Amazon EC2 API Coverage on Spinifex — Spinifex Docs",
-      "description": "Every operation in the Amazon EC2 API model and whether Spinifex implements it, covering instances, EBS volumes, VPC networking, tags and security groups.",
+      "description": "The Amazon EC2 API operations Spinifex implements, covering instances, EBS volumes, VPC networking, tags and security groups, with those it does not offer.",
       "tags": [
         "aws",
         "compatibility",
@@ -56,7 +56,7 @@
       "name": "ECR",
       "title": "ECR API Coverage",
       "seoTitle": "Elastic Container Registry API Coverage — Spinifex Docs",
-      "description": "Every operation in the Amazon ECR API model and whether Spinifex implements it, alongside the OCI distribution endpoint that carries the image layers.",
+      "description": "The Amazon ECR API operations Spinifex implements, alongside the OCI distribution endpoint that carries the image layers, and those the platform will not.",
       "tags": [
         "aws",
         "compatibility",
@@ -82,7 +82,7 @@
       "name": "ECS",
       "title": "ECS API Coverage",
       "seoTitle": "Elastic Container Service API Coverage — Spinifex Docs",
-      "description": "Every operation in the Amazon ECS API model and whether Spinifex implements it, covering clusters, services, tasks and container instances on each build.",
+      "description": "The Amazon ECS API operations Spinifex implements, covering clusters, services, tasks and container instances, with those the platform does not offer.",
       "tags": [
         "aws",
         "compatibility",
@@ -102,7 +102,7 @@
       "name": "EKS",
       "title": "EKS API Coverage",
       "seoTitle": "Elastic Kubernetes Service API Coverage — Spinifex Docs",
-      "description": "Every operation in the Amazon EKS API model and whether Spinifex implements it, covering clusters, nodegroups, add-ons and access entries on each build.",
+      "description": "The Amazon EKS API operations Spinifex implements, covering clusters, nodegroups, add-ons and access entries, with those the platform does not offer and why.",
       "tags": [
         "aws",
         "compatibility",
@@ -123,7 +123,7 @@
       "name": "ELBv2",
       "title": "ELBv2 API Coverage",
       "seoTitle": "Elastic Load Balancing v2 API Coverage — Spinifex Docs",
-      "description": "Every operation in the Elastic Load Balancing v2 API model and whether Spinifex implements it, for both the Application and Network Load Balancers it serves.",
+      "description": "The Elastic Load Balancing v2 API operations Spinifex implements, for both the Application and Network Load Balancers it serves, with those it does not.",
       "tags": [
         "aws",
         "compatibility",
@@ -142,7 +142,7 @@
       "name": "IAM",
       "title": "IAM API Coverage",
       "seoTitle": "AWS IAM API Operation Coverage on Spinifex — Spinifex Docs",
-      "description": "Every operation in the AWS IAM API model and whether Spinifex implements it, covering users, roles, policies, groups and instance profiles on each build.",
+      "description": "The AWS IAM API operations Spinifex implements, covering users, roles, policies, groups and instance profiles, with those the platform does not offer.",
       "tags": [
         "aws",
         "compatibility",
@@ -184,7 +184,7 @@
       "name": "RDS",
       "title": "RDS API Coverage",
       "seoTitle": "Relational Database Service API Coverage — Spinifex Docs",
-      "description": "Every operation in the Amazon RDS API model and whether Spinifex implements it, for the managed PostgreSQL and MariaDB engines it offers on each build.",
+      "description": "The Amazon RDS API operations Spinifex implements, for the managed PostgreSQL and MariaDB engines it offers, with those the platform does not offer and why.",
       "tags": [
         "aws",
         "compatibility",
@@ -227,7 +227,7 @@
       "name": "STS",
       "title": "STS API Coverage",
       "seoTitle": "AWS Security Token Service API Coverage — Spinifex Docs",
-      "description": "Every operation in the AWS STS API model and whether Spinifex implements it, covering role assumption, session tokens and web identity federation (IRSA).",
+      "description": "The AWS STS API operations Spinifex implements, covering role assumption, session tokens and web identity federation (IRSA), with those it does not offer.",
       "tags": [
         "aws",
         "compatibility",

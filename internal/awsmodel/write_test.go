@@ -44,7 +44,7 @@ func TestWritePagesWritesAServicePageAndTheIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(service), "| `AssumeRole` | "+StatusImplemented+" |") {
+	if !strings.Contains(string(service), "| `AssumeRole` |") {
 		t.Errorf("service page is missing its operation table:\n%s", service)
 	}
 	index, err := os.ReadFile(filepath.Join(dir, "README.md"))
@@ -53,6 +53,30 @@ func TestWritePagesWritesAServicePageAndTheIndex(t *testing.T) {
 	}
 	if !strings.Contains(string(index), "[STS](/coverage/sts)") {
 		t.Errorf("index does not link the service page:\n%s", index)
+	}
+}
+
+// The gaps the pages leave out are still written down, in a file the docs site
+// is not configured to render.
+func TestWritePagesWritesTheInternalReport(t *testing.T) {
+	dir := stagePages(t)
+	coverage := stsCoverage(t)
+
+	if err := WritePages(dir, []OperationCoverage{coverage}); err != nil {
+		t.Fatal(err)
+	}
+
+	report, err := os.ReadFile(filepath.Join(dir, "internal-report.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, operation := range coverage.Missing {
+		if !strings.Contains(string(report), "- `"+operation+"`") {
+			t.Errorf("internal report omits unimplemented operation %q:\n%s", operation, report)
+		}
+	}
+	if !strings.Contains(string(report), "% ") && !strings.Contains(string(report), "%)") {
+		t.Errorf("internal report carries no coverage figure:\n%s", report)
 	}
 }
 

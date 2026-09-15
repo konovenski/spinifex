@@ -66,7 +66,7 @@ func TestParsePageSetRejectsUnpublishableMetadata(t *testing.T) {
 	}
 }
 
-func TestRenderServicePageCarriesEveryStatus(t *testing.T) {
+func TestRenderServicePageCarriesEveryPublishedStatus(t *testing.T) {
 	pages := testPageSet(t)
 	coverage, err := CompareOperations(STS, DispatchInventory{
 		Registered:  []string{"AssumeRole", "GetCallerIdentity", "GetSessionToken", "PublishInternal"},
@@ -86,13 +86,12 @@ func TestRenderServicePageCarriesEveryStatus(t *testing.T) {
 		`category: "Coverage"`,
 		"sections:\n  - overview\n",
 		"# STS API Coverage\n\n## Overview\n",
-		"Spinifex implements **1 of the 8** operations (**12.5%**) in the STS `2011-06-15` API model.",
+		"Spinifex implements **1 operation** in the STS `2011-06-15` API model.",
 		"### Scope\n\nHand-written prose.",
 		"| `AssumeRole` | " + StatusImplemented + " |",
 		"| `GetSessionToken` | " + StatusStub + " |",
-		"| `GetCallerIdentity` | " + StatusNotApplicable + " |",
-		"| `AssumeRoleWithSAML` | " + StatusNotImplemented + " |",
 		"| `PublishInternal` | " + StatusOutsideModel + " |",
+		"### Not applicable\n",
 	} {
 		if !strings.Contains(page, want) {
 			t.Errorf("page does not contain %q:\n%s", want, page)
@@ -103,9 +102,10 @@ func TestRenderServicePageCarriesEveryStatus(t *testing.T) {
 	}
 }
 
-// A modelled operation is never summarised as a count: a visitor asking whether
-// Spinifex runs their workload is asking about the absent operations too.
-func TestRenderServicePageRowsEveryModelledOperation(t *testing.T) {
+// A published page states what the platform serves. An operation Spinifex has
+// not implemented is not a row on it, and no count invites reading the page as
+// a score against AWS.
+func TestRenderServicePagePublishesNeitherGapsNorScores(t *testing.T) {
 	pages := testPageSet(t)
 	coverage, err := CompareOperations(STS, DispatchInventory{Registered: []string{"AssumeRole"}})
 	if err != nil {
@@ -116,10 +116,35 @@ func TestRenderServicePageRowsEveryModelledOperation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, operation := range coverage.Modelled {
-		if !strings.Contains(page, "| `"+operation+"` |") {
-			t.Errorf("page has no row for modelled operation %q", operation)
+	if strings.Contains(page, StatusNotImplemented) {
+		t.Errorf("page publishes an unimplemented operation:\n%s", page)
+	}
+	if strings.Contains(page, "%") || strings.Contains(page, " of the ") {
+		t.Errorf("page publishes a coverage score:\n%s", page)
+	}
+	for _, operation := range coverage.Missing {
+		if strings.Contains(page, "| `"+operation+"` |") {
+			t.Errorf("page has a row for unimplemented operation %q", operation)
 		}
+	}
+	for _, operation := range coverage.Implemented {
+		if !strings.Contains(page, "| `"+operation+"` |") {
+			t.Errorf("page has no row for implemented operation %q", operation)
+		}
+	}
+}
+
+// A service page says what Spinifex serves, so a service that serves nothing
+// has no page rather than an empty one.
+func TestRenderServicePageRefusesAServiceWithNoImplementation(t *testing.T) {
+	pages := testPageSet(t)
+	coverage, err := CompareOperations(STS, DispatchInventory{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := RenderServicePage(coverage, pages, ""); err == nil {
+		t.Fatal("RenderServicePage published a page for a service with no implemented operations")
 	}
 }
 
@@ -235,13 +260,13 @@ func TestOperationStatusesRejectsAnInternalRouteThatIsModelled(t *testing.T) {
 	}
 }
 
-// A footnote reused across operations is written once, and both directions of
-// the reference are checked so neither side can rot.
-func TestRenderServicePageFootnotesSharedNotes(t *testing.T) {
+// Every not-applicable row carries its reason inline, so a visitor reads why an
+// operation is absent without following a footnote.
+func TestRenderServicePageGivesEveryNotApplicableRowAReason(t *testing.T) {
 	pages := testPageSet(t)
 	iam := pages.Services[IAM]
-	if len(iam.Notes) == 0 {
-		t.Skip("no notes are declared for IAM")
+	if len(iam.NotApplicable) == 0 {
+		t.Skip("no not-applicable operations are declared for IAM")
 	}
 	coverage, err := CompareOperations(IAM, DispatchInventory{Registered: []string{"CreateUser"}})
 	if err != nil {
@@ -252,16 +277,34 @@ func TestRenderServicePageFootnotesSharedNotes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(page, "\n### Notes\n\n1. ") {
-		t.Errorf("page has no numbered notes section:\n%s", page)
+	if !strings.Contains(page, "\n### Not applicable\n") {
+		t.Fatalf("page has no not-applicable section:\n%s", page)
 	}
-	if !strings.Contains(page, "| `UploadSSHPublicKey` | "+StatusNotApplicable+" [") {
-		t.Errorf("a declared operation carries no footnote reference:\n%s", page)
-	}
-	for _, text := range iam.Notes {
-		if strings.Count(page, text) != 1 {
-			t.Errorf("note %q is not written exactly once", text)
+	for operation, key := range iam.NotApplicable {
+		if !strings.Contains(page, "| `"+operation+"` | "+iam.Notes[key]+" |") {
+			t.Errorf("operation %q carries no reason:\n%s", operation, page)
 		}
+	}
+}
+
+// A refusal the dispatch tables report, with no declared reason behind it, is
+// still published with one.
+func TestRenderServicePageGivesAnUndeclaredRefusalAReason(t *testing.T) {
+	pages := testPageSet(t)
+	coverage, err := CompareOperations(STS, DispatchInventory{
+		Registered:  []string{"AssumeRole", "GetFederationToken"},
+		Unsupported: []string{"GetFederationToken"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	page, err := RenderServicePage(coverage, pages, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(page, "| `GetFederationToken` | The handler refuses this operation") {
+		t.Errorf("an undeclared refusal is published with no reason:\n%s", page)
 	}
 }
 
@@ -329,6 +372,9 @@ func TestRenderIndexPageLinksEveryPublishedService(t *testing.T) {
 	index, err := RenderIndexPage(coverages, pages, "")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if strings.Contains(index, "%") {
+		t.Errorf("index publishes a coverage score:\n%s", index)
 	}
 	for _, service := range Services() {
 		page, published := pages.Services[service]

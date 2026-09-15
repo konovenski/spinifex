@@ -1,7 +1,7 @@
 ---
 title: "ACM API Coverage"
 seoTitle: "AWS Certificate Manager API Coverage — Spinifex Docs"
-description: "Every operation in the AWS Certificate Manager API model and whether Spinifex implements it, generated from the gateway dispatch tables on each build."
+description: "The AWS Certificate Manager API operations Spinifex implements, generated from the gateway dispatch tables on each build, with those it does not offer and why."
 category: "Coverage"
 sections:
   - overview
@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **9 of the 15** operations (**60.0%**) in the ACM `2015-12-08` API model.
+Spinifex implements **9 operations** in the ACM `2015-12-08` API model.
 
 ### Import and issuance
 
@@ -30,20 +30,14 @@ Terraform's canonical certificate, DNS record and validation flow works unmodifi
 
 ### Operations
 
-| Operation | Status |
-|---|---|
-| `AddTagsToCertificate` | ✅ Implemented |
-| `DeleteCertificate` | ✅ Implemented |
-| `DescribeCertificate` | ✅ Implemented |
-| `ExportCertificate` | ❌ Not implemented |
-| `GetAccountConfiguration` | ❌ Not implemented |
-| `GetCertificate` | ✅ Implemented |
-| `ImportCertificate` | ✅ Implemented |
-| `ListCertificates` | ✅ Implemented |
-| `ListTagsForCertificate` | ✅ Implemented |
-| `PutAccountConfiguration` | ❌ Not implemented |
-| `RemoveTagsFromCertificate` | ✅ Implemented |
-| `RenewCertificate` | ❌ Not implemented |
-| `RequestCertificate` | ✅ Implemented |
-| `ResendValidationEmail` | ❌ Not implemented |
-| `UpdateCertificateOptions` | ❌ Not implemented |
+| Operation |
+|---|
+| `AddTagsToCertificate` |
+| `DeleteCertificate` |
+| `DescribeCertificate` |
+| `GetCertificate` |
+| `ImportCertificate` |
+| `ListCertificates` |
+| `ListTagsForCertificate` |
+| `RemoveTagsFromCertificate` |
+| `RequestCertificate` |

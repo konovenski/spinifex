@@ -1,7 +1,7 @@
 ---
 title: "ELBv2 API Coverage"
 seoTitle: "Elastic Load Balancing v2 API Coverage — Spinifex Docs"
-description: "Every operation in the Elastic Load Balancing v2 API model and whether Spinifex implements it, for both the Application and Network Load Balancers it serves."
+description: "The Elastic Load Balancing v2 API operations Spinifex implements, for both the Application and Network Load Balancers it serves, with those it does not."
 category: "Coverage"
 sections:
   - overview
@@ -18,7 +18,7 @@ tags:
 
 ## Overview
 
-Spinifex implements **34 of the 46** operations (**73.9%**) in the ELBv2 `2015-12-01` API model.
+Spinifex implements **34 operations** in the ELBv2 `2015-12-01` API model.
 
 ### Two data planes
 
@@ -30,18 +30,14 @@ The data plane is a system-managed load balancer VM, launched automatically duri
 |---|---|
 | `AddListenerCertificates` | ✅ Implemented |
 | `AddTags` | ✅ Implemented |
-| `AddTrustStoreRevocations` | ❌ Not implemented |
 | `CreateListener` | ✅ Implemented |
 | `CreateLoadBalancer` | ✅ Implemented |
 | `CreateRule` | ✅ Implemented |
 | `CreateTargetGroup` | ✅ Implemented |
-| `CreateTrustStore` | ❌ Not implemented |
 | `DeleteListener` | ✅ Implemented |
 | `DeleteLoadBalancer` | ✅ Implemented |
 | `DeleteRule` | ✅ Implemented |
-| `DeleteSharedTrustStoreAssociation` | ❌ Not implemented |
 | `DeleteTargetGroup` | ✅ Implemented |
-| `DeleteTrustStore` | ❌ Not implemented |
 | `DeregisterTargets` | ✅ Implemented |
 | `DescribeAccountLimits` | ✅ Implemented |
 | `DescribeListenerCertificates` | ✅ Implemented |
@@ -54,22 +50,14 @@ The data plane is a system-managed load balancer VM, launched automatically duri
 | `DescribeTargetGroupAttributes` | ✅ Implemented |
 | `DescribeTargetGroups` | ✅ Implemented |
 | `DescribeTargetHealth` | ✅ Implemented |
-| `DescribeTrustStoreAssociations` | ❌ Not implemented |
-| `DescribeTrustStoreRevocations` | ❌ Not implemented |
-| `DescribeTrustStores` | ❌ Not implemented |
-| `GetResourcePolicy` | ❌ Not implemented |
-| `GetTrustStoreCaCertificatesBundle` | ❌ Not implemented |
-| `GetTrustStoreRevocationContent` | ❌ Not implemented |
 | `ModifyListener` | ✅ Implemented |
 | `ModifyLoadBalancerAttributes` | ✅ Implemented |
 | `ModifyRule` | ✅ Implemented |
 | `ModifyTargetGroup` | ✅ Implemented |
 | `ModifyTargetGroupAttributes` | ✅ Implemented |
-| `ModifyTrustStore` | ❌ Not implemented |
 | `RegisterTargets` | ✅ Implemented |
 | `RemoveListenerCertificates` | ✅ Implemented |
 | `RemoveTags` | ✅ Implemented |
-| `RemoveTrustStoreRevocations` | ❌ Not implemented |
 | `SetIpAddressType` | ✅ Implemented |
 | `SetRulePriorities` | ✅ Implemented |
 | `SetSecurityGroups` | ✅ Implemented |

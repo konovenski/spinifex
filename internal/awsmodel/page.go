@@ -21,6 +21,10 @@ const (
 	StatusOutsideModel   = "🔒 Outside the pinned model"
 )
 
+// The reason published for an operation a handler refuses without the page
+// declaring why. The refusal is mechanical, so the row cannot be silent.
+const refusedByHandler = "The handler refuses this operation; the platform does not offer it."
+
 // Frontmatter length rules enforced by the docs site. See docs/README.md.
 const (
 	seoTitleSuffix = " — Spinifex Docs"
@@ -230,40 +234,31 @@ func validateFrontmatter(owner string, page PageMetadata) error {
 	return nil
 }
 
-// noteOrder returns the note keys in the order they are published. Sorted by
-// key rather than by first use, so adding an operation cannot renumber a note
-// that is already published.
-func noteOrder(notes map[string]string) []string {
-	keys := make([]string, 0, len(notes))
-	for key := range notes {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	return keys
-}
-
-// numberNotes assigns each note its published footnote number, rejecting a note
-// nothing references and a reference to a note that does not exist.
-func numberNotes(page PageMetadata) (map[string]int, error) {
+// validateNotes checks both directions of the note references, rejecting a note
+// nothing points at and a reference to a note that does not exist.
+func validateNotes(page PageMetadata) error {
 	referenced := map[string]bool{}
 	for operation, key := range page.NotApplicable {
 		if _, ok := page.Notes[key]; !ok {
-			return nil, fmt.Errorf("awsmodel: coverage page %s: operation %q references undefined note %q", page.Slug, operation, key)
+			return fmt.Errorf("awsmodel: coverage page %s: operation %q references undefined note %q", page.Slug, operation, key)
 		}
 		referenced[key] = true
 	}
 
-	numbering := make(map[string]int, len(page.Notes))
-	for index, key := range noteOrder(page.Notes) {
+	keys := make([]string, 0, len(page.Notes))
+	for key := range page.Notes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
 		if !referenced[key] {
-			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is never referenced", page.Slug, key)
+			return fmt.Errorf("awsmodel: coverage page %s: note %q is never referenced", page.Slug, key)
 		}
 		if page.Notes[key] == "" {
-			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is empty", page.Slug, key)
+			return fmt.Errorf("awsmodel: coverage page %s: note %q is empty", page.Slug, key)
 		}
-		numbering[key] = index + 1
 	}
-	return numbering, nil
+	return nil
 }
 
 // RenderServicePage renders one publishable coverage page. intro is optional
@@ -283,42 +278,90 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 		return "", fmt.Errorf("awsmodel: %s coverage is not enumerable, so it has no publishable page", coverage.Service)
 	}
 
-	var body strings.Builder
-	writeFrontmatter(&body, page, pages.Category)
-	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", page.Title)
-
-	fmt.Fprintf(&body, "Spinifex implements **%d of the %d** operations (**%.1f%%**) in the %s `%s` API model.\n\n",
-		len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent(), page.Name, coverage.APIVersion)
-
-	if intro != "" {
-		body.WriteString(strings.TrimSpace(intro) + "\n\n")
+	// A page exists to say what the platform serves. A service with nothing
+	// behind it has no such statement to make.
+	if len(coverage.Implemented) == 0 {
+		return "", fmt.Errorf("awsmodel: %s has no implemented operations, so it has no publishable page", coverage.Service)
 	}
 
 	statuses, err := coverage.OperationStatuses(page)
 	if err != nil {
 		return "", err
 	}
-	numbering, err := numberNotes(page)
-	if err != nil {
+	if err := validateNotes(page); err != nil {
 		return "", err
 	}
 
-	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
-	for _, status := range statuses {
-		if number, ok := numbering[status.NoteKey]; ok {
-			fmt.Fprintf(&body, "| `%s` | %s [%d](#notes) |\n", status.Operation, status.Status, number)
-			continue
-		}
-		fmt.Fprintf(&body, "| `%s` | %s |\n", status.Operation, status.Status)
+	var body strings.Builder
+	writeFrontmatter(&body, page, pages.Category)
+	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", page.Title)
+
+	noun := "operations"
+	if len(coverage.Implemented) == 1 {
+		noun = "operation"
+	}
+	fmt.Fprintf(&body, "Spinifex implements **%d %s** in the %s `%s` API model.\n\n",
+		len(coverage.Implemented), noun, page.Name, coverage.APIVersion)
+
+	if intro != "" {
+		body.WriteString(strings.TrimSpace(intro) + "\n\n")
 	}
 
-	if len(numbering) > 0 {
-		body.WriteString("\n### Notes\n\n")
-		for index, key := range noteOrder(page.Notes) {
-			fmt.Fprintf(&body, "%d. %s\n", index+1, page.Notes[key])
+	writeOperations(&body, statuses)
+	writeNotApplicable(&body, page, statuses)
+	return body.String(), nil
+}
+
+// writeOperations publishes the operations the gateway serves. The status
+// column is written only where a row needs it: a table whose every cell reads
+// "Implemented" says nothing the heading has not.
+func writeOperations(body *strings.Builder, statuses []OperationStatus) {
+	rows := make([]OperationStatus, 0, len(statuses))
+	uniform := true
+	for _, status := range statuses {
+		if status.Status == StatusNotApplicable || status.Status == StatusNotImplemented {
+			continue
+		}
+		uniform = uniform && status.Status == StatusImplemented
+		rows = append(rows, status)
+	}
+
+	if uniform {
+		body.WriteString("### Operations\n\n| Operation |\n|---|\n")
+		for _, row := range rows {
+			fmt.Fprintf(body, "| `%s` |\n", row.Operation)
+		}
+		return
+	}
+	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
+	for _, row := range rows {
+		fmt.Fprintf(body, "| `%s` | %s |\n", row.Operation, row.Status)
+	}
+}
+
+// writeNotApplicable publishes the operations the platform will never serve,
+// each with its reason in the row. A refusal reached mechanically carries the
+// generic reason, so no row is published without one.
+func writeNotApplicable(body *strings.Builder, page PageMetadata, statuses []OperationStatus) {
+	rows := make([]OperationStatus, 0, len(page.NotApplicable))
+	for _, status := range statuses {
+		if status.Status == StatusNotApplicable {
+			rows = append(rows, status)
 		}
 	}
-	return body.String(), nil
+	if len(rows) == 0 {
+		return
+	}
+
+	body.WriteString("\n### Not applicable\n\nThese operations describe AWS-hosted features this platform does not offer.\n\n")
+	body.WriteString("| Operation | Reason |\n|---|---|\n")
+	for _, row := range rows {
+		reason := page.Notes[row.NoteKey]
+		if reason == "" {
+			reason = refusedByHandler
+		}
+		fmt.Fprintf(body, "| `%s` | %s |\n", row.Operation, reason)
+	}
 }
 
 // RenderIndexPage renders the cross-service summary that links to each page.
@@ -330,15 +373,15 @@ func RenderIndexPage(coverages []OperationCoverage, pages PageSet, intro string)
 	var body strings.Builder
 	writeFrontmatter(&body, pages.Index, pages.Category)
 	fmt.Fprintf(&body, "# %s\n\n## Overview\n\n", pages.Index.Title)
-	fmt.Fprintf(&body, "Spinifex serves the AWS APIs below. Every page counts the operations in the pinned `aws-sdk-go %s` `api-2.json` model for its service and reports, operation by operation, whether Spinifex implements it.\n\n", SourceSDKVersion)
-	body.WriteString("| Service | Implemented | Modelled | Coverage |\n|---|---:|---:|---:|\n")
+	fmt.Fprintf(&body, "Spinifex serves the AWS APIs below. Every page names the operations Spinifex implements from the pinned `aws-sdk-go %s` `api-2.json` model for its service, alongside those the platform does not offer and why.\n\n", SourceSDKVersion)
+	body.WriteString("| Service | Operations |\n|---|---:|\n")
 	for _, coverage := range sortedCoverages(coverages) {
 		page, ok := pages.Services[coverage.Service]
 		if !ok {
 			continue
 		}
-		fmt.Fprintf(&body, "| [%s](%s/%s) | %d | %d | %.1f%% |\n",
-			page.Name, pages.BasePath, page.Slug, len(coverage.Implemented), len(coverage.Modelled), coverage.ImplementedPercent())
+		fmt.Fprintf(&body, "| [%s](%s/%s) | %d |\n",
+			page.Name, pages.BasePath, page.Slug, len(coverage.Implemented))
 	}
 
 	if intro != "" {
