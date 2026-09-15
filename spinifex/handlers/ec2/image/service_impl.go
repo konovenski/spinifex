@@ -132,7 +132,7 @@ func (s *ImageServiceImpl) DescribeImages(ctx context.Context, input *ec2.Descri
 	parsedFilters, err := filterutil.ParseFilters(input.Filters, describeImagesValidFilters)
 	if err != nil {
 		slog.WarnContext(ctx, "DescribeImages: invalid filter", "err", err)
-		return nil, errors.New(awserrors.ErrorInvalidParameterValue)
+		return nil, err
 	}
 
 	return s.describeImages(ctx, input, accountID, parsedFilters)
