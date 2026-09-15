@@ -21,11 +21,12 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 
 ## ec2
 
-`2016-11-15` — 125 of 625 modelled operations implemented (20.0%), 0 stubbed, 58 not applicable, 0 registered outside the pinned model.
+`2016-11-15` — 125 of 625 modelled operations implemented (20.0%), 0 stubbed, 39 not applicable, 0 registered outside the pinned model.
 
 ### Not implemented
 
 - `AcceptAddressTransfer`
+- `AcceptReservedInstancesExchangeQuote`
 - `AcceptTransitGatewayMulticastDomainAssociations`
 - `AcceptTransitGatewayPeeringAttachment`
 - `AcceptTransitGatewayVpcAttachment`
@@ -152,6 +153,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DeleteNetworkInsightsPath`
 - `DeleteNetworkInterfacePermission`
 - `DeletePublicIpv4Pool`
+- `DeleteQueuedReservedInstances`
 - `DeleteSpotDatafeedSubscription`
 - `DeleteSubnetCidrReservation`
 - `DeleteTrafficMirrorFilter`
@@ -190,6 +192,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DescribeAddressTransfers`
 - `DescribeBundleTasks`
 - `DescribeByoipCidrs`
+- `DescribeCapacityBlockOfferings`
 - `DescribeCapacityReservationFleets`
 - `DescribeClientVpnAuthorizationRules`
 - `DescribeClientVpnConnections`
@@ -208,6 +211,8 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DescribeFleetInstances`
 - `DescribeFleets`
 - `DescribeFlowLogs`
+- `DescribeHostReservationOfferings`
+- `DescribeHostReservations`
 - `DescribeHosts`
 - `DescribeImportImageTasks`
 - `DescribeImportSnapshotTasks`
@@ -242,6 +247,11 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `DescribePrefixLists`
 - `DescribePublicIpv4Pools`
 - `DescribeReplaceRootVolumeTasks`
+- `DescribeReservedInstances`
+- `DescribeReservedInstancesModifications`
+- `DescribeReservedInstancesOfferings`
+- `DescribeScheduledInstanceAvailability`
+- `DescribeScheduledInstances`
 - `DescribeSecurityGroupReferences`
 - `DescribeSnapshotAttribute`
 - `DescribeSnapshotTierStatus`
@@ -330,7 +340,9 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `GetConsoleScreenshot`
 - `GetDefaultCreditSpecification`
 - `GetEbsDefaultKmsKeyId`
+- `GetFlowLogsIntegrationTemplate`
 - `GetGroupsForCapacityReservation`
+- `GetHostReservationPurchasePreview`
 - `GetImageBlockPublicAccessState`
 - `GetInstanceMetadataDefaults`
 - `GetInstanceTpmEkPub`
@@ -348,6 +360,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `GetManagedPrefixListEntries`
 - `GetNetworkInsightsAccessScopeAnalysisFindings`
 - `GetNetworkInsightsAccessScopeContent`
+- `GetReservedInstancesExchangeQuote`
 - `GetSnapshotBlockPublicAccessState`
 - `GetSpotPlacementScores`
 - `GetSubnetCidrReservations`
@@ -395,6 +408,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `ModifyLocalGatewayRoute`
 - `ModifyManagedPrefixList`
 - `ModifyPrivateDnsNameOptions`
+- `ModifyReservedInstances`
 - `ModifySecurityGroupRules`
 - `ModifySnapshotAttribute`
 - `ModifySnapshotTier`
@@ -429,6 +443,10 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `ProvisionIpamByoasn`
 - `ProvisionIpamPoolCidr`
 - `ProvisionPublicIpv4PoolCidr`
+- `PurchaseCapacityBlock`
+- `PurchaseHostReservation`
+- `PurchaseReservedInstancesOffering`
+- `PurchaseScheduledInstances`
 - `RegisterInstanceEventNotificationAttributes`
 - `RegisterTransitGatewayMulticastGroupMembers`
 - `RegisterTransitGatewayMulticastGroupSources`
@@ -454,6 +472,7 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `RestoreSnapshotFromRecycleBin`
 - `RestoreSnapshotTier`
 - `RevokeClientVpnIngress`
+- `RunScheduledInstances`
 - `SearchLocalGatewayRoutes`
 - `SearchTransitGatewayMulticastGroups`
 - `SearchTransitGatewayRoutes`
@@ -469,10 +488,6 @@ Pinned model source: `aws-sdk-go v1.55.8`.
 - `WithdrawByoipCidr`
 
 ### Not applicable — do not build
-
-aws-analytics: The integration template wires flow logs into Athena and CloudFormation, neither of which this platform offers.
-
-- `GetFlowLogsIntegrationTemplate`
 
 aws-backbone: These report performance across AWS's own global network between its regions and zones.
 
@@ -529,33 +544,15 @@ marketplace: Product codes belong to AWS Marketplace, which has no equivalent he
 
 - `ConfirmProductInstance`
 
-purchasing: Reserved Instances, Scheduled Instances, Capacity Blocks and host reservations buy AWS capacity at an AWS price. Hardware here is already bought.
-
-- `AcceptReservedInstancesExchangeQuote`
-- `CancelReservedInstancesListing`
-- `CreateReservedInstancesListing`
-- `DeleteQueuedReservedInstances`
-- `DescribeCapacityBlockOfferings`
-- `DescribeHostReservationOfferings`
-- `DescribeHostReservations`
-- `DescribeReservedInstances`
-- `DescribeReservedInstancesListings`
-- `DescribeReservedInstancesModifications`
-- `DescribeReservedInstancesOfferings`
-- `DescribeScheduledInstanceAvailability`
-- `DescribeScheduledInstances`
-- `GetHostReservationPurchasePreview`
-- `GetReservedInstancesExchangeQuote`
-- `ModifyReservedInstances`
-- `PurchaseCapacityBlock`
-- `PurchaseHostReservation`
-- `PurchaseReservedInstancesOffering`
-- `PurchaseScheduledInstances`
-- `RunScheduledInstances`
-
 retired-accelerators: Elastic Graphics was retired by AWS, and attached nothing but an AWS-hosted accelerator while it existed.
 
 - `DescribeElasticGpus`
+
+ri-marketplace: The Reserved Instance Marketplace resells a reservation to another AWS customer, so AWS is the counterparty.
+
+- `CancelReservedInstancesListing`
+- `CreateReservedInstancesListing`
+- `DescribeReservedInstancesListings`
 
 spot-price: On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented.
 
@@ -563,7 +560,7 @@ spot-price: On owned hardware there is no spot-to-on-demand price differential, 
 
 ## ecr
 
-`2015-09-21` — 19 of 47 modelled operations implemented (40.4%), 13 stubbed, 6 not applicable, 3 registered outside the pinned model.
+`2015-09-21` — 19 of 47 modelled operations implemented (40.4%), 13 stubbed, 0 not applicable, 3 registered outside the pinned model.
 
 ### Not implemented
 
@@ -597,24 +594,19 @@ spot-price: On owned hardware there is no spot-to-on-demand price differential, 
 
 ### Registered and refused
 
+- `BatchGetRepositoryScanningConfiguration`
+- `DescribeImageScanFindings`
 - `GetImageScanningConfiguration`
+- `GetRegistryScanningConfiguration`
+- `PutImageScanningConfiguration`
+- `PutRegistryScanningConfiguration`
+- `StartImageScan`
 
 ### Registered outside the pinned model
 
 - `GetImageScanningConfiguration`
 - `ListRepositories`
 - `ReplicateImage`
-
-### Not applicable — do not build
-
-image-scanning: Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty.
-
-- `BatchGetRepositoryScanningConfiguration`
-- `DescribeImageScanFindings`
-- `GetRegistryScanningConfiguration`
-- `PutImageScanningConfiguration`
-- `PutRegistryScanningConfiguration`
-- `StartImageScan`
 
 ## ecs
 

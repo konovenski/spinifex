@@ -45,37 +45,27 @@
         "vpc"
       ],
       "notApplicable": {
-        "AcceptReservedInstancesExchangeQuote": "purchasing",
         "AttachClassicLinkVpc": "ec2-classic",
-        "CancelReservedInstancesListing": "purchasing",
+        "CancelReservedInstancesListing": "ri-marketplace",
         "ConfirmProductInstance": "marketplace",
         "CopyFpgaImage": "fpga",
         "CreateCarrierGateway": "aws-edge",
         "CreateFpgaImage": "fpga",
-        "CreateReservedInstancesListing": "purchasing",
+        "CreateReservedInstancesListing": "ri-marketplace",
         "DeleteCarrierGateway": "aws-edge",
         "DeleteFpgaImage": "fpga",
-        "DeleteQueuedReservedInstances": "purchasing",
         "DescribeAggregateIdFormat": "id-format",
         "DescribeAwsNetworkPerformanceMetricSubscriptions": "aws-backbone",
-        "DescribeCapacityBlockOfferings": "purchasing",
         "DescribeCarrierGateways": "aws-edge",
         "DescribeClassicLinkInstances": "ec2-classic",
         "DescribeElasticGpus": "retired-accelerators",
         "DescribeFpgaImageAttribute": "fpga",
         "DescribeFpgaImages": "fpga",
-        "DescribeHostReservationOfferings": "purchasing",
-        "DescribeHostReservations": "purchasing",
         "DescribeIdFormat": "id-format",
         "DescribeIdentityIdFormat": "id-format",
         "DescribeMovingAddresses": "ec2-classic",
         "DescribePrincipalIdFormat": "id-format",
-        "DescribeReservedInstances": "purchasing",
-        "DescribeReservedInstancesListings": "purchasing",
-        "DescribeReservedInstancesModifications": "purchasing",
-        "DescribeReservedInstancesOfferings": "purchasing",
-        "DescribeScheduledInstanceAvailability": "purchasing",
-        "DescribeScheduledInstances": "purchasing",
+        "DescribeReservedInstancesListings": "ri-marketplace",
         "DescribeSpotPriceHistory": "spot-price",
         "DescribeVpcClassicLink": "ec2-classic",
         "DescribeVpcClassicLinkDnsSupport": "ec2-classic",
@@ -87,25 +77,15 @@
         "EnableVpcClassicLink": "ec2-classic",
         "EnableVpcClassicLinkDnsSupport": "ec2-classic",
         "GetAwsNetworkPerformanceData": "aws-backbone",
-        "GetFlowLogsIntegrationTemplate": "aws-analytics",
-        "GetHostReservationPurchasePreview": "purchasing",
-        "GetReservedInstancesExchangeQuote": "purchasing",
         "ModifyFpgaImageAttribute": "fpga",
         "ModifyIdFormat": "id-format",
         "ModifyIdentityIdFormat": "id-format",
-        "ModifyReservedInstances": "purchasing",
         "MoveAddressToVpc": "ec2-classic",
-        "PurchaseCapacityBlock": "purchasing",
-        "PurchaseHostReservation": "purchasing",
-        "PurchaseReservedInstancesOffering": "purchasing",
-        "PurchaseScheduledInstances": "purchasing",
         "ReportInstanceStatus": "aws-support",
         "ResetFpgaImageAttribute": "fpga",
-        "RestoreAddressToClassic": "ec2-classic",
-        "RunScheduledInstances": "purchasing"
+        "RestoreAddressToClassic": "ec2-classic"
       },
       "notes": {
-        "aws-analytics": "The integration template wires flow logs into Athena and CloudFormation, neither of which this platform offers.",
         "aws-backbone": "These report performance across AWS's own global network between its regions and zones.",
         "aws-edge": "Carrier gateways route to a telecommunications carrier's 5G network in an AWS Wavelength Zone.",
         "aws-support": "Reporting an instance as impaired files a report with AWS support about AWS hardware.",
@@ -113,8 +93,8 @@
         "fpga": "FPGA images are built and ingested through AWS's own AFI pipeline for its F1 instances.",
         "id-format": "These switched resource IDs between the short and long forms during AWS's 2016 migration, which has long since finished.",
         "marketplace": "Product codes belong to AWS Marketplace, which has no equivalent here.",
-        "purchasing": "Reserved Instances, Scheduled Instances, Capacity Blocks and host reservations buy AWS capacity at an AWS price. Hardware here is already bought.",
         "retired-accelerators": "Elastic Graphics was retired by AWS, and attached nothing but an AWS-hosted accelerator while it existed.",
+        "ri-marketplace": "The Reserved Instance Marketplace resells a reservation to another AWS customer, so AWS is the counterparty.",
         "spot-price": "On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented."
       }
     },
@@ -131,18 +111,7 @@
         "ecr",
         "containers",
         "registry"
-      ],
-      "notApplicable": {
-        "BatchGetRepositoryScanningConfiguration": "image-scanning",
-        "DescribeImageScanFindings": "image-scanning",
-        "GetRegistryScanningConfiguration": "image-scanning",
-        "PutImageScanningConfiguration": "image-scanning",
-        "PutRegistryScanningConfiguration": "image-scanning",
-        "StartImageScan": "image-scanning"
-      },
-      "notes": {
-        "image-scanning": "Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty."
-      }
+      ]
     },
     "ecs": {
       "slug": "ecs",
