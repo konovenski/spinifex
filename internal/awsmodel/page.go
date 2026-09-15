@@ -21,10 +21,6 @@ const (
 	StatusOutsideModel   = "🔒 Outside the pinned model"
 )
 
-// The reason published for an operation a handler refuses without the page
-// declaring why. The refusal is mechanical, so the row cannot be silent.
-const refusedByHandler = "The handler refuses this operation; the platform does not offer it."
-
 // Frontmatter length rules enforced by the docs site. See docs/README.md.
 const (
 	seoTitleSuffix = " — Spinifex Docs"
@@ -238,31 +234,40 @@ func validateFrontmatter(owner string, page PageMetadata) error {
 	return nil
 }
 
-// validateNotes checks both directions of the note references, rejecting a note
-// nothing points at and a reference to a note that does not exist.
-func validateNotes(page PageMetadata) error {
+// noteOrder returns the note keys in the order they are published. Sorted by
+// key rather than by first use, so adding an operation cannot renumber a note
+// that is already published.
+func noteOrder(notes map[string]string) []string {
+	keys := make([]string, 0, len(notes))
+	for key := range notes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// numberNotes assigns each note its published footnote number, rejecting a note
+// nothing references and a reference to a note that does not exist.
+func numberNotes(page PageMetadata) (map[string]int, error) {
 	referenced := map[string]bool{}
 	for operation, key := range page.NotApplicable {
 		if _, ok := page.Notes[key]; !ok {
-			return fmt.Errorf("awsmodel: coverage page %s: operation %q references undefined note %q", page.Slug, operation, key)
+			return nil, fmt.Errorf("awsmodel: coverage page %s: operation %q references undefined note %q", page.Slug, operation, key)
 		}
 		referenced[key] = true
 	}
 
-	keys := make([]string, 0, len(page.Notes))
-	for key := range page.Notes {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	for _, key := range keys {
+	numbering := make(map[string]int, len(page.Notes))
+	for index, key := range noteOrder(page.Notes) {
 		if !referenced[key] {
-			return fmt.Errorf("awsmodel: coverage page %s: note %q is never referenced", page.Slug, key)
+			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is never referenced", page.Slug, key)
 		}
 		if page.Notes[key] == "" {
-			return fmt.Errorf("awsmodel: coverage page %s: note %q is empty", page.Slug, key)
+			return nil, fmt.Errorf("awsmodel: coverage page %s: note %q is empty", page.Slug, key)
 		}
+		numbering[key] = index + 1
 	}
-	return nil
+	return numbering, nil
 }
 
 // RenderServicePage renders one publishable coverage page. intro is optional
@@ -292,7 +297,8 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 	if err != nil {
 		return "", err
 	}
-	if err := validateNotes(page); err != nil {
+	numbering, err := numberNotes(page)
+	if err != nil {
 		return "", err
 	}
 
@@ -315,19 +321,20 @@ func RenderServicePage(coverage OperationCoverage, pages PageSet, intro string) 
 		body.WriteString(strings.TrimSpace(intro) + "\n\n")
 	}
 
-	writeOperations(&body, statuses)
-	writeNotApplicable(&body, page, statuses)
+	writeOperations(&body, statuses, numbering)
+	writeNotes(&body, page, numbering)
 	return body.String(), nil
 }
 
-// writeOperations publishes the operations the gateway serves. The status
-// column is written only where a row needs it: a table whose every cell reads
-// "Implemented" says nothing the heading has not.
-func writeOperations(body *strings.Builder, statuses []OperationStatus) {
+// writeOperations publishes one row per operation the platform answers, served
+// or deliberately refused. The status column is written only where a row needs
+// it: a table whose every cell reads "Implemented" says nothing the heading has
+// not.
+func writeOperations(body *strings.Builder, statuses []OperationStatus, numbering map[string]int) {
 	rows := make([]OperationStatus, 0, len(statuses))
 	uniform := true
 	for _, status := range statuses {
-		if status.Status == StatusNotApplicable || status.Status == StatusNotImplemented {
+		if status.Status == StatusNotImplemented {
 			continue
 		}
 		uniform = uniform && status.Status == StatusImplemented
@@ -343,32 +350,23 @@ func writeOperations(body *strings.Builder, statuses []OperationStatus) {
 	}
 	body.WriteString("### Operations\n\n| Operation | Status |\n|---|---|\n")
 	for _, row := range rows {
+		if number, ok := numbering[row.NoteKey]; ok {
+			fmt.Fprintf(body, "| `%s` | %s [%d](#notes) |\n", row.Operation, row.Status, number)
+			continue
+		}
 		fmt.Fprintf(body, "| `%s` | %s |\n", row.Operation, row.Status)
 	}
 }
 
-// writeNotApplicable publishes the operations the platform will never serve,
-// each with its reason in the row. A refusal reached mechanically carries the
-// generic reason, so no row is published without one.
-func writeNotApplicable(body *strings.Builder, page PageMetadata, statuses []OperationStatus) {
-	rows := make([]OperationStatus, 0, len(page.NotApplicable))
-	for _, status := range statuses {
-		if status.Status == StatusNotApplicable {
-			rows = append(rows, status)
-		}
-	}
-	if len(rows) == 0 {
+// writeNotes publishes the reasons the table footnotes, numbered as the rows
+// reference them.
+func writeNotes(body *strings.Builder, page PageMetadata, numbering map[string]int) {
+	if len(numbering) == 0 {
 		return
 	}
-
-	body.WriteString("\n### Not applicable\n\nThese operations describe AWS-hosted features this platform does not offer.\n\n")
-	body.WriteString("| Operation | Reason |\n|---|---|\n")
-	for _, row := range rows {
-		reason := page.Notes[row.NoteKey]
-		if reason == "" {
-			reason = refusedByHandler
-		}
-		fmt.Fprintf(body, "| `%s` | %s |\n", row.Operation, reason)
+	body.WriteString("\n### Notes\n\n")
+	for index, key := range noteOrder(page.Notes) {
+		fmt.Fprintf(body, "%d. %s\n", index+1, page.Notes[key])
 	}
 }
 

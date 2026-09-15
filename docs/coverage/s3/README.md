@@ -34,57 +34,61 @@ That behaviour is measured separately, against the `ceph/s3-tests` suite Ceph RG
 
 ### Operations
 
-| Operation |
-|---|
-| `AbortMultipartUpload` |
-| `CompleteMultipartUpload` |
-| `CopyObject` |
-| `CreateBucket` |
-| `CreateMultipartUpload` |
-| `DeleteBucket` |
-| `DeleteObject` |
-| `DeleteObjects` |
-| `GetObject` |
-| `HeadBucket` |
-| `HeadObject` |
-| `ListBuckets` |
-| `ListMultipartUploads` |
-| `ListObjects` |
-| `ListObjectsV2` |
-| `ListParts` |
-| `PutObject` |
-| `UploadPart` |
-| `UploadPartCopy` |
-
-### Not applicable
-
-These operations describe AWS-hosted features this platform does not offer.
-
-| Operation | Reason |
+| Operation | Status |
 |---|---|
-| `CreateSession` | Sessions authenticate S3 Express One Zone directory buckets, a storage class this platform does not offer. |
-| `DeleteBucketAnalyticsConfiguration` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `DeleteBucketIntelligentTieringConfiguration` | Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media. |
-| `DeleteBucketInventoryConfiguration` | Inventory reports are an AWS-hosted scheduled export; a listing here is served live from the metadata store. |
-| `DeleteBucketMetricsConfiguration` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `DeleteBucketReplication` | Replication copies objects to a bucket in another region, and a deployment is a single region with no peer. |
-| `GetBucketAccelerateConfiguration` | Transfer acceleration routes uploads over AWS edge locations, which an on-premise deployment has none of. |
-| `GetBucketAnalyticsConfiguration` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `GetBucketIntelligentTieringConfiguration` | Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media. |
-| `GetBucketInventoryConfiguration` | Inventory reports are an AWS-hosted scheduled export; a listing here is served live from the metadata store. |
-| `GetBucketMetricsConfiguration` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `GetBucketReplication` | Replication copies objects to a bucket in another region, and a deployment is a single region with no peer. |
-| `GetBucketRequestPayment` | Requester Pays shifts transfer charges to the caller, which needs AWS billing behind it. |
-| `ListBucketAnalyticsConfigurations` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `ListBucketIntelligentTieringConfigurations` | Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media. |
-| `ListBucketInventoryConfigurations` | Inventory reports are an AWS-hosted scheduled export; a listing here is served live from the metadata store. |
-| `ListBucketMetricsConfigurations` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `PutBucketAccelerateConfiguration` | Transfer acceleration routes uploads over AWS edge locations, which an on-premise deployment has none of. |
-| `PutBucketAnalyticsConfiguration` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `PutBucketIntelligentTieringConfiguration` | Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media. |
-| `PutBucketInventoryConfiguration` | Inventory reports are an AWS-hosted scheduled export; a listing here is served live from the metadata store. |
-| `PutBucketMetricsConfiguration` | Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here. |
-| `PutBucketReplication` | Replication copies objects to a bucket in another region, and a deployment is a single region with no peer. |
-| `PutBucketRequestPayment` | Requester Pays shifts transfer charges to the caller, which needs AWS billing behind it. |
-| `RestoreObject` | Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media. |
-| `WriteGetObjectResponse` | S3 Object Lambda rewrites a response from a Lambda function, and Lambda is not offered. |
+| `AbortMultipartUpload` | ✅ Implemented |
+| `CompleteMultipartUpload` | ✅ Implemented |
+| `CopyObject` | ✅ Implemented |
+| `CreateBucket` | ✅ Implemented |
+| `CreateMultipartUpload` | ✅ Implemented |
+| `CreateSession` | ⛔ Not applicable [3](#notes) |
+| `DeleteBucket` | ✅ Implemented |
+| `DeleteBucketAnalyticsConfiguration` | ⛔ Not applicable [2](#notes) |
+| `DeleteBucketIntelligentTieringConfiguration` | ⛔ Not applicable [8](#notes) |
+| `DeleteBucketInventoryConfiguration` | ⛔ Not applicable [4](#notes) |
+| `DeleteBucketMetricsConfiguration` | ⛔ Not applicable [2](#notes) |
+| `DeleteBucketReplication` | ⛔ Not applicable [6](#notes) |
+| `DeleteObject` | ✅ Implemented |
+| `DeleteObjects` | ✅ Implemented |
+| `GetBucketAccelerateConfiguration` | ⛔ Not applicable [1](#notes) |
+| `GetBucketAnalyticsConfiguration` | ⛔ Not applicable [2](#notes) |
+| `GetBucketIntelligentTieringConfiguration` | ⛔ Not applicable [8](#notes) |
+| `GetBucketInventoryConfiguration` | ⛔ Not applicable [4](#notes) |
+| `GetBucketMetricsConfiguration` | ⛔ Not applicable [2](#notes) |
+| `GetBucketReplication` | ⛔ Not applicable [6](#notes) |
+| `GetBucketRequestPayment` | ⛔ Not applicable [7](#notes) |
+| `GetObject` | ✅ Implemented |
+| `HeadBucket` | ✅ Implemented |
+| `HeadObject` | ✅ Implemented |
+| `ListBucketAnalyticsConfigurations` | ⛔ Not applicable [2](#notes) |
+| `ListBucketIntelligentTieringConfigurations` | ⛔ Not applicable [8](#notes) |
+| `ListBucketInventoryConfigurations` | ⛔ Not applicable [4](#notes) |
+| `ListBucketMetricsConfigurations` | ⛔ Not applicable [2](#notes) |
+| `ListBuckets` | ✅ Implemented |
+| `ListMultipartUploads` | ✅ Implemented |
+| `ListObjects` | ✅ Implemented |
+| `ListObjectsV2` | ✅ Implemented |
+| `ListParts` | ✅ Implemented |
+| `PutBucketAccelerateConfiguration` | ⛔ Not applicable [1](#notes) |
+| `PutBucketAnalyticsConfiguration` | ⛔ Not applicable [2](#notes) |
+| `PutBucketIntelligentTieringConfiguration` | ⛔ Not applicable [8](#notes) |
+| `PutBucketInventoryConfiguration` | ⛔ Not applicable [4](#notes) |
+| `PutBucketMetricsConfiguration` | ⛔ Not applicable [2](#notes) |
+| `PutBucketReplication` | ⛔ Not applicable [6](#notes) |
+| `PutBucketRequestPayment` | ⛔ Not applicable [7](#notes) |
+| `PutObject` | ✅ Implemented |
+| `RestoreObject` | ⛔ Not applicable [8](#notes) |
+| `UploadPart` | ✅ Implemented |
+| `UploadPartCopy` | ✅ Implemented |
+| `WriteGetObjectResponse` | ⛔ Not applicable [5](#notes) |
+
+### Notes
+
+1. Transfer acceleration routes uploads over AWS edge locations, which an on-premise deployment has none of.
+2. Storage class analytics and CloudWatch request metrics are AWS-hosted reporting services with no equivalent here.
+3. Sessions authenticate S3 Express One Zone directory buckets, a storage class this platform does not offer.
+4. Inventory reports are an AWS-hosted scheduled export; a listing here is served live from the metadata store.
+5. S3 Object Lambda rewrites a response from a Lambda function, and Lambda is not offered.
+6. Replication copies objects to a bucket in another region, and a deployment is a single region with no peer.
+7. Requester Pays shifts transfer charges to the caller, which needs AWS billing behind it.
+8. Intelligent tiering, archive storage classes and the restores they need are AWS-hosted lifecycle services; objects here are held in one class on local media.

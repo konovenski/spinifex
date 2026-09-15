@@ -26,106 +26,106 @@ All IAM operations are account-scoped. The root user of an account bypasses poli
 
 ### Operations
 
-| Operation |
-|---|
-| `AddRoleToInstanceProfile` |
-| `AddUserToGroup` |
-| `AttachGroupPolicy` |
-| `AttachRolePolicy` |
-| `AttachUserPolicy` |
-| `CreateAccessKey` |
-| `CreateGroup` |
-| `CreateInstanceProfile` |
-| `CreateOpenIDConnectProvider` |
-| `CreatePolicy` |
-| `CreateRole` |
-| `CreateUser` |
-| `DeleteAccessKey` |
-| `DeleteGroup` |
-| `DeleteGroupPolicy` |
-| `DeleteInstanceProfile` |
-| `DeleteOpenIDConnectProvider` |
-| `DeletePolicy` |
-| `DeleteRole` |
-| `DeleteRolePolicy` |
-| `DeleteUser` |
-| `DeleteUserPolicy` |
-| `DetachGroupPolicy` |
-| `DetachRolePolicy` |
-| `DetachUserPolicy` |
-| `GetAccountSummary` |
-| `GetGroup` |
-| `GetGroupPolicy` |
-| `GetInstanceProfile` |
-| `GetOpenIDConnectProvider` |
-| `GetPolicy` |
-| `GetPolicyVersion` |
-| `GetRole` |
-| `GetRolePolicy` |
-| `GetUser` |
-| `GetUserPolicy` |
-| `ListAccessKeys` |
-| `ListAttachedGroupPolicies` |
-| `ListAttachedRolePolicies` |
-| `ListAttachedUserPolicies` |
-| `ListGroupPolicies` |
-| `ListGroups` |
-| `ListGroupsForUser` |
-| `ListInstanceProfileTags` |
-| `ListInstanceProfiles` |
-| `ListInstanceProfilesForRole` |
-| `ListOpenIDConnectProviderTags` |
-| `ListOpenIDConnectProviders` |
-| `ListPolicies` |
-| `ListPolicyTags` |
-| `ListPolicyVersions` |
-| `ListRolePolicies` |
-| `ListRoleTags` |
-| `ListRoles` |
-| `ListUserPolicies` |
-| `ListUserTags` |
-| `ListUsers` |
-| `PutGroupPolicy` |
-| `PutRolePolicy` |
-| `PutUserPolicy` |
-| `RemoveRoleFromInstanceProfile` |
-| `RemoveUserFromGroup` |
-| `TagInstanceProfile` |
-| `TagOpenIDConnectProvider` |
-| `TagPolicy` |
-| `TagRole` |
-| `TagUser` |
-| `UntagInstanceProfile` |
-| `UntagOpenIDConnectProvider` |
-| `UntagPolicy` |
-| `UntagRole` |
-| `UntagUser` |
-| `UpdateAccessKey` |
-| `UpdateAssumeRolePolicy` |
-| `UpdateRole` |
-
-### Not applicable
-
-These operations describe AWS-hosted features this platform does not offer.
-
-| Operation | Reason |
+| Operation | Status |
 |---|---|
-| `CreateServiceLinkedRole` | Service-linked roles exist for AWS service principals, which this platform has none of. |
-| `CreateServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `DeleteSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `DeleteServiceLinkedRole` | Service-linked roles exist for AWS service principals, which this platform has none of. |
-| `DeleteServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `DeleteSigningCertificate` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |
-| `GenerateOrganizationsAccessReport` | AWS Organizations is not offered, so there is no organization to report on. |
-| `GetOrganizationsAccessReport` | AWS Organizations is not offered, so there is no organization to report on. |
-| `GetSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `GetServiceLinkedRoleDeletionStatus` | Service-linked roles exist for AWS service principals, which this platform has none of. |
-| `ListSSHPublicKeys` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `ListServiceSpecificCredentials` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `ListSigningCertificates` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |
-| `ResetServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `UpdateSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `UpdateServiceSpecificCredential` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `UpdateSigningCertificate` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |
-| `UploadSSHPublicKey` | CodeCommit credentials and SSH keys; the service does not exist here. |
-| `UploadSigningCertificate` | X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS. |
+| `AddRoleToInstanceProfile` | ✅ Implemented |
+| `AddUserToGroup` | ✅ Implemented |
+| `AttachGroupPolicy` | ✅ Implemented |
+| `AttachRolePolicy` | ✅ Implemented |
+| `AttachUserPolicy` | ✅ Implemented |
+| `CreateAccessKey` | ✅ Implemented |
+| `CreateGroup` | ✅ Implemented |
+| `CreateInstanceProfile` | ✅ Implemented |
+| `CreateOpenIDConnectProvider` | ✅ Implemented |
+| `CreatePolicy` | ✅ Implemented |
+| `CreateRole` | ✅ Implemented |
+| `CreateServiceLinkedRole` | ⛔ Not applicable [3](#notes) |
+| `CreateServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
+| `CreateUser` | ✅ Implemented |
+| `DeleteAccessKey` | ✅ Implemented |
+| `DeleteGroup` | ✅ Implemented |
+| `DeleteGroupPolicy` | ✅ Implemented |
+| `DeleteInstanceProfile` | ✅ Implemented |
+| `DeleteOpenIDConnectProvider` | ✅ Implemented |
+| `DeletePolicy` | ✅ Implemented |
+| `DeleteRole` | ✅ Implemented |
+| `DeleteRolePolicy` | ✅ Implemented |
+| `DeleteSSHPublicKey` | ⛔ Not applicable [1](#notes) |
+| `DeleteServiceLinkedRole` | ⛔ Not applicable [3](#notes) |
+| `DeleteServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
+| `DeleteSigningCertificate` | ⛔ Not applicable [4](#notes) |
+| `DeleteUser` | ✅ Implemented |
+| `DeleteUserPolicy` | ✅ Implemented |
+| `DetachGroupPolicy` | ✅ Implemented |
+| `DetachRolePolicy` | ✅ Implemented |
+| `DetachUserPolicy` | ✅ Implemented |
+| `GenerateOrganizationsAccessReport` | ⛔ Not applicable [2](#notes) |
+| `GetAccountSummary` | ✅ Implemented |
+| `GetGroup` | ✅ Implemented |
+| `GetGroupPolicy` | ✅ Implemented |
+| `GetInstanceProfile` | ✅ Implemented |
+| `GetOpenIDConnectProvider` | ✅ Implemented |
+| `GetOrganizationsAccessReport` | ⛔ Not applicable [2](#notes) |
+| `GetPolicy` | ✅ Implemented |
+| `GetPolicyVersion` | ✅ Implemented |
+| `GetRole` | ✅ Implemented |
+| `GetRolePolicy` | ✅ Implemented |
+| `GetSSHPublicKey` | ⛔ Not applicable [1](#notes) |
+| `GetServiceLinkedRoleDeletionStatus` | ⛔ Not applicable [3](#notes) |
+| `GetUser` | ✅ Implemented |
+| `GetUserPolicy` | ✅ Implemented |
+| `ListAccessKeys` | ✅ Implemented |
+| `ListAttachedGroupPolicies` | ✅ Implemented |
+| `ListAttachedRolePolicies` | ✅ Implemented |
+| `ListAttachedUserPolicies` | ✅ Implemented |
+| `ListGroupPolicies` | ✅ Implemented |
+| `ListGroups` | ✅ Implemented |
+| `ListGroupsForUser` | ✅ Implemented |
+| `ListInstanceProfileTags` | ✅ Implemented |
+| `ListInstanceProfiles` | ✅ Implemented |
+| `ListInstanceProfilesForRole` | ✅ Implemented |
+| `ListOpenIDConnectProviderTags` | ✅ Implemented |
+| `ListOpenIDConnectProviders` | ✅ Implemented |
+| `ListPolicies` | ✅ Implemented |
+| `ListPolicyTags` | ✅ Implemented |
+| `ListPolicyVersions` | ✅ Implemented |
+| `ListRolePolicies` | ✅ Implemented |
+| `ListRoleTags` | ✅ Implemented |
+| `ListRoles` | ✅ Implemented |
+| `ListSSHPublicKeys` | ⛔ Not applicable [1](#notes) |
+| `ListServiceSpecificCredentials` | ⛔ Not applicable [1](#notes) |
+| `ListSigningCertificates` | ⛔ Not applicable [4](#notes) |
+| `ListUserPolicies` | ✅ Implemented |
+| `ListUserTags` | ✅ Implemented |
+| `ListUsers` | ✅ Implemented |
+| `PutGroupPolicy` | ✅ Implemented |
+| `PutRolePolicy` | ✅ Implemented |
+| `PutUserPolicy` | ✅ Implemented |
+| `RemoveRoleFromInstanceProfile` | ✅ Implemented |
+| `RemoveUserFromGroup` | ✅ Implemented |
+| `ResetServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
+| `TagInstanceProfile` | ✅ Implemented |
+| `TagOpenIDConnectProvider` | ✅ Implemented |
+| `TagPolicy` | ✅ Implemented |
+| `TagRole` | ✅ Implemented |
+| `TagUser` | ✅ Implemented |
+| `UntagInstanceProfile` | ✅ Implemented |
+| `UntagOpenIDConnectProvider` | ✅ Implemented |
+| `UntagPolicy` | ✅ Implemented |
+| `UntagRole` | ✅ Implemented |
+| `UntagUser` | ✅ Implemented |
+| `UpdateAccessKey` | ✅ Implemented |
+| `UpdateAssumeRolePolicy` | ✅ Implemented |
+| `UpdateRole` | ✅ Implemented |
+| `UpdateSSHPublicKey` | ⛔ Not applicable [1](#notes) |
+| `UpdateServiceSpecificCredential` | ⛔ Not applicable [1](#notes) |
+| `UpdateSigningCertificate` | ⛔ Not applicable [4](#notes) |
+| `UploadSSHPublicKey` | ⛔ Not applicable [1](#notes) |
+| `UploadSigningCertificate` | ⛔ Not applicable [4](#notes) |
+
+### Notes
+
+1. CodeCommit credentials and SSH keys; the service does not exist here.
+2. AWS Organizations is not offered, so there is no organization to report on.
+3. Service-linked roles exist for AWS service principals, which this platform has none of.
+4. X.509 signing certificates are an EC2-Classic SOAP credential, retired by AWS.

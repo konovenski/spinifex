@@ -35,11 +35,13 @@ Registry replication is a stub for the same kind of reason: a deployment is a si
 | `BatchCheckLayerAvailability` | 🟡 Stub |
 | `BatchDeleteImage` | ✅ Implemented |
 | `BatchGetImage` | ✅ Implemented |
+| `BatchGetRepositoryScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `CompleteLayerUpload` | 🟡 Stub |
 | `CreateRepository` | ✅ Implemented |
 | `DeleteLifecyclePolicy` | ✅ Implemented |
 | `DeleteRepository` | ✅ Implemented |
 | `DeleteRepositoryPolicy` | ✅ Implemented |
+| `DescribeImageScanFindings` | ⛔ Not applicable [1](#notes) |
 | `DescribeImages` | ✅ Implemented |
 | `DescribeRegistry` | 🟡 Stub |
 | `DescribeRepositories` | ✅ Implemented |
@@ -48,16 +50,20 @@ Registry replication is a stub for the same kind of reason: a deployment is a si
 | `GetLifecyclePolicy` | ✅ Implemented |
 | `GetLifecyclePolicyPreview` | ✅ Implemented |
 | `GetRegistryPolicy` | 🟡 Stub |
+| `GetRegistryScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `GetRepositoryPolicy` | ✅ Implemented |
 | `InitiateLayerUpload` | 🟡 Stub |
 | `ListImages` | ✅ Implemented |
 | `ListTagsForResource` | ✅ Implemented |
 | `PutImage` | ✅ Implemented |
+| `PutImageScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `PutImageTagMutability` | ✅ Implemented |
 | `PutLifecyclePolicy` | ✅ Implemented |
 | `PutRegistryPolicy` | 🟡 Stub |
+| `PutRegistryScanningConfiguration` | ⛔ Not applicable [1](#notes) |
 | `PutReplicationConfiguration` | 🟡 Stub |
 | `SetRepositoryPolicy` | ✅ Implemented |
+| `StartImageScan` | ⛔ Not applicable [1](#notes) |
 | `StartLifecyclePolicyPreview` | ✅ Implemented |
 | `TagResource` | 🟡 Stub |
 | `UntagResource` | 🟡 Stub |
@@ -66,15 +72,6 @@ Registry replication is a stub for the same kind of reason: a deployment is a si
 | `ListRepositories` | 🔒 Outside the pinned model |
 | `ReplicateImage` | 🔒 Outside the pinned model |
 
-### Not applicable
+### Notes
 
-These operations describe AWS-hosted features this platform does not offer.
-
-| Operation | Reason |
-|---|---|
-| `BatchGetRepositoryScanningConfiguration` | Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty. |
-| `DescribeImageScanFindings` | Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty. |
-| `GetRegistryScanningConfiguration` | Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty. |
-| `PutImageScanningConfiguration` | Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty. |
-| `PutRegistryScanningConfiguration` | Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty. |
-| `StartImageScan` | Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty. |
+1. Image scanning is an AWS-hosted vulnerability service with no equivalent here, so a finding set would always be empty.

@@ -26,138 +26,135 @@ Spot Instance Requests are a mock over the on-demand `RunInstances` path. A requ
 
 ### Operations
 
-| Operation |
-|---|
-| `AllocateAddress` |
-| `AssociateAddress` |
-| `AssociateIamInstanceProfile` |
-| `AssociateRouteTable` |
-| `AttachInternetGateway` |
-| `AttachNetworkInterface` |
-| `AttachVolume` |
-| `AuthorizeSecurityGroupEgress` |
-| `AuthorizeSecurityGroupIngress` |
-| `CancelCapacityReservation` |
-| `CancelSpotInstanceRequests` |
-| `CopyImage` |
-| `CopySnapshot` |
-| `CreateCapacityReservation` |
-| `CreateEgressOnlyInternetGateway` |
-| `CreateImage` |
-| `CreateInternetGateway` |
-| `CreateKeyPair` |
-| `CreateLaunchTemplate` |
-| `CreateLaunchTemplateVersion` |
-| `CreateNatGateway` |
-| `CreateNetworkInterface` |
-| `CreatePlacementGroup` |
-| `CreateRoute` |
-| `CreateRouteTable` |
-| `CreateSecurityGroup` |
-| `CreateSnapshot` |
-| `CreateSubnet` |
-| `CreateTags` |
-| `CreateVolume` |
-| `CreateVpc` |
-| `DeleteEgressOnlyInternetGateway` |
-| `DeleteInternetGateway` |
-| `DeleteKeyPair` |
-| `DeleteLaunchTemplate` |
-| `DeleteLaunchTemplateVersions` |
-| `DeleteNatGateway` |
-| `DeleteNetworkInterface` |
-| `DeletePlacementGroup` |
-| `DeleteRoute` |
-| `DeleteRouteTable` |
-| `DeleteSecurityGroup` |
-| `DeleteSnapshot` |
-| `DeleteSubnet` |
-| `DeleteTags` |
-| `DeleteVolume` |
-| `DeleteVpc` |
-| `DeregisterImage` |
-| `DescribeAccountAttributes` |
-| `DescribeAddresses` |
-| `DescribeAddressesAttribute` |
-| `DescribeAvailabilityZones` |
-| `DescribeCapacityReservations` |
-| `DescribeEgressOnlyInternetGateways` |
-| `DescribeIamInstanceProfileAssociations` |
-| `DescribeImageAttribute` |
-| `DescribeImages` |
-| `DescribeInstanceAttribute` |
-| `DescribeInstanceCreditSpecifications` |
-| `DescribeInstanceStatus` |
-| `DescribeInstanceTypeOfferings` |
-| `DescribeInstanceTypes` |
-| `DescribeInstances` |
-| `DescribeInternetGateways` |
-| `DescribeKeyPairs` |
-| `DescribeLaunchTemplateVersions` |
-| `DescribeLaunchTemplates` |
-| `DescribeNatGateways` |
-| `DescribeNetworkInterfaces` |
-| `DescribePlacementGroups` |
-| `DescribeRegions` |
-| `DescribeRouteTables` |
-| `DescribeSecurityGroupRules` |
-| `DescribeSecurityGroups` |
-| `DescribeSnapshots` |
-| `DescribeSpotInstanceRequests` |
-| `DescribeSubnets` |
-| `DescribeTags` |
-| `DescribeVolumeStatus` |
-| `DescribeVolumes` |
-| `DescribeVolumesModifications` |
-| `DescribeVpcAttribute` |
-| `DescribeVpcs` |
-| `DetachInternetGateway` |
-| `DetachNetworkInterface` |
-| `DetachVolume` |
-| `DisableEbsEncryptionByDefault` |
-| `DisableSerialConsoleAccess` |
-| `DisassociateAddress` |
-| `DisassociateIamInstanceProfile` |
-| `DisassociateRouteTable` |
-| `EnableEbsEncryptionByDefault` |
-| `EnableSerialConsoleAccess` |
-| `GetConsoleOutput` |
-| `GetEbsEncryptionByDefault` |
-| `GetPasswordData` |
-| `GetSecurityGroupsForVpc` |
-| `GetSerialConsoleAccessStatus` |
-| `ImportKeyPair` |
-| `ModifyImageAttribute` |
-| `ModifyInstanceAttribute` |
-| `ModifyInstanceMetadataOptions` |
-| `ModifyLaunchTemplate` |
-| `ModifyNetworkInterfaceAttribute` |
-| `ModifySubnetAttribute` |
-| `ModifyVolume` |
-| `ModifyVpcAttribute` |
-| `MonitorInstances` |
-| `RebootInstances` |
-| `RegisterImage` |
-| `ReleaseAddress` |
-| `ReplaceIamInstanceProfileAssociation` |
-| `ReplaceRoute` |
-| `ReplaceRouteTableAssociation` |
-| `RequestSpotInstances` |
-| `ResetImageAttribute` |
-| `RevokeSecurityGroupEgress` |
-| `RevokeSecurityGroupIngress` |
-| `RunInstances` |
-| `StartInstances` |
-| `StopInstances` |
-| `TerminateInstances` |
-| `UnmonitorInstances` |
-| `UpdateSecurityGroupRuleDescriptionsEgress` |
-| `UpdateSecurityGroupRuleDescriptionsIngress` |
-
-### Not applicable
-
-These operations describe AWS-hosted features this platform does not offer.
-
-| Operation | Reason |
+| Operation | Status |
 |---|---|
-| `DescribeSpotPriceHistory` | On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented. |
+| `AllocateAddress` | ✅ Implemented |
+| `AssociateAddress` | ✅ Implemented |
+| `AssociateIamInstanceProfile` | ✅ Implemented |
+| `AssociateRouteTable` | ✅ Implemented |
+| `AttachInternetGateway` | ✅ Implemented |
+| `AttachNetworkInterface` | ✅ Implemented |
+| `AttachVolume` | ✅ Implemented |
+| `AuthorizeSecurityGroupEgress` | ✅ Implemented |
+| `AuthorizeSecurityGroupIngress` | ✅ Implemented |
+| `CancelCapacityReservation` | ✅ Implemented |
+| `CancelSpotInstanceRequests` | ✅ Implemented |
+| `CopyImage` | ✅ Implemented |
+| `CopySnapshot` | ✅ Implemented |
+| `CreateCapacityReservation` | ✅ Implemented |
+| `CreateEgressOnlyInternetGateway` | ✅ Implemented |
+| `CreateImage` | ✅ Implemented |
+| `CreateInternetGateway` | ✅ Implemented |
+| `CreateKeyPair` | ✅ Implemented |
+| `CreateLaunchTemplate` | ✅ Implemented |
+| `CreateLaunchTemplateVersion` | ✅ Implemented |
+| `CreateNatGateway` | ✅ Implemented |
+| `CreateNetworkInterface` | ✅ Implemented |
+| `CreatePlacementGroup` | ✅ Implemented |
+| `CreateRoute` | ✅ Implemented |
+| `CreateRouteTable` | ✅ Implemented |
+| `CreateSecurityGroup` | ✅ Implemented |
+| `CreateSnapshot` | ✅ Implemented |
+| `CreateSubnet` | ✅ Implemented |
+| `CreateTags` | ✅ Implemented |
+| `CreateVolume` | ✅ Implemented |
+| `CreateVpc` | ✅ Implemented |
+| `DeleteEgressOnlyInternetGateway` | ✅ Implemented |
+| `DeleteInternetGateway` | ✅ Implemented |
+| `DeleteKeyPair` | ✅ Implemented |
+| `DeleteLaunchTemplate` | ✅ Implemented |
+| `DeleteLaunchTemplateVersions` | ✅ Implemented |
+| `DeleteNatGateway` | ✅ Implemented |
+| `DeleteNetworkInterface` | ✅ Implemented |
+| `DeletePlacementGroup` | ✅ Implemented |
+| `DeleteRoute` | ✅ Implemented |
+| `DeleteRouteTable` | ✅ Implemented |
+| `DeleteSecurityGroup` | ✅ Implemented |
+| `DeleteSnapshot` | ✅ Implemented |
+| `DeleteSubnet` | ✅ Implemented |
+| `DeleteTags` | ✅ Implemented |
+| `DeleteVolume` | ✅ Implemented |
+| `DeleteVpc` | ✅ Implemented |
+| `DeregisterImage` | ✅ Implemented |
+| `DescribeAccountAttributes` | ✅ Implemented |
+| `DescribeAddresses` | ✅ Implemented |
+| `DescribeAddressesAttribute` | ✅ Implemented |
+| `DescribeAvailabilityZones` | ✅ Implemented |
+| `DescribeCapacityReservations` | ✅ Implemented |
+| `DescribeEgressOnlyInternetGateways` | ✅ Implemented |
+| `DescribeIamInstanceProfileAssociations` | ✅ Implemented |
+| `DescribeImageAttribute` | ✅ Implemented |
+| `DescribeImages` | ✅ Implemented |
+| `DescribeInstanceAttribute` | ✅ Implemented |
+| `DescribeInstanceCreditSpecifications` | ✅ Implemented |
+| `DescribeInstanceStatus` | ✅ Implemented |
+| `DescribeInstanceTypeOfferings` | ✅ Implemented |
+| `DescribeInstanceTypes` | ✅ Implemented |
+| `DescribeInstances` | ✅ Implemented |
+| `DescribeInternetGateways` | ✅ Implemented |
+| `DescribeKeyPairs` | ✅ Implemented |
+| `DescribeLaunchTemplateVersions` | ✅ Implemented |
+| `DescribeLaunchTemplates` | ✅ Implemented |
+| `DescribeNatGateways` | ✅ Implemented |
+| `DescribeNetworkInterfaces` | ✅ Implemented |
+| `DescribePlacementGroups` | ✅ Implemented |
+| `DescribeRegions` | ✅ Implemented |
+| `DescribeRouteTables` | ✅ Implemented |
+| `DescribeSecurityGroupRules` | ✅ Implemented |
+| `DescribeSecurityGroups` | ✅ Implemented |
+| `DescribeSnapshots` | ✅ Implemented |
+| `DescribeSpotInstanceRequests` | ✅ Implemented |
+| `DescribeSpotPriceHistory` | ⛔ Not applicable [1](#notes) |
+| `DescribeSubnets` | ✅ Implemented |
+| `DescribeTags` | ✅ Implemented |
+| `DescribeVolumeStatus` | ✅ Implemented |
+| `DescribeVolumes` | ✅ Implemented |
+| `DescribeVolumesModifications` | ✅ Implemented |
+| `DescribeVpcAttribute` | ✅ Implemented |
+| `DescribeVpcs` | ✅ Implemented |
+| `DetachInternetGateway` | ✅ Implemented |
+| `DetachNetworkInterface` | ✅ Implemented |
+| `DetachVolume` | ✅ Implemented |
+| `DisableEbsEncryptionByDefault` | ✅ Implemented |
+| `DisableSerialConsoleAccess` | ✅ Implemented |
+| `DisassociateAddress` | ✅ Implemented |
+| `DisassociateIamInstanceProfile` | ✅ Implemented |
+| `DisassociateRouteTable` | ✅ Implemented |
+| `EnableEbsEncryptionByDefault` | ✅ Implemented |
+| `EnableSerialConsoleAccess` | ✅ Implemented |
+| `GetConsoleOutput` | ✅ Implemented |
+| `GetEbsEncryptionByDefault` | ✅ Implemented |
+| `GetPasswordData` | ✅ Implemented |
+| `GetSecurityGroupsForVpc` | ✅ Implemented |
+| `GetSerialConsoleAccessStatus` | ✅ Implemented |
+| `ImportKeyPair` | ✅ Implemented |
+| `ModifyImageAttribute` | ✅ Implemented |
+| `ModifyInstanceAttribute` | ✅ Implemented |
+| `ModifyInstanceMetadataOptions` | ✅ Implemented |
+| `ModifyLaunchTemplate` | ✅ Implemented |
+| `ModifyNetworkInterfaceAttribute` | ✅ Implemented |
+| `ModifySubnetAttribute` | ✅ Implemented |
+| `ModifyVolume` | ✅ Implemented |
+| `ModifyVpcAttribute` | ✅ Implemented |
+| `MonitorInstances` | ✅ Implemented |
+| `RebootInstances` | ✅ Implemented |
+| `RegisterImage` | ✅ Implemented |
+| `ReleaseAddress` | ✅ Implemented |
+| `ReplaceIamInstanceProfileAssociation` | ✅ Implemented |
+| `ReplaceRoute` | ✅ Implemented |
+| `ReplaceRouteTableAssociation` | ✅ Implemented |
+| `RequestSpotInstances` | ✅ Implemented |
+| `ResetImageAttribute` | ✅ Implemented |
+| `RevokeSecurityGroupEgress` | ✅ Implemented |
+| `RevokeSecurityGroupIngress` | ✅ Implemented |
+| `RunInstances` | ✅ Implemented |
+| `StartInstances` | ✅ Implemented |
+| `StopInstances` | ✅ Implemented |
+| `TerminateInstances` | ✅ Implemented |
+| `UnmonitorInstances` | ✅ Implemented |
+| `UpdateSecurityGroupRuleDescriptionsEgress` | ✅ Implemented |
+| `UpdateSecurityGroupRuleDescriptionsIngress` | ✅ Implemented |
+
+### Notes
+
+1. On owned hardware there is no spot-to-on-demand price differential, so any figure would be invented.

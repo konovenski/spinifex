@@ -70,50 +70,50 @@ A parameter whose omission would create a false safety, security or availability
 
 ### Operations
 
-| Operation |
-|---|
-| `AddTagsToResource` |
-| `CreateDBInstance` |
-| `CreateDBParameterGroup` |
-| `CreateDBSnapshot` |
-| `CreateDBSubnetGroup` |
-| `DeleteDBInstance` |
-| `DeleteDBParameterGroup` |
-| `DeleteDBSnapshot` |
-| `DeleteDBSubnetGroup` |
-| `DescribeDBEngineVersions` |
-| `DescribeDBInstanceAutomatedBackups` |
-| `DescribeDBInstances` |
-| `DescribeDBParameterGroups` |
-| `DescribeDBParameters` |
-| `DescribeDBSnapshots` |
-| `DescribeDBSubnetGroups` |
-| `DescribeEvents` |
-| `DescribeOrderableDBInstanceOptions` |
-| `ListTagsForResource` |
-| `ModifyDBInstance` |
-| `ModifyDBParameterGroup` |
-| `RebootDBInstance` |
-| `RemoveTagsFromResource` |
-| `RestoreDBInstanceFromDBSnapshot` |
-| `StartDBInstance` |
-| `StopDBInstance` |
-
-### Not applicable
-
-These operations describe AWS-hosted features this platform does not offer.
-
-| Operation | Reason |
+| Operation | Status |
 |---|---|
-| `CreateDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
-| `CreateDBInstanceReadReplica` | Replication between instances is not offered, so there is no replica to create or promote. |
-| `CreateOptionGroup` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
-| `DeleteDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
-| `DeleteOptionGroup` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
-| `DescribeDBClusters` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
-| `DescribeOptionGroups` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
-| `FailoverDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
-| `ModifyDBCluster` | Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly. |
-| `ModifyOptionGroup` | Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server. |
-| `PromoteReadReplica` | Replication between instances is not offered, so there is no replica to create or promote. |
-| `RestoreDBInstanceToPointInTime` | Point-in-time restore needs continuous transaction-log archival, which the backup path does not keep. |
+| `AddTagsToResource` | ✅ Implemented |
+| `CreateDBCluster` | ⛔ Not applicable [1](#notes) |
+| `CreateDBInstance` | ✅ Implemented |
+| `CreateDBInstanceReadReplica` | ⛔ Not applicable [4](#notes) |
+| `CreateDBParameterGroup` | ✅ Implemented |
+| `CreateDBSnapshot` | ✅ Implemented |
+| `CreateDBSubnetGroup` | ✅ Implemented |
+| `CreateOptionGroup` | ⛔ Not applicable [2](#notes) |
+| `DeleteDBCluster` | ⛔ Not applicable [1](#notes) |
+| `DeleteDBInstance` | ✅ Implemented |
+| `DeleteDBParameterGroup` | ✅ Implemented |
+| `DeleteDBSnapshot` | ✅ Implemented |
+| `DeleteDBSubnetGroup` | ✅ Implemented |
+| `DeleteOptionGroup` | ⛔ Not applicable [2](#notes) |
+| `DescribeDBClusters` | ⛔ Not applicable [1](#notes) |
+| `DescribeDBEngineVersions` | ✅ Implemented |
+| `DescribeDBInstanceAutomatedBackups` | ✅ Implemented |
+| `DescribeDBInstances` | ✅ Implemented |
+| `DescribeDBParameterGroups` | ✅ Implemented |
+| `DescribeDBParameters` | ✅ Implemented |
+| `DescribeDBSnapshots` | ✅ Implemented |
+| `DescribeDBSubnetGroups` | ✅ Implemented |
+| `DescribeEvents` | ✅ Implemented |
+| `DescribeOptionGroups` | ⛔ Not applicable [2](#notes) |
+| `DescribeOrderableDBInstanceOptions` | ✅ Implemented |
+| `FailoverDBCluster` | ⛔ Not applicable [1](#notes) |
+| `ListTagsForResource` | ✅ Implemented |
+| `ModifyDBCluster` | ⛔ Not applicable [1](#notes) |
+| `ModifyDBInstance` | ✅ Implemented |
+| `ModifyDBParameterGroup` | ✅ Implemented |
+| `ModifyOptionGroup` | ⛔ Not applicable [2](#notes) |
+| `PromoteReadReplica` | ⛔ Not applicable [4](#notes) |
+| `RebootDBInstance` | ✅ Implemented |
+| `RemoveTagsFromResource` | ✅ Implemented |
+| `RestoreDBInstanceFromDBSnapshot` | ✅ Implemented |
+| `RestoreDBInstanceToPointInTime` | ⛔ Not applicable [3](#notes) |
+| `StartDBInstance` | ✅ Implemented |
+| `StopDBInstance` | ✅ Implemented |
+
+### Notes
+
+1. Aurora and Multi-AZ clusters are not offered; a DB instance here is a single VM running the engine directly.
+2. Option groups configure engine add-ons for engines this platform does not offer, such as Oracle and SQL Server.
+3. Point-in-time restore needs continuous transaction-log archival, which the backup path does not keep.
+4. Replication between instances is not offered, so there is no replica to create or promote.
