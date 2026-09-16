@@ -22,10 +22,10 @@ require (
 	github.com/klauspost/cpuid/v2 v2.4.0
 	github.com/miekg/dns v1.1.73
 	github.com/minio/highwayhash v1.0.4
-	github.com/mulgadc/bluebottle v1.19.0
-	github.com/mulgadc/northstar v1.19.0
-	github.com/mulgadc/predastore v1.19.1-0.20260915004636-9bf67c7cea70
-	github.com/mulgadc/viperblock v1.19.0
+	github.com/mulgadc/bluebottle v1.20.0
+	github.com/mulgadc/northstar v1.20.0
+	github.com/mulgadc/predastore v1.20.0
+	github.com/mulgadc/viperblock v1.20.0
 	github.com/nats-io/nats-server/v2 v2.14.6
 	github.com/nats-io/nats.go v1.53.1
 	github.com/opencontainers/runtime-spec v1.3.0
@@ -64,10 +64,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.19 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.110.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.113.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.10.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.38.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.43.0 // indirect
