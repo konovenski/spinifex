@@ -57,7 +57,7 @@ func TestLookupEKSAction_ResolvesKnownRoutes(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.method+"_"+tc.path, func(t *testing.T) {
-			action, params, handler, ok := lookupEKSAction(tc.method, tc.path)
+			action, params, handler, ok := eksRouter.lookup(tc.method, tc.path)
 			require.True(t, ok, "expected route to match for %s %s", tc.method, tc.path)
 			require.NotNil(t, handler)
 			assert.Equal(t, tc.wantAction, action)
@@ -66,7 +66,7 @@ func TestLookupEKSAction_ResolvesKnownRoutes(t *testing.T) {
 	}
 }
 
-// IAM principal ARNs are percent-encoded in the request path; lookupEKSAction is
+// IAM principal ARNs are percent-encoded in the request path; eksRouter.lookup is
 // fed EscapedPath() so %2F stays a single segment and is unescaped before the handler.
 func TestLookupEKSAction_EncodedPrincipalARN(t *testing.T) {
 	const (
@@ -85,7 +85,7 @@ func TestLookupEKSAction_EncodedPrincipalARN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.method+"_"+tc.wantAction, func(t *testing.T) {
-			action, params, handler, ok := lookupEKSAction(tc.method, tc.path)
+			action, params, handler, ok := eksRouter.lookup(tc.method, tc.path)
 			require.True(t, ok, "encoded ARN path should match: %s %s", tc.method, tc.path)
 			require.NotNil(t, handler)
 			assert.Equal(t, tc.wantAction, action)
@@ -105,7 +105,7 @@ func TestLookupEKSAction_DisassociateEncodedARNs(t *testing.T) {
 		policyEscaped    = "arn%3Aaws%3Aeks%3A%3Aaws%3Acluster-access-policy%2FAmazonEKSViewPolicy"
 	)
 	path := "/clusters/alpha/access-entries/" + principalEscaped + "/access-policies/" + policyEscaped
-	action, params, handler, ok := lookupEKSAction("DELETE", path)
+	action, params, handler, ok := eksRouter.lookup("DELETE", path)
 	require.True(t, ok, "encoded disassociate path should match: %s", path)
 	require.NotNil(t, handler)
 	assert.Equal(t, "DisassociateAccessPolicy", action)
@@ -166,10 +166,10 @@ func TestLookupEKSAction_CoversAllActions(t *testing.T) {
 }
 
 func TestLookupEKSAction_UnknownReturnsFalse(t *testing.T) {
-	_, _, _, ok := lookupEKSAction("PATCH", "/clusters/alpha")
+	_, _, _, ok := eksRouter.lookup("PATCH", "/clusters/alpha")
 	assert.False(t, ok)
 
-	_, _, _, ok = lookupEKSAction("GET", "/clusters/alpha/wat")
+	_, _, _, ok = eksRouter.lookup("GET", "/clusters/alpha/wat")
 	assert.False(t, ok)
 }
 

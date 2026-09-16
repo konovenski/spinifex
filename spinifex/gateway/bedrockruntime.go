@@ -6,8 +6,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"net/url"
-	"regexp"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/bedrockruntime"
@@ -22,16 +20,11 @@ const (
 	bedrockGuardrailVersionHeader    = "X-Amzn-Bedrock-Guardrailversion"
 )
 
-// bedrockRuntimeRoute maps one HTTP method + path regex to an AWS action and handler.
-type bedrockRuntimeRoute struct {
-	method  string
-	pattern *regexp.Regexp
-	action  string
-	handler bedrockRuntimeRouteHandler
-}
+// bedrockRuntimeRoute maps one HTTP method + chi path pattern to an AWS action and handler.
+type bedrockRuntimeRoute = restRoute[bedrockRuntimeRouteHandler]
 
 // bedrockRuntimeRouteHandler invokes a per-action bedrock-runtime (data-plane)
-// gateway function. params holds the regex capture groups, PathUnescape'd.
+// gateway function. params holds the path params, PathUnescape'd.
 // resolver is gw.bedrockResolver() (credential store or no-op); endpoints is
 // gw.bedrockEndpointResolver() over the configured pinned self-host
 // endpoints; recorder is gw.bedrockRecorder() (invocation recorder or no-op);
@@ -45,7 +38,7 @@ type bedrockRuntimeRouteHandler func(ctx context.Context, accountID string, para
 // function here: BedrockRuntime_Request special-cases its action to bypass
 // the JSON-marshaling dispatch below, since its response is raw bytes.
 var bedrockRuntimeRoutes = []bedrockRuntimeRoute{
-	{"POST", regexp.MustCompile(`^/model/([^/]+)/converse$`), "Converse",
+	{"POST", "/model/{modelId}/converse", "Converse",
 		func(ctx context.Context, acct string, p []string, b []byte, resolver gateway_bedrock.CredentialResolver, endpoints gateway_bedrock.EndpointResolver, recorder gateway_bedrock.Recorder, access gateway_bedrock.AccessResolver, provisioned *gateway_bedrock.ProvisionedStore, guardrails *gateway_bedrock.GuardrailStore, embedder gateway_bedrock.Embedder) (any, error) {
 			input := new(bedrockruntime.ConverseInput)
 			if len(b) > 0 {
@@ -55,10 +48,10 @@ var bedrockRuntimeRoutes = []bedrockRuntimeRoute{
 			}
 			return gateway_bedrock.Converse(ctx, acct, p[0], input, resolver, endpoints, recorder, access, provisioned, guardrails, embedder)
 		}},
-	{"POST", regexp.MustCompile(`^/model/([^/]+)/invoke$`), "InvokeModel", nil},
-	{"POST", regexp.MustCompile(`^/model/([^/]+)/converse-stream$`), "ConverseStream", nil},
-	{"POST", regexp.MustCompile(`^/model/([^/]+)/invoke-with-response-stream$`), "InvokeModelWithResponseStream", nil},
-	{"POST", regexp.MustCompile(`^/guardrail/([^/]+)/version/([^/]+)/apply$`), "ApplyGuardrail",
+	{"POST", "/model/{modelId}/invoke", "InvokeModel", nil},
+	{"POST", "/model/{modelId}/converse-stream", "ConverseStream", nil},
+	{"POST", "/model/{modelId}/invoke-with-response-stream", "InvokeModelWithResponseStream", nil},
+	{"POST", "/guardrail/{guardrailIdentifier}/version/{guardrailVersion}/apply", "ApplyGuardrail",
 		func(ctx context.Context, acct string, p []string, b []byte, _ gateway_bedrock.CredentialResolver, _ gateway_bedrock.EndpointResolver, _ gateway_bedrock.Recorder, _ gateway_bedrock.AccessResolver, _ *gateway_bedrock.ProvisionedStore, guardrails *gateway_bedrock.GuardrailStore, embedder gateway_bedrock.Embedder) (any, error) {
 			input := new(bedrockruntime.ApplyGuardrailInput)
 			if len(b) > 0 {
@@ -72,41 +65,14 @@ var bedrockRuntimeRoutes = []bedrockRuntimeRoute{
 		}},
 }
 
-// lookupBedrockRuntimeAction matches method+path against bedrockRuntimeRoutes,
-// returning the action, path params, and handler, or ("", nil, nil, false) on
-// no match. path must be r.URL.EscapedPath(): captured params are
-// PathUnescape'd before returning, mirroring lookupEKSAction.
-func lookupBedrockRuntimeAction(method, path string) (string, []string, bedrockRuntimeRouteHandler, bool) {
-	for _, route := range bedrockRuntimeRoutes {
-		if route.method != method {
-			continue
-		}
-		m := route.pattern.FindStringSubmatch(path)
-		if m == nil {
-			continue
-		}
-		var params []string
-		if len(m) > 1 {
-			params = make([]string, 0, len(m)-1)
-			for _, raw := range m[1:] {
-				decoded, err := url.PathUnescape(raw)
-				if err != nil {
-					slog.Debug("bedrock-runtime: bad percent-encoding in path param", "param", raw, "err", err)
-					decoded = raw
-				}
-				params = append(params, decoded)
-			}
-		}
-		return route.action, params, route.handler, true
-	}
-	return "", nil, nil, false
-}
+// bedrockRuntimeRouter matches an escaped request path against bedrockRuntimeRoutes.
+var bedrockRuntimeRouter = newRESTRouter("bedrock-runtime", bedrockRuntimeRoutes)
 
 // BedrockRuntime_Request dispatches bedrock-runtime (data-plane) REST-JSON
 // requests: resolves method+path to an action, reads the body, calls the
 // handler, and serialises the output as JSON.
 func (gw *GatewayConfig) BedrockRuntime_Request(w http.ResponseWriter, r *http.Request) error {
-	action, params, handler, ok := lookupBedrockRuntimeAction(r.Method, r.URL.EscapedPath())
+	action, params, handler, ok := bedrockRuntimeRouter.lookup(r.Method, r.URL.EscapedPath())
 	if !ok {
 		slog.DebugContext(r.Context(), "bedrock-runtime: no route for request", "method", r.Method, "path", r.URL.Path)
 		return errors.New(awserrors.ErrorInvalidAction)

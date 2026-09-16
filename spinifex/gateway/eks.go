@@ -6,8 +6,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"net/url"
-	"regexp"
 	"slices"
 	"strings"
 
@@ -32,47 +30,42 @@ func jsonErrorType(code string) string {
 	return code + "Exception"
 }
 
-// eksRoute maps one HTTP method + path regex to an AWS action and handler.
-type eksRoute struct {
-	method  string
-	pattern *regexp.Regexp
-	action  string
-	handler eksRouteHandler
-}
+// eksRoute maps one HTTP method + chi path pattern to an AWS action and handler.
+type eksRoute = restRoute[eksRouteHandler]
 
 // eksRouteHandler invokes a per-action EKS gateway function. callerARN is used
 // by CreateCluster for the bootstrap-creator-admin AccessEntry; ignored by others.
 type eksRouteHandler func(ctx context.Context, gw *GatewayConfig, accountID, callerARN string, params []string, body []byte) (any, error)
 
-// eksRoutes is the dispatch table. More-specific paths must precede less-specific
-// ones with the same prefix so the regex matcher picks the deeper route first.
+// eksRoutes is the dispatch table. Order is presentational: the router matches
+// through a chi trie, which prefers a literal segment over a {param} one.
 var eksRoutes = []eksRoute{
 	// Cluster
-	{"POST", regexp.MustCompile(`^/clusters$`), "CreateCluster",
+	{"POST", "/clusters", "CreateCluster",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.CreateCluster(ctx, gw.NATSConn, acct, callerARN, b)
 		}},
-	{"GET", regexp.MustCompile(`^/clusters$`), "ListClusters",
+	{"GET", "/clusters", "ListClusters",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListClusters(ctx, gw.NATSConn, acct)
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/update-config$`), "UpdateClusterConfig",
+	{"POST", "/clusters/{clusterName}/update-config", "UpdateClusterConfig",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.UpdateClusterConfig(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/update-version$`), "UpdateClusterVersion",
+	{"POST", "/clusters/{clusterName}/update-version", "UpdateClusterVersion",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.UpdateClusterVersion(ctx, gw.NATSConn, acct, p[0], b)
 		}},
 	// Control-plane VM broker: relays bootstrap/state POSTs onto eks.bus.*/eks.state.* NATS subjects.
 	// acct and callerARN are ignored; cluster account comes from the body.
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/internal-publish$`), "PublishInternal",
+	{"POST", "/clusters/{clusterName}/internal-publish", "PublishInternal",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.PublishInternal(ctx, gw.NATSConn, p[0], b)
 		}},
 	// Token review broker: the eks-token-webhook POSTs bearer tokens here;
 	// the gateway resolves them host-side (STS verify + AccessEntry lookup).
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/token-review$`), "WebhookTokenReview",
+	{"POST", "/clusters/{clusterName}/token-review", "WebhookTokenReview",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.WebhookTokenReview(ctx, gw.NATSConn, p[0], b)
 		}},
@@ -82,7 +75,7 @@ var eksRoutes = []eksRoute{
 	// ignored — the cluster account is the {accountId} path segment, since a GET
 	// carries no body to hold it (cf. PublishInternal). AuthorizeInternal binds
 	// that segment to the caller's own cluster.
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/internal-addons/([^/]+)$`), "ListInternalAddons",
+	{"GET", "/clusters/{clusterName}/internal-addons/{accountId}", "ListInternalAddons",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListInternalAddons(ctx, gw.NATSConn, p[0], p[1])
 		}},
@@ -90,139 +83,139 @@ var eksRoutes = []eksRoute{
 	// Internal control-plane route: the on-VM k3s-recovery agent pulls its
 	// per-member recovery directive (cluster-reset / wipe-rejoin) at boot. Same
 	// system-cred carve-out as internal-addons; instance ID is the third segment.
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/internal-recovery/([^/]+)/([^/]+)$`), "GetRecoveryDirective",
+	{"GET", "/clusters/{clusterName}/internal-recovery/{accountId}/{instanceId}", "GetRecoveryDirective",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.GetRecoveryDirective(ctx, gw.NATSConn, p[0], p[1], p[2])
 		}},
 
 	// Nodegroup
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/node-groups$`), "CreateNodegroup",
+	{"POST", "/clusters/{clusterName}/node-groups", "CreateNodegroup",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.CreateNodegroup(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/node-groups$`), "ListNodegroups",
+	{"GET", "/clusters/{clusterName}/node-groups", "ListNodegroups",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListNodegroups(ctx, gw.NATSConn, acct, p[0])
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/node-groups/([^/]+)/update-config$`), "UpdateNodegroupConfig",
+	{"POST", "/clusters/{clusterName}/node-groups/{nodegroupName}/update-config", "UpdateNodegroupConfig",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.UpdateNodegroupConfig(ctx, gw.NATSConn, acct, p[0], p[1], b)
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/node-groups/([^/]+)/update-version$`), "UpdateNodegroupVersion",
+	{"POST", "/clusters/{clusterName}/node-groups/{nodegroupName}/update-version", "UpdateNodegroupVersion",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.UpdateNodegroupVersion(ctx, gw.NATSConn, acct, p[0], p[1], b)
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/node-groups/([^/]+)$`), "DescribeNodegroup",
+	{"GET", "/clusters/{clusterName}/node-groups/{nodegroupName}", "DescribeNodegroup",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DescribeNodegroup(ctx, gw.NATSConn, acct, p[0], p[1])
 		}},
-	{"DELETE", regexp.MustCompile(`^/clusters/([^/]+)/node-groups/([^/]+)$`), "DeleteNodegroup",
+	{"DELETE", "/clusters/{clusterName}/node-groups/{nodegroupName}", "DeleteNodegroup",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DeleteNodegroup(ctx, gw.NATSConn, acct, p[0], p[1])
 		}},
 
 	// AccessEntry / AccessPolicy
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/access-entries$`), "CreateAccessEntry",
+	{"POST", "/clusters/{clusterName}/access-entries", "CreateAccessEntry",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.CreateAccessEntry(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/access-entries$`), "ListAccessEntries",
+	{"GET", "/clusters/{clusterName}/access-entries", "ListAccessEntries",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListAccessEntries(ctx, gw.NATSConn, acct, p[0])
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/access-entries/([^/]+)/access-policies$`), "AssociateAccessPolicy",
+	{"POST", "/clusters/{clusterName}/access-entries/{principalArn}/access-policies", "AssociateAccessPolicy",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.AssociateAccessPolicy(ctx, gw.NATSConn, acct, p[0], p[1], b)
 		}},
-	{"DELETE", regexp.MustCompile(`^/clusters/([^/]+)/access-entries/([^/]+)/access-policies/([^/]+)$`), "DisassociateAccessPolicy",
+	{"DELETE", "/clusters/{clusterName}/access-entries/{principalArn}/access-policies/{policyArn}", "DisassociateAccessPolicy",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DisassociateAccessPolicy(ctx, gw.NATSConn, acct, p[0], p[1], p[2])
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/access-entries/([^/]+)/access-policies$`), "ListAssociatedAccessPolicies",
+	{"GET", "/clusters/{clusterName}/access-entries/{principalArn}/access-policies", "ListAssociatedAccessPolicies",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListAssociatedAccessPolicies(ctx, gw.NATSConn, acct, p[0], p[1])
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/access-entries/([^/]+)$`), "DescribeAccessEntry",
+	{"GET", "/clusters/{clusterName}/access-entries/{principalArn}", "DescribeAccessEntry",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DescribeAccessEntry(ctx, gw.NATSConn, acct, p[0], p[1])
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/access-entries/([^/]+)$`), "UpdateAccessEntry",
+	{"POST", "/clusters/{clusterName}/access-entries/{principalArn}", "UpdateAccessEntry",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.UpdateAccessEntry(ctx, gw.NATSConn, acct, p[0], p[1], b)
 		}},
-	{"DELETE", regexp.MustCompile(`^/clusters/([^/]+)/access-entries/([^/]+)$`), "DeleteAccessEntry",
+	{"DELETE", "/clusters/{clusterName}/access-entries/{principalArn}", "DeleteAccessEntry",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DeleteAccessEntry(ctx, gw.NATSConn, acct, p[0], p[1])
 		}},
-	{"GET", regexp.MustCompile(`^/access-policies$`), "ListAccessPolicies",
+	{"GET", "/access-policies", "ListAccessPolicies",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListAccessPolicies(ctx, gw.NATSConn, acct)
 		}},
 
 	// Addons
-	{"GET", regexp.MustCompile(`^/addons/supported-versions$`), "DescribeAddonVersions",
+	{"GET", "/addons/supported-versions", "DescribeAddonVersions",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DescribeAddonVersions(ctx, gw.NATSConn, acct)
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/addons$`), "ListAddons",
+	{"GET", "/clusters/{clusterName}/addons", "ListAddons",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListAddons(ctx, gw.NATSConn, acct, p[0])
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/addons$`), "CreateAddon",
+	{"POST", "/clusters/{clusterName}/addons", "CreateAddon",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.CreateAddon(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/addons/([^/]+)/update$`), "UpdateAddon",
+	{"POST", "/clusters/{clusterName}/addons/{addonName}/update", "UpdateAddon",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.UpdateAddon(ctx, gw.NATSConn, acct, p[0], p[1], b)
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/addons/([^/]+)$`), "DescribeAddon",
+	{"GET", "/clusters/{clusterName}/addons/{addonName}", "DescribeAddon",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DescribeAddon(ctx, gw.NATSConn, acct, p[0], p[1])
 		}},
-	{"DELETE", regexp.MustCompile(`^/clusters/([^/]+)/addons/([^/]+)$`), "DeleteAddon",
+	{"DELETE", "/clusters/{clusterName}/addons/{addonName}", "DeleteAddon",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DeleteAddon(ctx, gw.NATSConn, acct, p[0], p[1])
 		}},
 
 	// OIDC identity-provider configs
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/identity-provider-configs/associate$`), "AssociateIdentityProviderConfig",
+	{"POST", "/clusters/{clusterName}/identity-provider-configs/associate", "AssociateIdentityProviderConfig",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.AssociateIdentityProviderConfig(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/identity-provider-configs/describe$`), "DescribeIdentityProviderConfig",
+	{"POST", "/clusters/{clusterName}/identity-provider-configs/describe", "DescribeIdentityProviderConfig",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DescribeIdentityProviderConfig(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"POST", regexp.MustCompile(`^/clusters/([^/]+)/identity-provider-configs/disassociate$`), "DisassociateIdentityProviderConfig",
+	{"POST", "/clusters/{clusterName}/identity-provider-configs/disassociate", "DisassociateIdentityProviderConfig",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DisassociateIdentityProviderConfig(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)/identity-provider-configs$`), "ListIdentityProviderConfigs",
+	{"GET", "/clusters/{clusterName}/identity-provider-configs", "ListIdentityProviderConfigs",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListIdentityProviderConfigs(ctx, gw.NATSConn, acct, p[0])
 		}},
 
 	// Cluster CRUD — listed after more-specific /clusters/{name}/... routes.
-	{"GET", regexp.MustCompile(`^/clusters/([^/]+)$`), "DescribeCluster",
+	{"GET", "/clusters/{clusterName}", "DescribeCluster",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DescribeCluster(ctx, gw.NATSConn, acct, p[0])
 		}},
-	{"DELETE", regexp.MustCompile(`^/clusters/([^/]+)$`), "DeleteCluster",
+	{"DELETE", "/clusters/{clusterName}", "DeleteCluster",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.DeleteCluster(ctx, gw.NATSConn, acct, p[0])
 		}},
 
 	// Tags
-	{"POST", regexp.MustCompile(`^/tags/(.+)$`), "TagResource",
+	{"POST", "/tags/*", "TagResource",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.TagResource(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"DELETE", regexp.MustCompile(`^/tags/(.+)$`), "UntagResource",
+	{"DELETE", "/tags/*", "UntagResource",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.UntagResource(ctx, gw.NATSConn, acct, p[0], b)
 		}},
-	{"GET", regexp.MustCompile(`^/tags/(.+)$`), "ListTagsForResource",
+	{"GET", "/tags/*", "ListTagsForResource",
 		func(ctx context.Context, gw *GatewayConfig, acct, callerARN string, p []string, b []byte) (any, error) {
 			return gateway_eks.ListTagsForResource(ctx, gw.NATSConn, acct, p[0])
 		}},
@@ -239,41 +232,13 @@ func eksActionNames() []string {
 	return slices.Compact(names)
 }
 
-// lookupEKSAction matches method+path against eksRoutes, returning the action,
-// path params, and handler, or ("", nil, nil, false) on no match.
-// path must be r.URL.EscapedPath(): ARNs in path segments are percent-encoded
-// by the CLI (e.g. user%2Fadmin), and matching the decoded path would break
-// the [^/]+ capture. Captured params are PathUnescape'd before returning.
-func lookupEKSAction(method, path string) (string, []string, eksRouteHandler, bool) {
-	for _, route := range eksRoutes {
-		if route.method != method {
-			continue
-		}
-		m := route.pattern.FindStringSubmatch(path)
-		if m == nil {
-			continue
-		}
-		var params []string
-		if len(m) > 1 {
-			params = make([]string, 0, len(m)-1)
-			for _, raw := range m[1:] {
-				decoded, err := url.PathUnescape(raw)
-				if err != nil {
-					slog.Debug("EKS: bad percent-encoding in path param", "param", raw, "err", err)
-					decoded = raw
-				}
-				params = append(params, decoded)
-			}
-		}
-		return route.action, params, route.handler, true
-	}
-	return "", nil, nil, false
-}
+// eksRouter matches an escaped request path against eksRoutes.
+var eksRouter = newRESTRouter("eks", eksRoutes)
 
 // EKS_Request dispatches EKS REST-JSON requests: resolves method+path to an
 // action, reads the body, calls the handler, and serialises the output as JSON.
 func (gw *GatewayConfig) EKS_Request(w http.ResponseWriter, r *http.Request) error {
-	action, params, handler, ok := lookupEKSAction(r.Method, r.URL.EscapedPath())
+	action, params, handler, ok := eksRouter.lookup(r.Method, r.URL.EscapedPath())
 	if !ok {
 		slog.DebugContext(r.Context(), "EKS: no route for request", "method", r.Method, "path", r.URL.Path)
 		return errors.New(awserrors.ErrorInvalidAction)

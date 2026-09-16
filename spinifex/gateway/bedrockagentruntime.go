@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
-	"regexp"
 	"strings"
 	"uuid"
 
@@ -27,17 +25,12 @@ import (
 // resolves the same six dependencies once per request.
 type converseFn func(ctx context.Context, accountID, modelID string, input *bedrockruntime.ConverseInput) (*bedrockruntime.ConverseOutput, error)
 
-// bedrockAgentRuntimeRoute maps one HTTP method + path regex to an AWS action
-// and handler, mirroring bedrockAgentRoute.
-type bedrockAgentRuntimeRoute struct {
-	method  string
-	pattern *regexp.Regexp
-	action  string
-	handler bedrockAgentRuntimeRouteHandler
-}
+// bedrockAgentRuntimeRoute maps one HTTP method + chi path pattern to an AWS
+// action and handler, mirroring bedrockAgentRoute.
+type bedrockAgentRuntimeRoute = restRoute[bedrockAgentRuntimeRouteHandler]
 
 // bedrockAgentRuntimeRouteHandler invokes a per-action bedrock-agent-runtime
-// (data-plane) gateway function. params holds the regex capture groups,
+// (data-plane) gateway function. params holds the path params,
 // PathUnescape'd. body is the raw request bytes, needed alongside the typed
 // SDK input because RetrievalFilter's leaf operators must be recovered from
 // it directly (see wireFilter). kb/vector are gw.BedrockAgentKB/
@@ -50,7 +43,7 @@ type bedrockAgentRuntimeRouteHandler func(ctx context.Context, accountID string,
 // verified against the vendored aws-sdk-go bedrockagentruntime request
 // definitions (opRetrieve/opRetrieveAndGenerate).
 var bedrockAgentRuntimeRoutes = []bedrockAgentRuntimeRoute{
-	{"POST", regexp.MustCompile(`^/knowledgebases/([^/]+)/retrieve$`), "Retrieve",
+	{"POST", "/knowledgebases/{knowledgeBaseId}/retrieve", "Retrieve",
 		func(ctx context.Context, acct string, p []string, b []byte, kb *handlers_ochrevector.KBStore, vector handlers_ochrevector.VectorService, _ converseFn) (any, error) {
 			input := new(bedrockagentruntime.RetrieveInput)
 			if len(b) > 0 {
@@ -61,7 +54,7 @@ var bedrockAgentRuntimeRoutes = []bedrockAgentRuntimeRoute{
 			input.KnowledgeBaseId = aws.String(p[0])
 			return Retrieve(ctx, acct, kb, vector, b, input)
 		}},
-	{"POST", regexp.MustCompile(`^/retrieveAndGenerate$`), "RetrieveAndGenerate",
+	{"POST", "/retrieveAndGenerate", "RetrieveAndGenerate",
 		func(ctx context.Context, acct string, _ []string, b []byte, kb *handlers_ochrevector.KBStore, vector handlers_ochrevector.VectorService, converse converseFn) (any, error) {
 			input := new(bedrockagentruntime.RetrieveAndGenerateInput)
 			if len(b) > 0 {
@@ -73,33 +66,8 @@ var bedrockAgentRuntimeRoutes = []bedrockAgentRuntimeRoute{
 		}},
 }
 
-// lookupBedrockAgentRuntimeAction matches method+path against
-// bedrockAgentRuntimeRoutes, mirroring lookupBedrockAgentAction.
-func lookupBedrockAgentRuntimeAction(method, path string) (string, []string, bedrockAgentRuntimeRouteHandler, bool) {
-	for _, route := range bedrockAgentRuntimeRoutes {
-		if route.method != method {
-			continue
-		}
-		m := route.pattern.FindStringSubmatch(path)
-		if m == nil {
-			continue
-		}
-		var params []string
-		if len(m) > 1 {
-			params = make([]string, 0, len(m)-1)
-			for _, raw := range m[1:] {
-				decoded, err := url.PathUnescape(raw)
-				if err != nil {
-					slog.Debug("bedrock-agent-runtime: bad percent-encoding in path param", "param", raw, "err", err)
-					decoded = raw
-				}
-				params = append(params, decoded)
-			}
-		}
-		return route.action, params, route.handler, true
-	}
-	return "", nil, nil, false
-}
+// bedrockAgentRuntimeRouter matches an escaped request path against bedrockAgentRuntimeRoutes.
+var bedrockAgentRuntimeRouter = newRESTRouter("bedrock-agent-runtime", bedrockAgentRuntimeRoutes)
 
 // BedrockAgentRuntime_Request dispatches bedrock-agent-runtime (data-plane)
 // REST-JSON requests: resolves method+path to an action, reads the body,
@@ -108,7 +76,7 @@ func lookupBedrockAgentRuntimeAction(method, path string) (string, []string, bed
 // is on bedrock-runtime (it ends up calling gateway_bedrock.Converse
 // in-process); Retrieve never reaches a model, so it is not metered.
 func (gw *GatewayConfig) BedrockAgentRuntime_Request(w http.ResponseWriter, r *http.Request) error {
-	action, params, handler, ok := lookupBedrockAgentRuntimeAction(r.Method, r.URL.EscapedPath())
+	action, params, handler, ok := bedrockAgentRuntimeRouter.lookup(r.Method, r.URL.EscapedPath())
 	if !ok {
 		slog.DebugContext(r.Context(), "bedrock-agent-runtime: no route for request", "method", r.Method, "path", r.URL.Path)
 		return errors.New(awserrors.ErrorInvalidAction)

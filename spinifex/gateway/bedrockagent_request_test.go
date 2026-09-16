@@ -305,7 +305,7 @@ func TestBedrockAgentRequest_StartAndListAndGetIngestionJob(t *testing.T) {
 }
 
 // TestBedrockAgentRequest_StopIngestionJob proves the StopIngestionJob route
-// resolves (lookupBedrockAgentAction no longer falls through to
+// resolves (bedrockAgentRouter.lookup no longer falls through to
 // ErrInvalidAction for it) and round-trips a STOPPED job through the full
 // HTTP dispatch path.
 func TestBedrockAgentRequest_StopIngestionJob(t *testing.T) {

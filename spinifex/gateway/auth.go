@@ -266,23 +266,23 @@ func resolveNonQueryAction(r *http.Request, service string) string {
 	method, path := r.Method, r.URL.EscapedPath()
 	switch service {
 	case "eks":
-		if action, _, _, ok := lookupEKSAction(method, path); ok {
+		if action, _, _, ok := eksRouter.lookup(method, path); ok {
 			return action
 		}
 	case "bedrock":
-		if action, _, _, ok := lookupBedrockAction(method, path); ok {
+		if action, _, _, ok := bedrockRouter.lookup(method, path); ok {
 			return action
 		}
 	case "bedrock-runtime":
-		if action, _, _, ok := lookupBedrockRuntimeAction(method, path); ok {
+		if action, _, _, ok := bedrockRuntimeRouter.lookup(method, path); ok {
 			return action
 		}
 	case "bedrock-agent":
-		if action, _, _, ok := lookupBedrockAgentAction(method, path); ok {
+		if action, _, _, ok := bedrockAgentRouter.lookup(method, path); ok {
 			return action
 		}
 	case "bedrock-agent-runtime":
-		if action, _, _, ok := lookupBedrockAgentRuntimeAction(method, path); ok {
+		if action, _, _, ok := bedrockAgentRuntimeRouter.lookup(method, path); ok {
 			return action
 		}
 	}

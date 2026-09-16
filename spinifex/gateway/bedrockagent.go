@@ -8,8 +8,6 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
-	"net/url"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -23,16 +21,11 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-// bedrockAgentRoute maps one HTTP method + path regex to an AWS action and handler.
-type bedrockAgentRoute struct {
-	method  string
-	pattern *regexp.Regexp
-	action  string
-	handler bedrockAgentRouteHandler
-}
+// bedrockAgentRoute maps one HTTP method + chi path pattern to an AWS action and handler.
+type bedrockAgentRoute = restRoute[bedrockAgentRouteHandler]
 
 // bedrockAgentRouteHandler invokes a per-action bedrock-agent (control-plane)
-// gateway function. params holds the regex capture groups, PathUnescape'd.
+// gateway function. params holds the path params, PathUnescape'd.
 // kb/ds are gw.BedrockAgentKB / gw.BedrockAgentDataSources; vector is
 // gw.BedrockAgentVector, the NATSVectorService forwarding client to .9's
 // daemon-side VectorService.
@@ -40,11 +33,10 @@ type bedrockAgentRouteHandler func(ctx context.Context, accountID, region string
 
 // bedrockAgentRoutes is the dispatch table. Real AWS HTTP paths/methods
 // (verified against the vendored aws-sdk-go bedrockagent request
-// definitions), not invented ones. More-specific paths must precede
-// less-specific ones with the same prefix so the regex matcher picks the
-// deeper route first.
+// definitions), not invented ones — including the trailing slashes, which
+// chi matches exactly.
 var bedrockAgentRoutes = []bedrockAgentRoute{
-	{"PUT", regexp.MustCompile(`^/knowledgebases/$`), "CreateKnowledgeBase",
+	{"PUT", "/knowledgebases/", "CreateKnowledgeBase",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, _ *handlers_ochrevector.DataSourceStore, vector handlers_ochrevector.VectorService) (any, error) {
 			input := new(bedrockagent.CreateKnowledgeBaseInput)
 			if len(b) > 0 {
@@ -54,19 +46,19 @@ var bedrockAgentRoutes = []bedrockAgentRoute{
 			}
 			return CreateKnowledgeBase(ctx, acct, region, kb, vector, input)
 		}},
-	{"POST", regexp.MustCompile(`^/knowledgebases/$`), "ListKnowledgeBases",
+	{"POST", "/knowledgebases/", "ListKnowledgeBases",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, _ *handlers_ochrevector.DataSourceStore, _ handlers_ochrevector.VectorService) (any, error) {
 			return ListKnowledgeBases(ctx, acct, kb, new(bedrockagent.ListKnowledgeBasesInput))
 		}},
-	{"GET", regexp.MustCompile(`^/knowledgebases/([^/]+)$`), "GetKnowledgeBase",
+	{"GET", "/knowledgebases/{knowledgeBaseId}", "GetKnowledgeBase",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, _ *handlers_ochrevector.DataSourceStore, _ handlers_ochrevector.VectorService) (any, error) {
 			return GetKnowledgeBase(ctx, acct, region, kb, &bedrockagent.GetKnowledgeBaseInput{KnowledgeBaseId: aws.String(p[0])})
 		}},
-	{"DELETE", regexp.MustCompile(`^/knowledgebases/([^/]+)$`), "DeleteKnowledgeBase",
+	{"DELETE", "/knowledgebases/{knowledgeBaseId}", "DeleteKnowledgeBase",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, vector handlers_ochrevector.VectorService) (any, error) {
 			return DeleteKnowledgeBase(ctx, acct, kb, ds, vector, &bedrockagent.DeleteKnowledgeBaseInput{KnowledgeBaseId: aws.String(p[0])})
 		}},
-	{"PUT", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/$`), "CreateDataSource",
+	{"PUT", "/knowledgebases/{knowledgeBaseId}/datasources/", "CreateDataSource",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, _ handlers_ochrevector.VectorService) (any, error) {
 			input := new(bedrockagent.CreateDataSourceInput)
 			if len(b) > 0 {
@@ -77,71 +69,44 @@ var bedrockAgentRoutes = []bedrockAgentRoute{
 			input.KnowledgeBaseId = aws.String(p[0])
 			return CreateDataSource(ctx, acct, region, kb, ds, input)
 		}},
-	{"POST", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/$`), "ListDataSources",
+	{"POST", "/knowledgebases/{knowledgeBaseId}/datasources/", "ListDataSources",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, _ handlers_ochrevector.VectorService) (any, error) {
 			return ListDataSources(ctx, acct, kb, ds, &bedrockagent.ListDataSourcesInput{KnowledgeBaseId: aws.String(p[0])})
 		}},
-	{"GET", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/([^/]+)$`), "GetDataSource",
+	{"GET", "/knowledgebases/{knowledgeBaseId}/datasources/{dataSourceId}", "GetDataSource",
 		func(ctx context.Context, acct, region string, p []string, b []byte, _ *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, _ handlers_ochrevector.VectorService) (any, error) {
 			return GetDataSource(ctx, acct, region, ds, &bedrockagent.GetDataSourceInput{KnowledgeBaseId: aws.String(p[0]), DataSourceId: aws.String(p[1])})
 		}},
-	{"DELETE", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/([^/]+)$`), "DeleteDataSource",
+	{"DELETE", "/knowledgebases/{knowledgeBaseId}/datasources/{dataSourceId}", "DeleteDataSource",
 		func(ctx context.Context, acct, region string, p []string, b []byte, _ *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, _ handlers_ochrevector.VectorService) (any, error) {
 			return DeleteDataSource(ctx, acct, ds, &bedrockagent.DeleteDataSourceInput{KnowledgeBaseId: aws.String(p[0]), DataSourceId: aws.String(p[1])})
 		}},
-	{"PUT", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/([^/]+)/ingestionjobs/$`), "StartIngestionJob",
+	{"PUT", "/knowledgebases/{knowledgeBaseId}/datasources/{dataSourceId}/ingestionjobs/", "StartIngestionJob",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, vector handlers_ochrevector.VectorService) (any, error) {
 			return StartIngestionJob(ctx, acct, kb, ds, vector, &bedrockagent.StartIngestionJobInput{KnowledgeBaseId: aws.String(p[0]), DataSourceId: aws.String(p[1])})
 		}},
-	{"POST", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/([^/]+)/ingestionjobs/$`), "ListIngestionJobs",
+	{"POST", "/knowledgebases/{knowledgeBaseId}/datasources/{dataSourceId}/ingestionjobs/", "ListIngestionJobs",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, vector handlers_ochrevector.VectorService) (any, error) {
 			return ListIngestionJobs(ctx, acct, kb, ds, vector, &bedrockagent.ListIngestionJobsInput{KnowledgeBaseId: aws.String(p[0]), DataSourceId: aws.String(p[1])})
 		}},
-	{"GET", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/([^/]+)/ingestionjobs/([^/]+)$`), "GetIngestionJob",
+	{"GET", "/knowledgebases/{knowledgeBaseId}/datasources/{dataSourceId}/ingestionjobs/{ingestionJobId}", "GetIngestionJob",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, vector handlers_ochrevector.VectorService) (any, error) {
 			return GetIngestionJob(ctx, acct, kb, ds, vector, &bedrockagent.GetIngestionJobInput{KnowledgeBaseId: aws.String(p[0]), DataSourceId: aws.String(p[1]), IngestionJobId: aws.String(p[2])})
 		}},
-	{"PUT", regexp.MustCompile(`^/knowledgebases/([^/]+)/datasources/([^/]+)/ingestionjobs/([^/]+)/stop$`), "StopIngestionJob",
+	{"PUT", "/knowledgebases/{knowledgeBaseId}/datasources/{dataSourceId}/ingestionjobs/{ingestionJobId}/stop", "StopIngestionJob",
 		func(ctx context.Context, acct, region string, p []string, b []byte, kb *handlers_ochrevector.KBStore, ds *handlers_ochrevector.DataSourceStore, vector handlers_ochrevector.VectorService) (any, error) {
 			return StopIngestionJob(ctx, acct, kb, ds, vector, &StopIngestionJobInput{KnowledgeBaseId: aws.String(p[0]), DataSourceId: aws.String(p[1]), IngestionJobId: aws.String(p[2])})
 		}},
 }
 
-// lookupBedrockAgentAction matches method+path against bedrockAgentRoutes,
-// returning the action, path params, and handler, or ("", nil, nil, false) on
-// no match. path must be r.URL.EscapedPath(): captured params are
-// PathUnescape'd before returning, mirroring lookupBedrockAction.
-func lookupBedrockAgentAction(method, path string) (string, []string, bedrockAgentRouteHandler, bool) {
-	for _, route := range bedrockAgentRoutes {
-		if route.method != method {
-			continue
-		}
-		m := route.pattern.FindStringSubmatch(path)
-		if m == nil {
-			continue
-		}
-		var params []string
-		if len(m) > 1 {
-			params = make([]string, 0, len(m)-1)
-			for _, raw := range m[1:] {
-				decoded, err := url.PathUnescape(raw)
-				if err != nil {
-					slog.Debug("bedrock-agent: bad percent-encoding in path param", "param", raw, "err", err)
-					decoded = raw
-				}
-				params = append(params, decoded)
-			}
-		}
-		return route.action, params, route.handler, true
-	}
-	return "", nil, nil, false
-}
+// bedrockAgentRouter matches an escaped request path against bedrockAgentRoutes.
+var bedrockAgentRouter = newRESTRouter("bedrock-agent", bedrockAgentRoutes)
 
 // BedrockAgent_Request dispatches bedrock-agent (control-plane) REST-JSON
 // requests: resolves method+path to an action, reads the body, calls the
 // handler, and serialises the output as JSON, mirroring Bedrock_Request.
 func (gw *GatewayConfig) BedrockAgent_Request(w http.ResponseWriter, r *http.Request) error {
-	action, params, handler, ok := lookupBedrockAgentAction(r.Method, r.URL.EscapedPath())
+	action, params, handler, ok := bedrockAgentRouter.lookup(r.Method, r.URL.EscapedPath())
 	if !ok {
 		slog.DebugContext(r.Context(), "bedrock-agent: no route for request", "method", r.Method, "path", r.URL.Path)
 		return errors.New(awserrors.ErrorInvalidAction)
