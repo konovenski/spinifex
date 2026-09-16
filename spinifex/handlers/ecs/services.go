@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"strings"
 	"time"
@@ -382,6 +383,16 @@ func (s *Service) reconcileService(ctx context.Context, kv jetstream.KeyValue, a
 			n := min(desired-primaryActive, max(maxCount-(running+pending), 0))
 			if n > 0 {
 				s.launchDeploymentTasks(ctx, accountID, svc, primary, n)
+			} else {
+				// Wants more tasks than desired but the maximumPercent ceiling leaves
+				// no room this pass (AWS's "unable to place a task"). Unlike the
+				// rollout-state transitions, this condition carries no state flag of
+				// its own and can hold for many passes, so the call itself is the
+				// guard: skip when the newest event already says the same thing.
+				msg := fmt.Sprintf("(service %s) was unable to place a task.", svc.Name)
+				if len(svc.Events) == 0 || svc.Events[0].Message != msg {
+					appendServiceEvent(svc, msg)
+				}
 			}
 		}
 		s.stopSurplusTasks(ctx, kv, accountID, tasks, primary.ID, desired, running, minCount)
@@ -672,6 +683,19 @@ func loadBalancersFromAWS(in []*ecs.LoadBalancer) []LoadBalancerTarget {
 	return out
 }
 
+// awsTimeOrNil returns a pointer to t for projection onto an SDK timestamp
+// field, or nil for a zero time. A record written before the field existed
+// decodes with a zero time.Time, and must project as an absent key — jsonutil
+// drops a nil *time.Time member outright, whereas a non-nil zero time would
+// marshal as the 1970-01-01 epoch, which is worse than omitting it: it reads
+// as a real (wrong) timestamp instead of "unknown".
+func awsTimeOrNil(t time.Time) *time.Time {
+	if t.IsZero() {
+		return nil
+	}
+	return aws.Time(t)
+}
+
 func (s *Service) serviceToAWS(accountID string, r *ServiceRecord) *ecs.Service {
 	svc := &ecs.Service{
 		ServiceName:          aws.String(r.Name),
@@ -685,6 +709,7 @@ func (s *Service) serviceToAWS(accountID string, r *ServiceRecord) *ecs.Service 
 		TaskDefinition:       aws.String(r.TaskDefARN),
 		EnableECSManagedTags: aws.Bool(r.EnableECSManagedTags),
 		Tags:                 tagsToAWS(r.Tags),
+		CreatedAt:            awsTimeOrNil(r.CreatedAt),
 	}
 	if r.LaunchType != "" {
 		svc.LaunchType = aws.String(r.LaunchType)
@@ -728,6 +753,8 @@ func (s *Service) serviceToAWS(accountID string, r *ServiceRecord) *ecs.Service 
 			RunningCount:   aws.Int64(int64(d.RunningCount)),
 			PendingCount:   aws.Int64(int64(d.PendingCount)),
 			FailedTasks:    aws.Int64(int64(d.FailedTasks)),
+			CreatedAt:      awsTimeOrNil(d.CreatedAt),
+			UpdatedAt:      awsTimeOrNil(d.UpdatedAt),
 			RolloutState:   aws.String(d.RolloutState),
 			RolloutStateReason: func() *string {
 				if d.RolloutReason == "" {
@@ -735,6 +762,18 @@ func (s *Service) serviceToAWS(accountID string, r *ServiceRecord) *ecs.Service 
 				}
 				return aws.String(d.RolloutReason)
 			}(),
+		})
+	}
+	// Always a list, never nil: the SDK's jsonutil marshaler drops a nil slice
+	// member outright, which would put the key straight back to null on the wire.
+	// r.Events is stored newest first, matching AWS's own ordering.
+	svc.Events = make([]*ecs.ServiceEvent, 0, len(r.Events))
+	for i := range r.Events {
+		e := &r.Events[i]
+		svc.Events = append(svc.Events, &ecs.ServiceEvent{
+			Id:        aws.String(e.ID),
+			CreatedAt: aws.Time(e.CreatedAt),
+			Message:   aws.String(e.Message),
 		})
 	}
 	return svc
