@@ -22,7 +22,6 @@ func keyPairTagSpecs(resourceType string) []*ec2.TagSpecification {
 }
 
 func TestCreateKeyPair_TagSpecifications(t *testing.T) {
-	requireSSHKeygen(t)
 	svc, _ := newTestKeyService()
 
 	out, err := svc.CreateKeyPair(context.Background(), &ec2.CreateKeyPairInput{

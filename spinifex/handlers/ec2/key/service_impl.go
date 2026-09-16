@@ -3,20 +3,22 @@ package handlers_ec2_key
 import (
 	"bytes"
 	"context"
-	"crypto/md5"  //nolint:gosec // G501: MD5 is the digest EC2 puts on the wire, not a security choice
+	"crypto"
+	"crypto/ed25519"
+	"crypto/md5" //nolint:gosec // G501: MD5 is the digest EC2 puts on the wire, not a security choice
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha1" //nolint:gosec // G505: SHA-1 is the digest EC2 puts on the wire, not a security choice
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -33,7 +35,8 @@ import (
 // Ensure KeyServiceImpl implements KeyService.
 var _ KeyService = (*KeyServiceImpl)(nil)
 
-// KeyServiceImpl handles key pair operations with ssh-keygen and S3 storage.
+// KeyServiceImpl handles key pair operations with in-process key generation and
+// S3 storage.
 type KeyServiceImpl struct {
 	config     *config.Config
 	store      objectstore.ObjectStore
@@ -64,7 +67,8 @@ func NewKeyServiceImplWithStore(store objectstore.ObjectStore, bucketName string
 	}
 }
 
-// CreateKeyPair generates a new SSH key pair using ssh-keygen.
+// CreateKeyPair generates a new SSH key pair, storing the public half and
+// returning the private half to the caller once.
 func (s *KeyServiceImpl) CreateKeyPair(ctx context.Context, input *ec2.CreateKeyPairInput, accountID string) (*ec2.CreateKeyPairOutput, error) {
 	if input == nil || input.KeyName == nil {
 		return nil, errors.New(awserrors.ErrorMissingParameter)
@@ -107,58 +111,19 @@ func (s *KeyServiceImpl) CreateKeyPair(ctx context.Context, input *ec2.CreateKey
 		}
 	}
 
-	// Create temporary directory for key generation
-	tmpDir, err := os.MkdirTemp("", "spinifex-keypair-*")
+	// Generate the key in process; the private half never reaches local disk.
+	privateKeyData, publicKey, err := generateKeyPair(keyType)
 	if err != nil {
-		slog.ErrorContext(ctx, "Failed to create temp directory", "err", err)
-		return nil, errors.New(awserrors.ErrorServerInternal)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	privateKeyPath := filepath.Join(tmpDir, "id_key")
-	publicKeyPath := privateKeyPath + ".pub"
-
-	// Generate key pair using ssh-keygen
-	var cmd *exec.Cmd
-	if keyType == "ed25519" {
-		// ED25519 has no PEM representation, so it stays in OpenSSH format.
-		cmd = exec.Command("ssh-keygen", "-t", "ed25519", "-f", privateKeyPath, "-N", "", "-C", "")
-	} else {
-		// RSA 2048-bit in PKCS#1 PEM, as AWS returns it. OpenSSH reads that format
-		// for SSH either way, but GetPasswordData's --priv-launch-key cannot read
-		// the OpenSSH container at all.
-		cmd = exec.Command("ssh-keygen", "-t", "rsa", "-b", "2048", "-m", "PEM", "-f", privateKeyPath, "-N", "", "-C", "")
-	}
-
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		slog.ErrorContext(ctx, "ssh-keygen failed", "err", err, "stderr", stderr.String())
+		slog.ErrorContext(ctx, "Failed to generate key pair", "keyName", keyName, "keyType", keyType, "err", err)
 		return nil, errors.New(awserrors.ErrorServerInternal)
 	}
 
-	// Read private key
-	privateKeyData, err := os.ReadFile(privateKeyPath)
-	if err != nil {
-		slog.ErrorContext(ctx, "Failed to read private key", "err", err)
-		return nil, errors.New(awserrors.ErrorServerInternal)
-	}
-
-	// Read public key
-	publicKeyData, err := os.ReadFile(publicKeyPath)
-	if err != nil {
-		slog.ErrorContext(ctx, "Failed to read public key", "err", err)
-		return nil, errors.New(awserrors.ErrorServerInternal)
-	}
+	// The key line plus a trailing newline, the form the store serves to guests
+	// as their authorized_keys.
+	publicKeyData := ssh.MarshalAuthorizedKey(publicKey)
 
 	// Fingerprint the key we just generated; the digest algorithm follows the
-	// key algorithm, so it is derived from the parsed key rather than keyType.
-	publicKey, _, _, _, err := ssh.ParseAuthorizedKey(publicKeyData)
-	if err != nil {
-		slog.ErrorContext(ctx, "Failed to parse generated public key", "err", err)
-		return nil, errors.New(awserrors.ErrorServerInternal)
-	}
+	// key algorithm, so it is derived from the key rather than keyType.
 	fingerprint, err := createdKeyFingerprint(privateKeyData, publicKey)
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to fingerprint generated key pair", "keyName", keyName, "err", err)
@@ -222,6 +187,49 @@ func (s *KeyServiceImpl) CreateKeyPair(ctx context.Context, input *ec2.CreateKey
 	slog.InfoContext(ctx, "Key pair created successfully", "keyName", keyName, "fingerprint", fingerprint, "keyPairId", keyPairID)
 
 	return output, nil
+}
+
+// generateKeyPair generates a key pair of the given EC2 key type, returning the
+// private key in the PEM container AWS hands back for that type alongside the
+// public half.
+func generateKeyPair(keyType string) ([]byte, ssh.PublicKey, error) {
+	var block *pem.Block
+	var cryptoPub crypto.PublicKey
+
+	switch keyType {
+	case "ed25519":
+		// ED25519 has no PEM representation, so it stays in OpenSSH format.
+		pub, priv, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			return nil, nil, fmt.Errorf("generate ed25519 key: %w", err)
+		}
+		if block, err = ssh.MarshalPrivateKey(priv, ""); err != nil {
+			return nil, nil, fmt.Errorf("marshal ed25519 private key: %w", err)
+		}
+		cryptoPub = pub
+
+	case "rsa":
+		// RSA 2048-bit in PKCS#1 PEM, as AWS returns it. OpenSSH reads that format
+		// for SSH either way, but GetPasswordData's --priv-launch-key cannot read
+		// the OpenSSH container at all.
+		priv, err := rsa.GenerateKey(rand.Reader, 2048)
+		if err != nil {
+			return nil, nil, fmt.Errorf("generate rsa key: %w", err)
+		}
+		block = &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)}
+		cryptoPub = &priv.PublicKey
+
+	default:
+		// The caller has already rejected every other type, so this only guards a
+		// future type being generated under a container AWS does not use.
+		return nil, nil, fmt.Errorf("unsupported key type %q", keyType)
+	}
+
+	publicKey, err := ssh.NewPublicKey(cryptoPub)
+	if err != nil {
+		return nil, nil, fmt.Errorf("wrap generated public key: %w", err)
+	}
+	return pem.EncodeToMemory(block), publicKey, nil
 }
 
 // importedKeyFingerprint fingerprints a key supplied to ImportKeyPair: the MD5

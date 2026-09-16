@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
-	"os/exec"
 	"strings"
 	"testing"
 
@@ -132,14 +131,6 @@ func putStoredObject(t *testing.T, store objectstore.ObjectStore, key, body stri
 	require.NoError(t, err)
 }
 
-// requireSSHKeygen skips the test if ssh-keygen is not available.
-func requireSSHKeygen(t *testing.T) {
-	t.Helper()
-	if _, err := exec.LookPath("ssh-keygen"); err != nil {
-		t.Skip("ssh-keygen not available, skipping")
-	}
-}
-
 // importTestKey is a helper that imports an ed25519 key and returns the output.
 func importTestKey(t *testing.T, svc *KeyServiceImpl, keyName string) *ec2.ImportKeyPairOutput {
 	t.Helper()
@@ -157,7 +148,6 @@ func importTestKey(t *testing.T, svc *KeyServiceImpl, keyName string) *ec2.Impor
 // ============================================================
 
 func TestCreateKeyPair_ED25519(t *testing.T) {
-	requireSSHKeygen(t)
 	svc, store := newTestKeyService()
 
 	out, err := svc.CreateKeyPair(context.Background(), &ec2.CreateKeyPairInput{
@@ -191,7 +181,6 @@ func TestCreateKeyPair_ED25519(t *testing.T) {
 }
 
 func TestCreateKeyPair_RSA(t *testing.T) {
-	requireSSHKeygen(t)
 	svc, _ := newTestKeyService()
 
 	out, err := svc.CreateKeyPair(context.Background(), &ec2.CreateKeyPairInput{
@@ -251,7 +240,6 @@ func TestCreateKeyPair_InvalidKeyName(t *testing.T) {
 }
 
 func TestCreateKeyPair_Duplicate(t *testing.T) {
-	requireSSHKeygen(t)
 	svc, _ := newTestKeyService()
 
 	_, err := svc.CreateKeyPair(context.Background(), &ec2.CreateKeyPairInput{
@@ -601,7 +589,6 @@ func TestDescribeKeyPairs_AllKeys(t *testing.T) {
 // KeyType is now read back from the record rather than guessed at, across every
 // combination of path and algorithm that writes one.
 func TestDescribeKeyPairs_KeyType(t *testing.T) {
-	requireSSHKeygen(t)
 	svc, _ := newTestKeyService()
 
 	importTestKey(t, svc, "ed25519-imported")
