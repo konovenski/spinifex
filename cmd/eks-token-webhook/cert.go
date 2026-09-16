@@ -33,12 +33,12 @@ func serverTLSConfig(cert tls.Certificate) *tls.Config {
 // valid even if the webhook process is restarted. Returns the parsed cert and
 // the certificate PEM (for embedding as the kubeconfig CA bundle).
 func ensureServingCert(certPath, keyPath string) (tls.Certificate, []byte, error) {
-	if certPEM, keyPEM, ok := readCertPair(certPath, keyPath); ok {
-		cert, err := tls.X509KeyPair(certPEM, keyPEM)
-		if err == nil {
+	// Fall through to regenerate on a missing/corrupt/incompatible persisted
+	// pair. The cert PEM is re-read because tls.Certificate keeps only DER.
+	if cert, err := tls.LoadX509KeyPair(certPath, keyPath); err == nil {
+		if certPEM, err := os.ReadFile(certPath); err == nil {
 			return cert, certPEM, nil
 		}
-		// Fall through to regenerate on a corrupt/incompatible persisted pair.
 	}
 
 	certPEM, keyPEM, err := generateSelfSigned()
@@ -56,18 +56,6 @@ func ensureServingCert(certPath, keyPath string) (tls.Certificate, []byte, error
 		return tls.Certificate{}, nil, fmt.Errorf("parse minted keypair: %w", err)
 	}
 	return cert, certPEM, nil
-}
-
-func readCertPair(certPath, keyPath string) (certPEM, keyPEM []byte, ok bool) {
-	c, err := os.ReadFile(certPath)
-	if err != nil {
-		return nil, nil, false
-	}
-	k, err := os.ReadFile(keyPath)
-	if err != nil {
-		return nil, nil, false
-	}
-	return c, k, true
 }
 
 func generateSelfSigned() (certPEM, keyPEM []byte, err error) {
