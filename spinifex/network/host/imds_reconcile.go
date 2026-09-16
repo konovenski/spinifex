@@ -48,11 +48,11 @@ func ListIMDSTaps(ctx context.Context, r Runner) ([]IMDSTapEndpoint, error) {
 		// a port missing it can never be a member of the live set either way, and one
 		// structurally broken port must not stall every reconcile pass.
 		ifaceID, ok := row.externalIDs["iface-id"]
-		if !ok || !strings.HasPrefix(ifaceID, ovsIfaceIDPrefix) {
+		eniID, prefixed := strings.CutPrefix(ifaceID, ovsIfaceIDPrefix)
+		if !ok || !prefixed {
 			slog.Warn("IMDS: skipping IMDS patch port with unexpected iface-id", "port", row.name, "iface_id", ifaceID)
 			continue
 		}
-		eniID := strings.TrimPrefix(ifaceID, ovsIfaceIDPrefix)
 		taps = append(taps, IMDSTapEndpoint{ENIID: eniID, Endpoint: IMDSEndpointName(eniID)})
 	}
 	return taps, nil

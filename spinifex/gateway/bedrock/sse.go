@@ -49,15 +49,15 @@ func (s *sseScanner) Next() (sseEvent, bool, error) {
 			}
 			continue // keepalive blank line between records
 		}
-		switch {
-		case strings.HasPrefix(line, ":"):
-			// comment/keepalive, ignore — does not start a record
-		case strings.HasPrefix(line, "event:"):
+		if strings.HasPrefix(line, ":") {
+			continue // comment/keepalive, does not start a record
+		}
+		if v, ok := strings.CutPrefix(line, "event:"); ok {
 			sawAny = true
-			event = strings.TrimSpace(strings.TrimPrefix(line, "event:"))
-		case strings.HasPrefix(line, "data:"):
+			event = strings.TrimSpace(v)
+		} else if v, ok := strings.CutPrefix(line, "data:"); ok {
 			sawAny = true
-			dataLines = append(dataLines, strings.TrimPrefix(strings.TrimPrefix(line, "data:"), " "))
+			dataLines = append(dataLines, strings.TrimPrefix(v, " "))
 		}
 	}
 

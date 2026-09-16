@@ -133,6 +133,7 @@ func (rt *Router) Converse(ctx context.Context, accountID, modelID string, input
 	backend = entry.Provider
 
 	var p Provider
+	vendor, isVendor := strings.CutPrefix(entry.Provider, providerPrefix)
 	switch {
 	case entry.Provider == tierSelfHost:
 		var release func()
@@ -146,8 +147,8 @@ func (rt *Router) Converse(ctx context.Context, accountID, modelID string, input
 		} else {
 			p = newVLLMProvider(rt.endpointResolver)
 		}
-	case strings.HasPrefix(entry.Provider, providerPrefix):
-		switch strings.TrimPrefix(entry.Provider, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			var key string
 			var resolvable bool
@@ -267,6 +268,7 @@ func (rt *Router) ConverseStream(ctx context.Context, accountID, modelID string,
 	// whether the eventual source gets slot-release wrapping and whether an
 	// error return past this point must release the slot explicitly.
 	var selfHostRelease func()
+	vendor, isVendor := strings.CutPrefix(entry.Provider, providerPrefix)
 	switch {
 	case entry.Provider == tierSelfHost:
 		selfHostRelease, err = admitSelfHost(ctx, rt.provisioned, ptAccountID, modelID, entry)
@@ -278,8 +280,8 @@ func (rt *Router) ConverseStream(ctx context.Context, accountID, modelID string,
 		} else {
 			p = newVLLMProvider(rt.endpointResolver)
 		}
-	case strings.HasPrefix(entry.Provider, providerPrefix):
-		switch strings.TrimPrefix(entry.Provider, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			key, ok, err := rt.resolver.Resolve(ctx, accountID, vendorAnthropic)
 			if err != nil {

@@ -2503,10 +2503,11 @@ func listClusterNames(ctx context.Context, kv jetstream.KeyValue) ([]string, err
 	names := make([]string, 0, len(keys))
 	seen := make(map[string]struct{}, len(keys))
 	for _, k := range keys {
-		if !strings.HasPrefix(k, "clusters/") || !strings.HasSuffix(k, suffix) {
+		rest, prefixed := strings.CutPrefix(k, "clusters/")
+		name, suffixed := strings.CutSuffix(rest, suffix)
+		if !prefixed || !suffixed {
 			continue
 		}
-		name := strings.TrimSuffix(strings.TrimPrefix(k, "clusters/"), suffix)
 		if name == "" || strings.Contains(name, "/") {
 			continue
 		}

@@ -192,11 +192,12 @@ func setAnthropicCompletionTexts(body []byte, texts []string) ([]byte, error) {
 // extractTokenUsage's own backend switch. ok is false when body doesn't
 // decode as backend's shape or backend has no guardrail support.
 func extractInvokePromptTexts(backend string, body []byte) (texts []string, ok bool) {
+	vendor, isVendor := strings.CutPrefix(backend, providerPrefix)
 	switch {
 	case backend == tierSelfHost:
 		return extractLlamaPromptTexts(body)
-	case strings.HasPrefix(backend, providerPrefix):
-		switch strings.TrimPrefix(backend, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			return extractAnthropicPromptTexts(body)
 		}
@@ -206,11 +207,12 @@ func extractInvokePromptTexts(backend string, body []byte) (texts []string, ok b
 
 // extractInvokeCompletionTexts is extractInvokePromptTexts' OUTPUT sibling.
 func extractInvokeCompletionTexts(backend string, body []byte) (texts []string, ok bool) {
+	vendor, isVendor := strings.CutPrefix(backend, providerPrefix)
 	switch {
 	case backend == tierSelfHost:
 		return extractLlamaCompletionTexts(body)
-	case strings.HasPrefix(backend, providerPrefix):
-		switch strings.TrimPrefix(backend, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			return extractAnthropicCompletionTexts(body)
 		}
@@ -222,11 +224,12 @@ func extractInvokeCompletionTexts(backend string, body []byte) (texts []string, 
 // InvokeModel response body carrying message as the assistant text, for an
 // INPUT guardrail block -- the backend is never called.
 func invokeGuardrailBlockedResponse(backend, modelID, message string) ([]byte, error) {
+	vendor, isVendor := strings.CutPrefix(backend, providerPrefix)
 	switch {
 	case backend == tierSelfHost:
 		return buildLlamaBlockedResponse(message)
-	case strings.HasPrefix(backend, providerPrefix):
-		switch strings.TrimPrefix(backend, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			return buildAnthropicBlockedResponse(modelID, message)
 		}
@@ -237,11 +240,12 @@ func invokeGuardrailBlockedResponse(backend, modelID, message string) ([]byte, e
 // invokeGuardrailBlockedCompletion rewrites respBody's assistant text
 // wholesale with message, for an OUTPUT guardrail block.
 func invokeGuardrailBlockedCompletion(backend string, respBody []byte, message string) ([]byte, error) {
+	vendor, isVendor := strings.CutPrefix(backend, providerPrefix)
 	switch {
 	case backend == tierSelfHost:
 		return replaceLlamaCompletion(respBody, message)
-	case strings.HasPrefix(backend, providerPrefix):
-		switch strings.TrimPrefix(backend, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			return replaceAnthropicCompletion(respBody, message)
 		}
@@ -252,14 +256,15 @@ func invokeGuardrailBlockedCompletion(backend string, respBody []byte, message s
 // invokeGuardrailRedactedCompletion rewrites respBody's assistant text
 // positionally with texts, for an OUTPUT ANONYMIZE redaction.
 func invokeGuardrailRedactedCompletion(backend string, respBody []byte, texts []string) ([]byte, error) {
+	vendor, isVendor := strings.CutPrefix(backend, providerPrefix)
 	switch {
 	case backend == tierSelfHost:
 		if len(texts) == 0 {
 			return respBody, nil
 		}
 		return setLlamaCompletionText(respBody, texts[0])
-	case strings.HasPrefix(backend, providerPrefix):
-		switch strings.TrimPrefix(backend, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			return setAnthropicCompletionTexts(respBody, texts)
 		}
@@ -271,6 +276,7 @@ func invokeGuardrailRedactedCompletion(backend string, respBody []byte, texts []
 // invoke-stream chunk for buffered OUTPUT accumulation. ok=false is a benign
 // no-text chunk; decodeErr=true is a real JSON-decode failure (fail closed).
 func extractInvokeStreamChunkText(backend string, chunk []byte) (text string, ok bool, decodeErr bool) {
+	vendor, isVendor := strings.CutPrefix(backend, providerPrefix)
 	switch {
 	case backend == tierSelfHost:
 		var c struct {
@@ -280,8 +286,8 @@ func extractInvokeStreamChunkText(backend string, chunk []byte) (text string, ok
 			return "", false, true
 		}
 		return c.Generation, c.Generation != "", false
-	case strings.HasPrefix(backend, providerPrefix):
-		switch strings.TrimPrefix(backend, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			var c struct {
 				Type  string `json:"type"`
@@ -361,11 +367,12 @@ func anthropicGuardedStreamChunks(message string, blocked bool) ([][]byte, error
 // buildGuardedInvokeStreamChunks dispatches to the family-specific guarded
 // invoke-stream chunk builder for backend.
 func buildGuardedInvokeStreamChunks(backend, message string, blocked bool) ([][]byte, error) {
+	vendor, isVendor := strings.CutPrefix(backend, providerPrefix)
 	switch {
 	case backend == tierSelfHost:
 		return llamaGuardedStreamChunks(message, blocked)
-	case strings.HasPrefix(backend, providerPrefix):
-		switch strings.TrimPrefix(backend, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			return anthropicGuardedStreamChunks(message, blocked)
 		}

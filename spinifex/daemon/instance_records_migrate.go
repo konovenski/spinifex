@@ -94,7 +94,8 @@ func rekeyRecordSeparator(ctx context.Context, kvc migrate.KVContext) error {
 
 	moved := 0
 	for _, key := range keys {
-		if !strings.HasPrefix(key, slashRecordPrefix) {
+		instanceID, ok := strings.CutPrefix(key, slashRecordPrefix)
+		if !ok {
 			continue
 		}
 
@@ -106,7 +107,7 @@ func rekeyRecordSeparator(ctx context.Context, kvc migrate.KVContext) error {
 			return fmt.Errorf("read %s: %w", key, err)
 		}
 
-		dest := instanceRecordKey(strings.TrimPrefix(key, slashRecordPrefix))
+		dest := instanceRecordKey(instanceID)
 		if _, err := kvc.KV.Create(ctx, dest, entry.Value()); err != nil {
 			if !errors.Is(err, jetstream.ErrKeyExists) {
 				return fmt.Errorf("write %s: %w", dest, err)
@@ -151,10 +152,10 @@ func carryNodeOwnershipForward(ctx context.Context, kvc migrate.KVContext) error
 
 	seeded, owned := 0, 0
 	for _, key := range keys {
-		if !strings.HasPrefix(key, InstanceStatePrefix) {
+		nodeID, ok := strings.CutPrefix(key, InstanceStatePrefix)
+		if !ok {
 			continue
 		}
-		nodeID := strings.TrimPrefix(key, InstanceStatePrefix)
 
 		if _, err := kvc.KV.Create(ctx, NodePresencePrefix+nodeID, marker); err != nil {
 			// A node that has already upgraded wrote its own marker; it is the

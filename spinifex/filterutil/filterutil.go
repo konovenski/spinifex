@@ -58,10 +58,10 @@ func MatchesAny(filterValues []string, value string) bool {
 // Each tag:Key filter uses OR logic across its values, with wildcard support.
 func MatchesTags(filters map[string][]string, tags map[string]string) bool {
 	for name, values := range filters {
-		if !strings.HasPrefix(name, "tag:") {
+		tagKey, ok := strings.CutPrefix(name, "tag:")
+		if !ok {
 			continue
 		}
-		tagKey := name[4:] // strip "tag:" prefix
 		tagValue, exists := tags[tagKey]
 		if !exists {
 			return false

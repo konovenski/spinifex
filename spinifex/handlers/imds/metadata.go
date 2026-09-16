@@ -157,8 +157,8 @@ func (s *IMDSServiceImpl) dispatch(w http.ResponseWriter, r *http.Request, eni *
 	slog.InfoContext(ctx, "IMDS: serving metadata request", "path", path,
 		"instance_id", eni.instanceID, "private_ip", eni.privateIP, "public_ip", eni.publicIP)
 
-	if strings.HasPrefix(path, prefixSecurityCreds) && len(path) > len(prefixSecurityCreds) {
-		s.serveRoleCredentials(ctx, w, eni, strings.TrimPrefix(path, prefixSecurityCreds))
+	if role, ok := strings.CutPrefix(path, prefixSecurityCreds); ok && role != "" {
+		s.serveRoleCredentials(ctx, w, eni, role)
 		return
 	}
 

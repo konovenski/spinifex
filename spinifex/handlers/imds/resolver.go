@@ -132,7 +132,8 @@ func (r *metadataResolver) findENIByID(ctx context.Context, eniID string) (strin
 
 	suffix := "." + eniID
 	for _, key := range keys {
-		if !strings.HasSuffix(key, suffix) {
+		accountID, ok := strings.CutSuffix(key, suffix)
+		if !ok {
 			continue
 		}
 		entry, err := r.eniKV.Get(ctx, key)
@@ -142,7 +143,7 @@ func (r *metadataResolver) findENIByID(ctx context.Context, eniID string) (strin
 			}
 			return "", nil, fmt.Errorf("get eni record %s: %w", key, err)
 		}
-		return strings.TrimSuffix(key, suffix), entry.Value(), nil
+		return accountID, entry.Value(), nil
 	}
 	return "", nil, nil
 }

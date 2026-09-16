@@ -50,8 +50,7 @@ func groupMembers(sysfsRoot string, groupNum int) ([]IOMMUGroupMember, error) {
 // bind/unbind lifecycle while the endpoint is claimed.
 func isBridgeClass(class string) bool {
 	s := strings.ToLower(strings.TrimSpace(class))
-	s = strings.TrimPrefix(s, "0x")
-	return len(s) >= 2 && s[:2] == "06"
+	return strings.HasPrefix(strings.TrimPrefix(s, "0x"), "06")
 }
 
 // filterBridgeMembers returns members with bridge-class devices removed.

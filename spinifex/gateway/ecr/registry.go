@@ -164,14 +164,14 @@ func splitV2Path(path string) (name, kind, ref string, ok bool) {
 
 func (reg *Registry) routeBlobs(w http.ResponseWriter, r *http.Request, name, ref string) {
 	ctx := r.Context()
+	uploadID, isUpload := strings.CutPrefix(ref, "uploads/")
 	switch {
 	case ref == "uploads/" || ref == "uploads":
 		if r.Method == http.MethodPost {
 			reg.startUpload(w, r, name)
 			return
 		}
-	case strings.HasPrefix(ref, "uploads/"):
-		uploadID := strings.TrimPrefix(ref, "uploads/")
+	case isUpload:
 		switch r.Method {
 		case http.MethodPatch:
 			reg.patchUpload(w, r, name, uploadID)

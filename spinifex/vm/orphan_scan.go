@@ -56,11 +56,10 @@ func pidFileOwners(runtimeDir string) map[int]string {
 		return owners
 	}
 	for _, entry := range entries {
-		name := entry.Name()
-		if !strings.HasSuffix(name, ".pid") {
+		id, ok := strings.CutSuffix(entry.Name(), ".pid")
+		if !ok {
 			continue
 		}
-		id := strings.TrimSuffix(name, ".pid")
 		if pid, err := utils.ReadPidFileFrom(runtimeDir, id); err == nil {
 			owners[pid] = id
 		}

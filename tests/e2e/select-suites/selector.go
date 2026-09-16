@@ -285,10 +285,8 @@ func subjectsOverlap(a, b []string) bool {
 // matches anything sharing its prefix; two wildcards match if one prefix
 // contains the other.
 func subjectMatch(x, y string) bool {
-	xw := strings.HasSuffix(x, ".*")
-	yw := strings.HasSuffix(y, ".*")
-	xp := strings.TrimSuffix(x, ".*")
-	yp := strings.TrimSuffix(y, ".*")
+	xp, xw := strings.CutSuffix(x, ".*")
+	yp, yw := strings.CutSuffix(y, ".*")
 	switch {
 	case xw && yw:
 		return xp == yp || strings.HasPrefix(xp, yp+".") || strings.HasPrefix(yp, xp+".")

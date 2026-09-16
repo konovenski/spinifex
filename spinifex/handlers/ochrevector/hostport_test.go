@@ -168,13 +168,14 @@ func (f *fakeVPC) DescribeNetworkInterfaces(_ context.Context, in *ec2.DescribeN
 		for _, filter := range in.Filters {
 			name := aws.StringValue(filter.Name)
 			var got string
+			tagKey, isTag := strings.CutPrefix(name, "tag:")
 			switch {
 			case name == "subnet-id":
 				got = aws.StringValue(ni.SubnetId)
 			case name == "description":
 				got = aws.StringValue(ni.Description)
-			case strings.HasPrefix(name, "tag:"):
-				got = tagValue(ni.TagSet, strings.TrimPrefix(name, "tag:"))
+			case isTag:
+				got = tagValue(ni.TagSet, tagKey)
 			default:
 				return nil, fmt.Errorf("fakeVPC: unsupported ENI filter %q", name)
 			}

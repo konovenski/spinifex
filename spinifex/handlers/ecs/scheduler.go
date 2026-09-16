@@ -434,8 +434,5 @@ func (sc *Scheduler) convergeInstanceRoles(ctx context.Context) error {
 
 // accountIDFromBucket extracts the account ID from an ECS per-account bucket name.
 func accountIDFromBucket(bucket string) (string, bool) {
-	if !strings.HasPrefix(bucket, KVBucketECSAccountPrefix) {
-		return "", false
-	}
-	return strings.TrimPrefix(bucket, KVBucketECSAccountPrefix), true
+	return strings.CutPrefix(bucket, KVBucketECSAccountPrefix)
 }

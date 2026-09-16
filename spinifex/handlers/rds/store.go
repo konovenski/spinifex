@@ -306,10 +306,11 @@ func ListDBParameterGroupNames(ctx context.Context, kv jetstream.KeyValue) ([]st
 	prefix := DBParameterGroupsPrefix()
 	names := make([]string, 0, len(keys))
 	for _, key := range keys {
-		if !strings.HasPrefix(key, prefix) || !strings.HasSuffix(key, "/meta") {
+		rest, prefixed := strings.CutPrefix(key, prefix)
+		name, suffixed := strings.CutSuffix(rest, "/meta")
+		if !prefixed || !suffixed {
 			continue
 		}
-		name := strings.TrimSuffix(strings.TrimPrefix(key, prefix), "/meta")
 		if name == "" || strings.Contains(name, "/") {
 			continue
 		}
@@ -388,10 +389,10 @@ func listNames(ctx context.Context, kv jetstream.KeyValue, prefix string) ([]str
 	}
 	names := make([]string, 0, len(keys))
 	for _, key := range keys {
-		if !strings.HasPrefix(key, prefix) {
+		name, ok := strings.CutPrefix(key, prefix)
+		if !ok {
 			continue
 		}
-		name := strings.TrimPrefix(key, prefix)
 		if name == "" || strings.Contains(name, "/") {
 			continue
 		}

@@ -97,11 +97,12 @@ func ListAddonRecords(ctx context.Context, kv jetstream.KeyValue, cluster string
 	prefix := AddonsPrefix(cluster)
 	out := make([]*AddonRecord, 0)
 	for _, k := range keys {
-		if !strings.HasPrefix(k, prefix) {
+		rest, ok := strings.CutPrefix(k, prefix)
+		if !ok {
 			continue
 		}
 		// Skip sub-keys (e.g. staged manifest); record keys are one segment under the prefix.
-		if strings.Contains(strings.TrimPrefix(k, prefix), "/") {
+		if strings.Contains(rest, "/") {
 			continue
 		}
 		entry, err := kv.Get(ctx, k)

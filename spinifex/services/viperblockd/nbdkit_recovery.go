@@ -87,6 +87,8 @@ func parseNbdkitCmdline(cmdline []byte) (disc discoveredNbdkit, ok bool) {
 	args := bytes.Split(bytes.TrimRight(cmdline, "\x00"), []byte{0})
 	for i := 0; i < len(args); i++ {
 		arg := string(args[i])
+		volume, isVolume := strings.CutPrefix(arg, "volume=")
+		baseDir, isBaseDir := strings.CutPrefix(arg, "base_dir=")
 		switch {
 		case arg == "--unix" && i+1 < len(args):
 			disc.Socket = string(args[i+1])
@@ -96,10 +98,10 @@ func parseNbdkitCmdline(cmdline []byte) (disc discoveredNbdkit, ok bool) {
 				disc.Port = port
 			}
 			i++
-		case strings.HasPrefix(arg, "volume="):
-			disc.Volume = strings.TrimPrefix(arg, "volume=")
-		case strings.HasPrefix(arg, "base_dir="):
-			disc.BaseDir = strings.TrimPrefix(arg, "base_dir=")
+		case isVolume:
+			disc.Volume = volume
+		case isBaseDir:
+			disc.BaseDir = baseDir
 		case strings.HasSuffix(arg, ".so"):
 			disc.Plugin = arg
 		}

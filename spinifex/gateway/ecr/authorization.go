@@ -114,6 +114,7 @@ func classifyTagsOperation(method, name, ref string) (ClassifiedOperation, bool)
 // classifyBlobOperation mirrors Registry.routeBlobs' dispatch exactly, so
 // every method/ref combination it accepts has a matching authorization case.
 func classifyBlobOperation(method, name, ref string, query url.Values) (ClassifiedOperation, bool) {
+	uploadID, isUpload := strings.CutPrefix(ref, "uploads/")
 	switch {
 	case ref == "uploads/" || ref == "uploads":
 		if method != http.MethodPost {
@@ -134,8 +135,8 @@ func classifyBlobOperation(method, name, ref string, query url.Values) (Classifi
 			op.Requirements = append(op.Requirements, ActionRequirement{ActionBatchCheckLayerAvailability, ScopeSource})
 		}
 		return op, true
-	case strings.HasPrefix(ref, "uploads/"):
-		if strings.TrimPrefix(ref, "uploads/") == "" {
+	case isUpload:
+		if uploadID == "" {
 			return ClassifiedOperation{}, false
 		}
 		switch method {

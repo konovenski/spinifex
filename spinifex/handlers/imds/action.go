@@ -81,8 +81,8 @@ func imdsAction(method, path string) string {
 		return "imds.public-keys"
 	}
 
-	if strings.HasPrefix(path, prefixSecurityCreds) {
-		if len(path) > len(prefixSecurityCreds) {
+	if role, ok := strings.CutPrefix(path, prefixSecurityCreds); ok {
+		if role != "" {
 			return "imds.iam.security-credentials.role"
 		}
 		return "imds.iam.security-credentials.list"

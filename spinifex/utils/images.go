@@ -194,10 +194,11 @@ func parseSumsFile(body []byte, filename string) (string, error) {
 			}
 		case 4:
 			// BSD-style: "<algo> (<name>) = <hex>". The "=" guard rejects PGP armor lines that happen to tokenise to 4 fields.
-			if fields[2] != "=" || !strings.HasPrefix(fields[1], "(") || !strings.HasSuffix(fields[1], ")") {
+			inner, open := strings.CutPrefix(fields[1], "(")
+			name, closed := strings.CutSuffix(inner, ")")
+			if fields[2] != "=" || !open || !closed {
 				continue
 			}
-			name := strings.TrimSuffix(strings.TrimPrefix(fields[1], "("), ")")
 			if name == filename {
 				return fields[3], nil
 			}

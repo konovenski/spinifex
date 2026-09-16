@@ -42,11 +42,10 @@ type TokenVerifyResponse struct {
 // `k8s-aws-v1.<base64url>` bearer token. The encoding is base64url without
 // padding, matching the aws-iam-authenticator / aws-cli get-token output.
 func DecodeGetToken(token string) (string, error) {
-	token = strings.TrimSpace(token)
-	if !strings.HasPrefix(token, getTokenV1Prefix) {
+	encoded, ok := strings.CutPrefix(strings.TrimSpace(token), getTokenV1Prefix)
+	if !ok {
 		return "", ErrMalformedToken
 	}
-	encoded := strings.TrimPrefix(token, getTokenV1Prefix)
 	raw, err := base64.RawURLEncoding.DecodeString(encoded)
 	if err != nil {
 		return "", ErrMalformedToken

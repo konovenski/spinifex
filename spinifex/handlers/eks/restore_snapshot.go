@@ -63,10 +63,11 @@ type etcdSnapshotKey struct {
 // vary in length, so comparing the whole basename would not be.
 func parseEtcdSnapshotKey(basename string) (etcdSnapshotKey, bool) {
 	const prefix, suffix = "etcd-", ".snap"
-	if !strings.HasPrefix(basename, prefix) || !strings.HasSuffix(basename, suffix) {
+	rest, prefixed := strings.CutPrefix(basename, prefix)
+	mid, suffixed := strings.CutSuffix(rest, suffix)
+	if !prefixed || !suffixed {
 		return etcdSnapshotKey{}, false
 	}
-	mid := strings.TrimSuffix(strings.TrimPrefix(basename, prefix), suffix)
 	i := strings.LastIndex(mid, "-")
 	if i <= 0 || i == len(mid)-1 {
 		return etcdSnapshotKey{}, false

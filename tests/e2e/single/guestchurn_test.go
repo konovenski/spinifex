@@ -389,10 +389,11 @@ func runGuestChurnRound(t *testing.T, fix *Fixture, instanceID, origType, keyPat
 		// Bash strips the ".nano" suffix and appends ".small" — same family,
 		// more RAM at matching vCPU. Avoids xlarge (16 GiB) which the CI host
 		// can't satisfy.
-		if !strings.HasSuffix(origType, ".nano") {
+		family, ok := strings.CutSuffix(origType, ".nano")
+		if !ok {
 			t.Fatalf("phase7b: expected discovered instance type to end with .nano, got %q", origType)
 		}
-		modifyType := strings.TrimSuffix(origType, ".nano") + ".small"
+		modifyType := family + ".small"
 		harness.Detail(t, "from_type", origType, "to_type", modifyType)
 
 		// Stop the instance first — ModifyInstanceAttribute on a running

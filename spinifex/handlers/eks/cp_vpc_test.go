@@ -53,10 +53,10 @@ func ec2TagsFromMap(m map[string]string) []*ec2.Tag {
 func cpvpcMatchTagFilters(tagMap map[string]string, filters []*ec2.Filter) bool {
 	for _, f := range filters {
 		name := aws.StringValue(f.Name)
-		if !strings.HasPrefix(name, "tag:") {
+		key, isTag := strings.CutPrefix(name, "tag:")
+		if !isTag {
 			continue
 		}
-		key := strings.TrimPrefix(name, "tag:")
 		got, ok := tagMap[key]
 		if !ok {
 			return false

@@ -226,19 +226,23 @@ type MIGProfileSpec struct {
 	MemoryMiB int64
 }
 
+// migTypePrefix marks an instance type name as a MIG profile type.
+const migTypePrefix = "mig."
+
 // IsMIGType reports whether the instance type name is a MIG profile type
 // (i.e. was produced by GenerateMIGTypes).
 func IsMIGType(instanceType string) bool {
-	return strings.HasPrefix(instanceType, "mig.")
+	return strings.HasPrefix(instanceType, migTypePrefix)
 }
 
 // MIGProfileFromType extracts the nvidia-smi profile name from a MIG instance
 // type name (e.g. "mig.1g.10gb" → "1g.10gb"). Returns "" for non-MIG types.
 func MIGProfileFromType(instanceType string) string {
-	if !IsMIGType(instanceType) {
+	profile, ok := strings.CutPrefix(instanceType, migTypePrefix)
+	if !ok {
 		return ""
 	}
-	return strings.TrimPrefix(instanceType, "mig.")
+	return profile
 }
 
 // GenerateMIGTypes returns one InstanceTypeInfo per unique MIG profile. Instance
@@ -247,7 +251,7 @@ func MIGProfileFromType(instanceType string) string {
 func GenerateMIGTypes(profiles []MIGProfileSpec, arch string) map[string]*ec2.InstanceTypeInfo {
 	types := make(map[string]*ec2.InstanceTypeInfo)
 	for _, p := range profiles {
-		name := "mig." + p.Name
+		name := migTypePrefix + p.Name
 		if _, exists := types[name]; exists {
 			continue
 		}

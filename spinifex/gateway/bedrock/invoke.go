@@ -135,6 +135,7 @@ func (rt *InvokeRouter) InvokeModel(ctx context.Context, accountID, modelID stri
 	backend = entry.Provider
 
 	var a InvokeAdapter
+	vendor, isVendor := strings.CutPrefix(entry.Provider, providerPrefix)
 	switch {
 	case entry.Provider == tierSelfHost:
 		// Family validation first: a model this platform cannot serve at
@@ -150,8 +151,8 @@ func (rt *InvokeRouter) InvokeModel(ctx context.Context, accountID, modelID stri
 			return nil, "", err
 		}
 		defer release()
-	case strings.HasPrefix(entry.Provider, providerPrefix):
-		switch strings.TrimPrefix(entry.Provider, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			var key string
 			var resolvable bool
@@ -323,6 +324,7 @@ func (rt *InvokeStreamRouter) InvokeModelWithResponseStream(ctx context.Context,
 	// once, either explicitly here or via the slot-releasing source wrapper
 	// on the success path.
 	var selfHostRelease func()
+	vendor, isVendor := strings.CutPrefix(entry.Provider, providerPrefix)
 	switch {
 	case entry.Provider == tierSelfHost:
 		// Family validation first: a model this platform cannot serve at
@@ -336,8 +338,8 @@ func (rt *InvokeStreamRouter) InvokeModelWithResponseStream(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
-	case strings.HasPrefix(entry.Provider, providerPrefix):
-		switch strings.TrimPrefix(entry.Provider, providerPrefix) {
+	case isVendor:
+		switch vendor {
 		case vendorAnthropic:
 			key, ok, err := rt.resolver.Resolve(ctx, accountID, vendorAnthropic)
 			if err != nil {
