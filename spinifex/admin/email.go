@@ -1,11 +1,12 @@
 package admin
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
+
+	toml "github.com/pelletier/go-toml/v2"
 )
 
 // Deliberately loose — we want to catch obvious typos (missing @, missing
@@ -27,30 +28,20 @@ func ValidateEmail(addr string) error {
 }
 
 // ReadOperatorEmail extracts the [operator].email scalar from spinifex.toml,
-// returning "" on any error or missing section. Uses a text scan, not a full TOML parser.
+// returning "" on any error or missing section.
 func ReadOperatorEmail(tomlPath string) string {
-	f, err := os.Open(tomlPath)
+	raw, err := os.ReadFile(tomlPath)
 	if err != nil {
 		return ""
 	}
-	defer f.Close()
 
-	keyRE := regexp.MustCompile(`^\s*email\s*=\s*"([^"]*)"`)
-	sc := bufio.NewScanner(f)
-	inOperator := false
-	for sc.Scan() {
-		line := sc.Text()
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "[") {
-			inOperator = trimmed == "[operator]"
-			continue
-		}
-		if !inOperator {
-			continue
-		}
-		if m := keyRE.FindStringSubmatch(line); m != nil {
-			return m[1]
-		}
+	var cfg struct {
+		Operator struct {
+			Email string `toml:"email"`
+		} `toml:"operator"`
 	}
-	return ""
+	if err := toml.Unmarshal(raw, &cfg); err != nil {
+		return ""
+	}
+	return cfg.Operator.Email
 }
