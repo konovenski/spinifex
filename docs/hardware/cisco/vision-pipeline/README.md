@@ -14,8 +14,6 @@ tags:
   - predastore
   - terraform
 resources:
-  - title: "Benchmark and workload materials (CISCO-refarch)"
-    url: "https://github.com/tomnewton-mulga/CISCO-refarch"
   - title: "Multi-Node Install"
     url: "/docs/install-multi-node"
   - title: "VPC Networking"

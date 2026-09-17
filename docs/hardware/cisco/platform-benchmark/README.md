@@ -22,8 +22,6 @@ resources:
     url: "/docs/launching-instances"
   - title: "GPU Passthrough"
     url: "/docs/gpu-passthrough"
-  - title: "cisco-ucs-platform-benchmark (scripts and raw results)"
-    url: "https://github.com/tomnewton-mulga/CISCO-refarch"
 sections:
   - overview
   - prerequisites
@@ -239,42 +237,46 @@ sequential repetitions per guest.
 
 | Guest | 16K mixed read/write | 16K random read | 128K mixed read/write | 128K random read |
 |---|---:|---:|---:|---:|
-| GPU | 75 / 32 MiB/s | 75 MiB/s | 210 / 91 MiB/s | 332 MiB/s |
-| CPU1 | 74 / 32 MiB/s | 76 MiB/s | 218 / 94 MiB/s | 333 MiB/s |
-| CPU2 | 69 / 30 MiB/s | 107 MiB/s | 226 / 98 MiB/s | 405 MiB/s |
+| GPU | 107 / 46 MiB/s | 107 MiB/s | 232 / 101 MiB/s | 376 MiB/s |
+| CPU1 | 80 / 35 MiB/s | 80 MiB/s | 226 / 98 MiB/s | 371 MiB/s |
+| CPU2 | 79 / 34 MiB/s | 80 MiB/s | 228 / 98 MiB/s | 372 MiB/s |
 
-The 128K guest random-read numbers (332–405 MiB/s) sit between the [AWS EBS gp3](https://docs.aws.amazon.com/ebs/latest/userguide/general-purpose.html)
-baseline (125 MiB/s) and its provisioned maximum (1,000 MiB/s) — a meaningful result
-given that gp3 baseline is what most AWS operators treat as the default floor for
-general-purpose block storage. The 16K numbers (75–107 MiB/s) land near that baseline.
-The gap to the raw NVMe host performance (the [KIOXIA CD8P](https://americas.kioxia.com/en-us/business/ssd/data-center-ssd/cd8p-r.html) delivers over 4,000 MiB/s
-host-side at comparable queue depths) is not architectural — it is the current
-single-queue virtio-blk attach path and unthreaded NBD backend, both of which have
-a clear source-level fix. These numbers are the baseline to improve against in future
-releases, not the ceiling.
+<img src="../../../../.github/assets/images/cisco-ucs-platform-benchmark/guest-storage-throughput.svg" alt="Guest block storage throughput by block size and access pattern">
+
+The 128K guest random-read numbers (371–376 MiB/s) sit between the [AWS EBS gp3](https://docs.aws.amazon.com/ebs/latest/userguide/general-purpose.html)
+baseline (125 MiB/s) and its provisioned maximum (1,000 MiB/s). The 16K numbers (79–107 MiB/s) land near that baseline.
 
 128K mixed I/O improves throughput but carries a high p99 latency envelope (roughly
-0.47–0.75 s); size queues and write patterns accordingly for latency-sensitive
+0.45–0.80 s); size queues and write patterns accordingly for latency-sensitive
 applications.
 
-Predastore S3 validation used 1 GiB objects with three sequential and three
-distributed-concurrent repetitions per host:
+Predastore S3 validation used 1 GiB objects. The AWS CLI splits any download above 8 MiB into concurrent ranged GETs while a plain client issues a single streaming GET, so the sweep measures both patterns with the same client (presigned `curl`) on the host and on each guest — a single-stream PUT/GET, and a chunked/concurrent Range GET (8 MiB parts, 10 in flight) that mirrors the AWS CLI's default download path — with three repetitions each:
 
-| Workload | Write, median | Read, median |
+| Client | Single-stream read | Chunked/concurrent read |
 |---|---:|---:|
-| One host client | 121.9 MiB/s | 213.2 MiB/s |
-| Three-host aggregate | 184.2 MiB/s | 381.7 MiB/s |
+| Host | 340 MiB/s | 462 MiB/s |
+| GPU guest | 399 MiB/s | 391 MiB/s |
+| CPU1 guest | 525 MiB/s | 350 MiB/s |
+| CPU2 guest | 517 MiB/s | 351 MiB/s |
 
-The single-host sequential read (213 MiB/s) is a credible result for a single-node
-S3-compatible store at low-to-moderate concurrency with 1 GiB objects — throughput at
-this scale is typically network- and per-request-latency-bound rather than disk-bound,
-and 213 MiB/s uses roughly 17% of the 25GbE storage fabric. The three-node distributed read (381.7 MiB/s, 1.79× single-host) confirms
-Predastore is distributing reads across the cluster. The write scaling ratio (184.2 vs
-121.9 MiB/s, 1.51×) is narrower than read, so worth tracking as a leading indicator of
-backend contention as the cluster grows and write load increases.
+<img src="../../../../.github/assets/images/cisco-ucs-platform-benchmark/predastore-s3-read-by-client.svg" alt="Predastore S3 read throughput by client, single-stream versus chunked/concurrent GET">
 
-All sequential S3 checksum validations passed. Full methodology, raw fio JSON and S3
-metrics are in the [benchmark repository](https://github.com/tomnewton-mulga/CISCO-refarch).
+Single-stream writes land at 282–304 MiB/s across the host and all three guests. Under three simultaneous clients — one per physical node — the cluster sustains 640 MiB/s aggregate read and 538 MiB/s aggregate write from the host, and 665 / 515 MiB/s from the guests.
+
+With the client held constant, single-stream host and guest reads fall in the same 340–525 MiB/s band, and aggregate read reaches 640–665 MiB/s across three concurrent clients. The chunked/concurrent Range-GET results vary by individual client rather than tracking host-versus-guest; that variation has no confirmed explanation yet and remains under investigation. All sequential S3 checksum validations passed.
+
+### 6. Network benchmark
+
+Network throughput was measured with iperf3 over TCP, with a 10-second run after a 3-second warmup, five repetitions at 1, 2, 4, 8 and 16 parallel streams, on two paths: host-to-host across the dedicated 25GbE storage fabric (VLAN 1336), and guest-to-guest across the OVN overlay that connects instances.
+
+| Path | Single stream | 2–16 streams |
+|---|---:|---:|
+| Host physical fabric (25GbE) | 23.4 Gbit/s | 23.5 Gbit/s |
+| Guest overlay (OVN) | 22.0 Gbit/s | 22.5 Gbit/s |
+
+<img src="../../../../.github/assets/images/cisco-ucs-platform-benchmark/network-goodput-vs-streams.svg" alt="Network TCP goodput versus parallel stream count, host physical fabric versus guest overlay">
+
+TCP goodput on a 25GbE link settles near 23.5 Gbit/s once framing and protocol overhead are removed, so the host path runs at effectively line rate with zero retransmissions. The guest overlay sustains 22.0 Gbit/s on a single stream, rising to 22.5 Gbit/s at two streams and holding flat through sixteen — 95–96% of the physical fabric across the full range.
 
 ## What this architecture unlocks
 

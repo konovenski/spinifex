@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="470" viewBox="0 0 760 470" font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+<rect width="760" height="470" fill="#ffffff"/>
+<text x="74" y="30" font-size="19" font-weight="700" fill="#1f2937">Guest block storage throughput (Viperblock)</text>
+<text x="74" y="49" font-size="12.5" fill="#6b7280">fio, 4 jobs, iodepth 32, direct I/O, per-guest sequential runs — Spinifex v1.20.0</text>
+<line x1="74" y1="386.0" x2="734" y2="386.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="64" y="390.0" font-size="12" text-anchor="end" fill="#6b7280">0</text>
+<line x1="74" y1="305.0" x2="734" y2="305.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="64" y="309.0" font-size="12" text-anchor="end" fill="#6b7280">100</text>
+<line x1="74" y1="224.0" x2="734" y2="224.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="64" y="228.0" font-size="12" text-anchor="end" fill="#6b7280">200</text>
+<line x1="74" y1="143.0" x2="734" y2="143.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="64" y="147.0" font-size="12" text-anchor="end" fill="#6b7280">300</text>
+<line x1="74" y1="62.0" x2="734" y2="62.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="64" y="66.0" font-size="12" text-anchor="end" fill="#6b7280">400</text>
+<text x="22" y="224.0" font-size="12.5" fill="#6b7280" transform="rotate(-90 22 224.0)" text-anchor="middle">MiB/s</text>
+<rect x="111.4" y="81.4" width="45.4" height="304.6" rx="2.5" fill="#2563eb"/>
+<text x="134.1" y="75.4" font-size="11" text-anchor="middle" fill="#1f2937">376</text>
+<rect x="159.8" y="198.1" width="45.4" height="187.9" rx="2.5" fill="#0d9488"/>
+<text x="182.5" y="192.1" font-size="11" text-anchor="middle" fill="#1f2937">232</text>
+<rect x="208.2" y="299.3" width="45.4" height="86.7" rx="2.5" fill="#f59e0b"/>
+<text x="230.9" y="293.3" font-size="11" text-anchor="middle" fill="#1f2937">107</text>
+<text x="184.0" y="408.0" font-size="13" text-anchor="middle" font-weight="600" fill="#1f2937">GPU</text>
+<rect x="331.4" y="85.5" width="45.4" height="300.5" rx="2.5" fill="#2563eb"/>
+<text x="354.1" y="79.5" font-size="11" text-anchor="middle" fill="#1f2937">371</text>
+<rect x="379.8" y="202.9" width="45.4" height="183.1" rx="2.5" fill="#0d9488"/>
+<text x="402.5" y="196.9" font-size="11" text-anchor="middle" fill="#1f2937">226</text>
+<rect x="428.2" y="321.2" width="45.4" height="64.8" rx="2.5" fill="#f59e0b"/>
+<text x="450.9" y="315.2" font-size="11" text-anchor="middle" fill="#1f2937">80</text>
+<text x="404.0" y="408.0" font-size="13" text-anchor="middle" font-weight="600" fill="#1f2937">CPU1</text>
+<rect x="551.4" y="84.7" width="45.4" height="301.3" rx="2.5" fill="#2563eb"/>
+<text x="574.1" y="78.7" font-size="11" text-anchor="middle" fill="#1f2937">372</text>
+<rect x="599.8" y="201.3" width="45.4" height="184.7" rx="2.5" fill="#0d9488"/>
+<text x="622.5" y="195.3" font-size="11" text-anchor="middle" fill="#1f2937">228</text>
+<rect x="648.2" y="321.2" width="45.4" height="64.8" rx="2.5" fill="#f59e0b"/>
+<text x="670.9" y="315.2" font-size="11" text-anchor="middle" fill="#1f2937">80</text>
+<text x="624.0" y="408.0" font-size="13" text-anchor="middle" font-weight="600" fill="#1f2937">CPU2</text>
+<line x1="74" y1="386" x2="734" y2="386" stroke="#1f2937" stroke-width="1.5"/>
+<rect x="74" y="444" width="13" height="13" rx="2.5" fill="#2563eb"/>
+<text x="93" y="455" font-size="12.5" fill="#1f2937">128K random read</text>
+<rect x="216.8" y="444" width="13" height="13" rx="2.5" fill="#0d9488"/>
+<text x="235.8" y="455" font-size="12.5" fill="#1f2937">128K mixed read</text>
+<rect x="352.3" y="444" width="13" height="13" rx="2.5" fill="#f59e0b"/>
+<text x="371.3" y="455" font-size="12.5" fill="#1f2937">16K random read</text>
+</svg>

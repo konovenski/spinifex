@@ -22,8 +22,6 @@ resources:
     url: "/hardware/cisco/platform-benchmark"
   - title: "Vision pipeline (companion document)"
     url: "/hardware/cisco/vision-pipeline"
-  - title: "Benchmark and workload materials (CISCO-refarch)"
-    url: "https://github.com/tomnewton-mulga/CISCO-refarch"
   - title: "vLLM"
     url: "https://docs.vllm.ai"
   - title: "Qwen2.5-7B-Instruct"
