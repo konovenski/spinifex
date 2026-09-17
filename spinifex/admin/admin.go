@@ -213,18 +213,25 @@ func GenerateConfigFile(configPath string, configTemplate string, configSettings
 }
 
 // AWSGWServiceDNSNames builds the AWS-parity TLS SANs for the awsgw cert from
-// the cluster region and internal suffix: the exact ECR control-plane host and
-// the wildcard covering per-account registry hosts. Returns nil if either input
-// is empty so callers omit the SANs rather than emitting malformed names.
+// the cluster region and internal suffix: the ECR control-plane host, the
+// wildcard covering per-account registry hosts, and one name per service in
+// config.AWSGWServiceNames. Shares that list with handlers/dns's
+// ServiceEndpointNames so the SANs and the DNS records can never drift apart.
+// Returns nil if either input is empty so callers omit the SANs rather than
+// emitting malformed names.
 func AWSGWServiceDNSNames(region, suffix string) []string {
 	if region == "" || suffix == "" {
 		return nil
 	}
 	base := "ecr." + region + "." + suffix
-	return []string{
+	names := []string{
 		base,            // control plane: ecr.{region}.{suffix}
 		"*.dkr." + base, // registry: *.dkr.ecr.{region}.{suffix}
 	}
+	for _, svc := range config.AWSGWServiceNames {
+		names = append(names, svc+"."+region+"."+suffix)
+	}
+	return names
 }
 
 // GenerateCertificatesIfNeeded prepares the TLS material for a node. The CA is
@@ -232,7 +239,7 @@ func AWSGWServiceDNSNames(region, suffix string) []string {
 // peer certs, and CA-baked AMIs — so it is regenerated only when absent, never on
 // force. The CA-signed server cert is cheap to reissue, so force refreshes it to
 // pick up a changed bind IP / SANs while keeping the CA (and all trust) intact.
-func GenerateCertificatesIfNeeded(configDir string, force bool, bindIP string, awsRegion, internalSuffix string) (caCertPath string) {
+func GenerateCertificatesIfNeeded(configDir string, force bool, bindIP string, awsRegion, servicesDomain string) (caCertPath string) {
 	caCertPath = filepath.Join(configDir, "ca.pem")
 	caKeyPath := filepath.Join(configDir, "ca.key")
 	serverCertPath := filepath.Join(configDir, "server.pem")
@@ -260,7 +267,7 @@ func GenerateCertificatesIfNeeded(configDir string, force bool, bindIP string, a
 	}
 
 	if force || !FileExists(serverCertPath) || !FileExists(serverKeyPath) {
-		extraDNS := AWSGWServiceDNSNames(awsRegion, internalSuffix)
+		extraDNS := AWSGWServiceDNSNames(awsRegion, servicesDomain)
 		// Always pin the canonical mgmt-bridge IP; the control plane publishes to
 		// it regardless of whether br-mgmt is up when this cert is minted.
 		extraIPs := []string{bindIP, config.DefaultMgmtBridgeIP}
@@ -306,8 +313,8 @@ func TenantCAKeyPath(configDir string) string {
 
 // GenerateServerCertOnly generates a server certificate signed by an existing CA.
 // Used by joining nodes that receive the CA from the leader. awsRegion and
-// internalSuffix add the AWS-parity ECR SANs; empty values omit them.
-func GenerateServerCertOnly(configDir string, bindIP, awsRegion, internalSuffix string) error {
+// servicesDomain add the AWS-parity ECR SANs; empty values omit them.
+func GenerateServerCertOnly(configDir string, bindIP, awsRegion, servicesDomain string) error {
 	caCertPath := filepath.Join(configDir, "ca.pem")
 	caKeyPath := filepath.Join(configDir, "ca.key")
 	serverCertPath := filepath.Join(configDir, "server.pem")
@@ -317,7 +324,7 @@ func GenerateServerCertOnly(configDir string, bindIP, awsRegion, internalSuffix 
 		return fmt.Errorf("CA files not found in %s", configDir)
 	}
 
-	extraDNS := AWSGWServiceDNSNames(awsRegion, internalSuffix)
+	extraDNS := AWSGWServiceDNSNames(awsRegion, servicesDomain)
 	// Always pin the canonical mgmt-bridge IP (see GenerateCertificatesIfNeeded).
 	extraIPs := []string{bindIP, config.DefaultMgmtBridgeIP}
 	return GenerateSignedCert(serverCertPath, serverKeyPath, caCertPath, caKeyPath, extraIPs, extraDNS)
