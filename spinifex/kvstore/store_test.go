@@ -316,17 +316,56 @@ func TestStore_CompareAndSetRejectsAStaleRevision(t *testing.T) {
 	// Another writer commits first, moving the revision on.
 	seedRaw(t, store, "acct-a/one", record{Name: "one", Count: 2})
 
-	err := store.CompareAndSet(t.Context(), "acct-a/one", &record{Name: "one", Count: 99}, stale)
+	_, err := store.CompareAndSet(t.Context(), "acct-a/one", &record{Name: "one", Count: 99}, stale)
 	require.ErrorIs(t, err, kvstore.ErrConflict)
 
 	got, fresh, err := store.Get(t.Context(), "acct-a/one")
 	require.NoError(t, err)
 	assert.Equal(t, 2, got.Count, "a rejected write must leave the winner's value in place")
 
-	require.NoError(t, store.CompareAndSet(t.Context(), "acct-a/one", &record{Name: "one", Count: 3}, fresh))
+	_, err = store.CompareAndSet(t.Context(), "acct-a/one", &record{Name: "one", Count: 3}, fresh)
+	require.NoError(t, err)
 	got, _, err = store.Get(t.Context(), "acct-a/one")
 	require.NoError(t, err)
 	assert.Equal(t, 3, got.Count, "the same call commits at the current revision")
+}
+
+// TestBucket_CompareAndDeleteWithdrawsOnlyItsOwnWrite pins the reservation
+// rollback: the holder removes the record it wrote, and a replacement that
+// landed on top of it survives.
+func TestBucket_CompareAndDeleteWithdrawsOnlyItsOwnWrite(t *testing.T) {
+	t.Parallel()
+	store := newStore(t)
+	own := mustCreate(t, store, "acct-a/mine", record{Name: "mine", Count: 1})
+
+	require.NoError(t, store.CompareAndDelete(t.Context(), "acct-a/mine", own))
+	_, _, err := store.Get(t.Context(), "acct-a/mine")
+	require.ErrorIs(t, err, kvstore.ErrNotFound, "the holder's own write is withdrawn")
+
+	stale := mustCreate(t, store, "acct-a/theirs", record{Name: "theirs", Count: 1})
+	// A replacement lands on top of the reservation.
+	seedRaw(t, store, "acct-a/theirs", record{Name: "theirs", Count: 2})
+
+	err = store.CompareAndDelete(t.Context(), "acct-a/theirs", stale)
+	require.ErrorIs(t, err, kvstore.ErrConflict)
+	got, _, err := store.Get(t.Context(), "acct-a/theirs")
+	require.NoError(t, err, "a lost guard must leave the replacement in place")
+	assert.Equal(t, 2, got.Count)
+}
+
+// Unlike Delete, a guarded delete carries an expected last sequence, so a key
+// that is already gone fails the guard rather than reporting success.
+func TestBucket_CompareAndDeleteReportsAnAbsentKeyAsConflict(t *testing.T) {
+	t.Parallel()
+	store := newStore(t)
+	rev := mustCreate(t, store, "acct-a/one", record{Name: "one"})
+	require.NoError(t, store.CompareAndDelete(t.Context(), "acct-a/one", rev))
+
+	err := store.CompareAndDelete(t.Context(), "acct-a/one", rev)
+	require.ErrorIs(t, err, kvstore.ErrConflict, "the spent revision does not delete a second time")
+
+	err = store.CompareAndDelete(t.Context(), "never-existed", 1)
+	require.ErrorIs(t, err, kvstore.ErrConflict)
 }
 
 // TestStore_CreateReturnsTheClaimRevision pins the claim-then-CAS sequence a
@@ -344,11 +383,11 @@ func TestStore_CreateReturnsTheClaimRevision(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, read, claimed, "the claim revision is the record's current revision")
 
-	require.NoError(t, store.CompareAndSet(t.Context(), "singleton", &record{Name: "available"}, claimed),
-		"the winner promotes its own claim without re-reading")
+	_, err = store.CompareAndSet(t.Context(), "singleton", &record{Name: "available"}, claimed)
+	require.NoError(t, err, "the winner promotes its own claim without re-reading")
 
 	// The spent revision must not commit a second time.
-	err = store.CompareAndSet(t.Context(), "singleton", &record{Name: "impostor"}, claimed)
+	_, err = store.CompareAndSet(t.Context(), "singleton", &record{Name: "impostor"}, claimed)
 	require.ErrorIs(t, err, kvstore.ErrConflict)
 
 	got, _, err := store.Get(t.Context(), "singleton")

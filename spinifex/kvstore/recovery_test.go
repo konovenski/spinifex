@@ -191,8 +191,22 @@ func TestStore_CompareAndSetDoesNotReRun(t *testing.T) {
 	require.NoError(t, err)
 	loseStream(t, js)
 
-	err = store.CompareAndSet(t.Context(), "acct-a/one", &record{Name: "two"}, rev)
+	_, err = store.CompareAndSet(t.Context(), "acct-a/one", &record{Name: "two"}, rev)
 	require.Error(t, err, "a revision-guarded write must not be replayed onto a reopened bucket")
+	assert.ErrorContains(t, err, "acct-a/one")
+}
+
+// CompareAndDelete guards on the caller's revision, so replaying it against a
+// reopened bucket would delete under a revision from the bucket it lost.
+func TestBucket_CompareAndDeleteDoesNotReRun(t *testing.T) {
+	t.Parallel()
+	_, js, store := newRecoverableStore(t, kvstore.Config{RecreateIfMissing: true})
+	rev, err := store.Create(t.Context(), "acct-a/one", &record{Name: "one"})
+	require.NoError(t, err)
+	loseStream(t, js)
+
+	err = store.CompareAndDelete(t.Context(), "acct-a/one", rev)
+	require.Error(t, err, "a revision-guarded delete must not be replayed onto a reopened bucket")
 	assert.ErrorContains(t, err, "acct-a/one")
 }
 
@@ -402,4 +416,32 @@ func TestBucket_DescriptionReachesTheCreatedBucket(t *testing.T) {
 	status, err := kv.Status(t.Context())
 	require.NoError(t, err)
 	assert.Equal(t, "a bucket that says what it is", status.(*jetstream.KeyValueBucketStatus).StreamInfo().Config.Description)
+}
+
+// A Store over a fixed handle cannot reopen, so a transient outage must leave
+// the handle it already has. Discarding it would end every later call with the
+// configured Missing reason, long after the stream came back.
+func TestBucket_FixedHandleSurvivesATransientOutage(t *testing.T) {
+	t.Parallel()
+	_, nc, _ := testutil.StartTestJetStream(t)
+	js := testutil.NewJetStream(t, nc)
+
+	const bucket = "kvstore-fixed-handle-test"
+	cfg := jetstream.KeyValueConfig{Bucket: bucket, History: 1}
+	kv, err := js.CreateKeyValue(t.Context(), cfg)
+	require.NoError(t, err)
+
+	store := kvstore.Over[record](nil, kv, kvstore.Config{Name: bucket, Missing: "test: no JetStream client"})
+	require.NoError(t, store.Set(t.Context(), "acct-a/one", &record{Name: "one"}))
+
+	loseStream := func() { require.NoError(t, js.DeleteKeyValue(t.Context(), bucket)) }
+	loseStream()
+	_, _, err = store.Get(t.Context(), "acct-a/one")
+	require.Error(t, err, "the call meeting the lost stream still fails")
+
+	_, err = js.CreateKeyValue(t.Context(), cfg)
+	require.NoError(t, err)
+
+	err = store.Set(t.Context(), "acct-a/one", &record{Name: "two"})
+	require.NoError(t, err, "the store must work again once the stream is back")
 }

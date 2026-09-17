@@ -40,6 +40,11 @@ type Config struct {
 	// as instance state is by the owning node's next write.
 	RecreateIfMissing bool
 
+	// AttachOnly opens an existing bucket and never creates one, for a caller
+	// reading buckets it did not make: one deleted between a listing and the
+	// read is then an error rather than a silently recreated empty bucket.
+	AttachOnly bool
+
 	// OnOpen runs after every successful open, including a recovery reopen, so
 	// a recreated bucket is re-stamped rather than left unversioned. Owners
 	// use it to run their schema migrations.
@@ -175,13 +180,16 @@ func (b *Bucket) Reopen(ctx context.Context) (jetstream.KeyValue, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	b.kv = nil
+	// Checked before the handle is discarded. A Bucket over a fixed handle has
+	// nothing to resolve against, so dropping it would turn one transient
+	// outage into a permanent failure for every later call.
 	if b.js == nil {
 		if b.cfg.Missing == "" {
 			return nil, errors.New("kvstore: cannot reopen without a JetStream client")
 		}
 		return nil, errors.New(b.cfg.Missing)
 	}
+	b.kv = nil
 
 	// Another goroutine may already have repaired it, so reconnecting comes
 	// first and is the only step that is always safe.
@@ -229,6 +237,82 @@ func (b *Bucket) withKV(ctx context.Context, op func(jetstream.KeyValue) error) 
 		return err
 	}
 	return op(kv)
+}
+
+// Delete removes a key. Idempotent: an already-absent key is success.
+//
+// On Bucket rather than Store because it decodes nothing, so every typed view
+// over one bucket shares it and a codec-free caller needs no type parameter.
+func (b *Bucket) Delete(ctx context.Context, key string) error {
+	err := b.withKV(ctx, func(kv jetstream.KeyValue) error {
+		if err := kv.Delete(ctx, key); err != nil {
+			return fmt.Errorf("kvstore: delete %s: %w", key, err)
+		}
+		return nil
+	})
+	if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+		return err
+	}
+	return nil
+}
+
+// CompareAndDelete removes a key only if it is still at rev, returning
+// ErrConflict when it is not.
+//
+// Unlike Delete this is not idempotent: a guarded delete carries an expected
+// last sequence, and an absent, tombstoned or purged key fails that check, so
+// an already-gone key reports ErrConflict rather than success.
+//
+// This is the delete half of CompareAndSet, for a caller undoing a reservation
+// it made — it must remove its own write and not a replacement that landed on
+// top of it.
+func (b *Bucket) CompareAndDelete(ctx context.Context, key string, rev uint64) error {
+	kv, err := b.KV(ctx)
+	if err != nil {
+		return err
+	}
+	// Not through withKV: the revision is the caller's, so a replay against a
+	// reopened bucket would be guarded on a revision from the bucket it lost.
+	if err := kv.Delete(ctx, key, jetstream.LastRevision(rev)); err != nil {
+		if errors.Is(err, jetstream.ErrKeyRevisionMismatch) {
+			return fmt.Errorf("%w: %s", ErrConflict, key)
+		}
+		return fmt.Errorf("kvstore: delete %s: %w", key, err)
+	}
+	return nil
+}
+
+// Purge is Delete for a key whose history must go with it, so a later Create
+// sees a key that never existed rather than one with a delete marker on top.
+func (b *Bucket) Purge(ctx context.Context, key string) error {
+	err := b.withKV(ctx, func(kv jetstream.KeyValue) error {
+		if err := kv.Purge(ctx, key); err != nil {
+			return fmt.Errorf("kvstore: purge %s: %w", key, err)
+		}
+		return nil
+	})
+	if err != nil && !errors.Is(err, jetstream.ErrKeyNotFound) {
+		return err
+	}
+	return nil
+}
+
+// Exists reports whether a key is present without decoding its value, so a
+// record that cannot be unmarshalled is still reported as present.
+func (b *Bucket) Exists(ctx context.Context, key string) (bool, error) {
+	err := b.withKV(ctx, func(kv jetstream.KeyValue) error {
+		if _, err := kv.Get(ctx, key); err != nil {
+			return fmt.Errorf("kvstore: get %s: %w", key, err)
+		}
+		return nil
+	})
+	if err != nil {
+		if errors.Is(err, jetstream.ErrKeyNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 // onOpen runs the configured open hook, naming the bucket on failure so a
@@ -298,6 +382,12 @@ func (b *Bucket) WatchFrom(ctx context.Context, filter string, revision uint64) 
 // open picks the kvutil helper matching the configured TTL and replica count.
 func (b *Bucket) open(ctx context.Context) (jetstream.KeyValue, error) {
 	switch {
+	case b.cfg.AttachOnly:
+		kv, err := b.js.KeyValue(ctx, b.cfg.Name)
+		if err != nil {
+			return nil, fmt.Errorf("open KV bucket %s: %w", b.cfg.Name, err)
+		}
+		return kv, nil
 	case b.cfg.TTL > 0:
 		return kvutil.GetOrCreateBucketWithOptions(ctx, b.js, kvutil.BucketOptions{
 			Name:        b.cfg.Name,

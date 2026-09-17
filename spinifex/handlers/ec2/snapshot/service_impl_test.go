@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"path"
+	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -15,6 +17,7 @@ import (
 	"github.com/mulgadc/spinifex/spinifex/config"
 	"github.com/mulgadc/spinifex/spinifex/ebsmetadata"
 	"github.com/mulgadc/spinifex/spinifex/ebsprovider"
+	"github.com/mulgadc/spinifex/spinifex/kvstore"
 	"github.com/mulgadc/spinifex/spinifex/objectstore"
 	"github.com/mulgadc/spinifex/spinifex/testutil"
 	"github.com/nats-io/nats.go/jetstream"
@@ -594,9 +597,18 @@ func setupTestNATSKV(t *testing.T) jetstream.KeyValue {
 	return kv
 }
 
+// newRefService builds a service whose only wiring is the volume-snapshot
+// index, which is all the ref tests touch. A nil kv is the disabled case.
+func newRefService(kv jetstream.KeyValue) *SnapshotServiceImpl {
+	if kv == nil {
+		return &SnapshotServiceImpl{}
+	}
+	return &SnapshotServiceImpl{snapRefs: kvstore.Over[[]string](nil, kv, snapshotRefsConfig())}
+}
+
 func TestAddSnapshotRef(t *testing.T) {
 	kv := setupTestNATSKV(t)
-	svc := &SnapshotServiceImpl{snapKV: kv}
+	svc := newRefService(kv)
 
 	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-a"))
 	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-b"))
@@ -610,7 +622,7 @@ func TestAddSnapshotRef(t *testing.T) {
 
 func TestRemoveSnapshotRef(t *testing.T) {
 	kv := setupTestNATSKV(t)
-	svc := &SnapshotServiceImpl{snapKV: kv}
+	svc := newRefService(kv)
 
 	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-a"))
 	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-b"))
@@ -633,7 +645,7 @@ func TestRemoveSnapshotRef(t *testing.T) {
 
 func TestRemoveSnapshotRef_NonExistentKey(t *testing.T) {
 	kv := setupTestNATSKV(t)
-	svc := &SnapshotServiceImpl{snapKV: kv}
+	svc := newRefService(kv)
 
 	// Should not error on non-existent key
 	require.NoError(t, svc.removeSnapshotRef(t.Context(), "vol-nonexistent", "snap-x"))
@@ -641,7 +653,7 @@ func TestRemoveSnapshotRef_NonExistentKey(t *testing.T) {
 
 func TestRemoveSnapshotRefForCleanupSurvivesCancellation(t *testing.T) {
 	kv := setupTestNATSKV(t)
-	svc := &SnapshotServiceImpl{snapKV: kv}
+	svc := newRefService(kv)
 	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-a"))
 
 	ctx, cancel := context.WithCancel(t.Context())
@@ -654,7 +666,7 @@ func TestRemoveSnapshotRefForCleanupSurvivesCancellation(t *testing.T) {
 
 func TestVolumeHasSnapshots(t *testing.T) {
 	kv := setupTestNATSKV(t)
-	svc := &SnapshotServiceImpl{snapKV: kv}
+	svc := newRefService(kv)
 
 	// No entry → false
 	has, err := svc.volumeHasSnapshots(t.Context(), "vol-1")
@@ -675,7 +687,7 @@ func TestVolumeHasSnapshots(t *testing.T) {
 }
 
 func TestKVNilFallback(t *testing.T) {
-	svc := &SnapshotServiceImpl{snapKV: nil}
+	svc := newRefService(nil)
 
 	// All methods should be no-ops when KV is nil
 	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-a"))
@@ -1272,4 +1284,97 @@ type copyFailingProvider struct {
 
 func (p *copyFailingProvider) CopySnapshot(context.Context, ebsprovider.CopySnapshotRequest) (*ebsprovider.Snapshot, error) {
 	return nil, errors.New("provider copy failed")
+}
+
+// Concurrent adds against one volume must not lose a reference, which is what
+// the CAS loop exists to prevent.
+func TestAddSnapshotRefConcurrentNoLostUpdates(t *testing.T) {
+	kv := setupTestNATSKV(t)
+	svc := newRefService(kv)
+
+	const refs = 16
+	var wg sync.WaitGroup
+	errs := make([]error, refs)
+	for i := range refs {
+		wg.Go(func() {
+			errs[i] = svc.addSnapshotRef(t.Context(), "vol-1", "snap-"+strconv.Itoa(i))
+		})
+	}
+	wg.Wait()
+	require.NoError(t, errors.Join(errs...))
+
+	entry, err := kv.Get(t.Context(), "vol-1")
+	require.NoError(t, err)
+	var snapshots []string
+	require.NoError(t, json.Unmarshal(entry.Value(), &snapshots))
+	assert.Len(t, snapshots, refs)
+}
+
+// Removing the last reference takes the key with it, so a volume that has lost
+// every snapshot leaves nothing behind for volumeHasSnapshots to read.
+func TestRemoveSnapshotRefDropsTheEmptiedKey(t *testing.T) {
+	kv := setupTestNATSKV(t)
+	svc := newRefService(kv)
+
+	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-a"))
+	require.NoError(t, svc.removeSnapshotRef(t.Context(), "vol-1", "snap-a"))
+
+	_, err := kv.Get(t.Context(), "vol-1")
+	require.ErrorIs(t, err, jetstream.ErrKeyNotFound, "the emptied index key must be gone")
+
+	has, err := svc.volumeHasSnapshots(t.Context(), "vol-1")
+	require.NoError(t, err)
+	assert.False(t, has)
+}
+
+// dropEmptySnapshotRefs leaves a key that is no longer empty alone, so a volume
+// that gained a snapshot after the check keeps its index.
+func TestDropEmptySnapshotRefsLeavesANonEmptyKey(t *testing.T) {
+	kv := setupTestNATSKV(t)
+	svc := newRefService(kv)
+
+	require.NoError(t, svc.addSnapshotRef(t.Context(), "vol-1", "snap-b"))
+	require.NoError(t, svc.dropEmptySnapshotRefs(t.Context(), "vol-1"))
+
+	entry, err := kv.Get(t.Context(), "vol-1")
+	require.NoError(t, err)
+	var snapshots []string
+	require.NoError(t, json.Unmarshal(entry.Value(), &snapshots))
+	assert.Equal(t, []string{"snap-b"}, snapshots)
+}
+
+// The empty-key delete is guarded on the revision the emptiness was read at, so
+// an add landing between that read and the delete keeps its reference. An
+// unguarded delete drops it, and volumeHasSnapshots then reports no snapshots
+// for a volume that has one — which is what DeleteVolume gates on.
+func TestDropEmptySnapshotRefsDoesNotDropAConcurrentAdd(t *testing.T) {
+	kv := setupTestNATSKV(t)
+	svc := newRefService(kv)
+
+	// Repeated because the losing interleaving is a window, not a certainty.
+	for i := range 200 {
+		volume := "vol-" + strconv.Itoa(i)
+		_, err := kv.Put(t.Context(), volume, []byte("[]"))
+		require.NoError(t, err)
+
+		start := make(chan struct{})
+		var wg sync.WaitGroup
+		var dropErr, addErr error
+		wg.Go(func() {
+			<-start
+			dropErr = svc.dropEmptySnapshotRefs(t.Context(), volume)
+		})
+		wg.Go(func() {
+			<-start
+			addErr = svc.addSnapshotRef(t.Context(), volume, "snap-b")
+		})
+		close(start)
+		wg.Wait()
+		require.NoError(t, dropErr)
+		require.NoError(t, addErr)
+
+		has, err := svc.volumeHasSnapshots(t.Context(), volume)
+		require.NoError(t, err)
+		assert.True(t, has, "iteration %d: the concurrent add was dropped by the empty-key delete", i)
+	}
 }
