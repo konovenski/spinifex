@@ -139,11 +139,28 @@ func instanceFactsFromVM(v *vm.VM) *instanceFacts {
 		lifecycleType:         v.InstanceLifecycle,
 		pendingTime:           aws.TimeValue(inst.LaunchTime),
 		userData:              decodeUserData(v.RunInstancesInput),
+		blockDeviceNames:      blockDeviceNames(inst.BlockDeviceMappings),
 	}
 	if inst.MetadataOptions != nil {
 		facts.httpTokens = aws.StringValue(inst.MetadataOptions.HttpTokens)
 	}
 	return facts
+}
+
+// blockDeviceNames projects device names in attachment order. The root volume
+// is written first at launch and attachments append after it, so index 0 is
+// the boot device. Nil and unset names are skipped.
+func blockDeviceNames(mappings []*ec2.InstanceBlockDeviceMapping) []string {
+	names := make([]string, 0, len(mappings))
+	for _, m := range mappings {
+		if m == nil {
+			continue
+		}
+		if name := aws.StringValue(m.DeviceName); name != "" {
+			names = append(names, name)
+		}
+	}
+	return names
 }
 
 // decodeUserData extracts and decodes the launch-time base64 user-data,
