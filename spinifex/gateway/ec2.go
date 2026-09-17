@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net"
 	"net/http"
 	"strings"
 	"uuid"
@@ -141,6 +142,24 @@ func ec2HandlerWithReq[In any](handler func(ctx context.Context, input *In, gw *
 			return xmlOutput, nil
 		},
 	}
+}
+
+// advertisedEndpoint returns this gateway's own dialable base URL, from the
+// same RegistryHost/RegistryPort that already advertise ECR. Falls back to
+// localhost only when no concrete host is configured.
+func (gw *GatewayConfig) advertisedEndpoint() string {
+	host := gw.RegistryHost
+	if host == "" {
+		host = "localhost"
+	}
+	port := gw.RegistryPort
+	if port == "" {
+		port = "9999"
+	}
+	if port == "443" {
+		return "https://" + host
+	}
+	return "https://" + net.JoinHostPort(host, port)
 }
 
 var ec2Actions = map[string]ec2Action{
@@ -293,7 +312,7 @@ var ec2Actions = map[string]ec2Action{
 		return gateway_ec2_image.ResetImageAttribute(ctx, input, gw.NATSConn, accountID)
 	}),
 	"DescribeRegions": ec2Handler(func(ctx context.Context, input *ec2.DescribeRegionsInput, gw *GatewayConfig, accountID string) (any, error) {
-		return gateway_ec2_zone.DescribeRegions(input, gw.Region)
+		return gateway_ec2_zone.DescribeRegions(input, gw.Region, gw.advertisedEndpoint())
 	}),
 	"DescribeAvailabilityZones": ec2Handler(func(ctx context.Context, input *ec2.DescribeAvailabilityZonesInput, gw *GatewayConfig, accountID string) (any, error) {
 		return gateway_ec2_zone.DescribeAvailabilityZones(input, gw.Region, gw.AZ)
