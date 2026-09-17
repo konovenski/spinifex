@@ -1,4 +1,4 @@
-package gateway_ecs
+package gateway_ecs_test
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/private/protocol/json/jsonutil"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/mulgadc/spinifex/spinifex/awserrors"
+	gateway_ecs "github.com/mulgadc/spinifex/spinifex/gateway/ecs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,7 +32,7 @@ func TestCheckAZRebalancing(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := checkAZRebalancing([]byte(tc.body))
+			err := gateway_ecs.CheckAZRebalancing([]byte(tc.body))
 			if !tc.wantErr {
 				require.NoError(t, err)
 				return
@@ -59,10 +60,10 @@ func TestAddSDKGapFields_DescribeServices(t *testing.T) {
 	var doc struct {
 		Services []map[string]any `json:"services"`
 	}
-	require.NoError(t, json.Unmarshal(addSDKGapFields(out, body), &doc))
+	require.NoError(t, json.Unmarshal(gateway_ecs.AddSDKGapFields(out, body), &doc))
 	require.Len(t, doc.Services, 2)
 	for _, svc := range doc.Services {
-		assert.Equal(t, azRebalancingDisabled, svc[availabilityZoneRebalancingField])
+		assert.Equal(t, gateway_ecs.AZRebalancingDisabled, svc[gateway_ecs.AvailabilityZoneRebalancingField])
 	}
 }
 
@@ -80,8 +81,8 @@ func TestAddSDKGapFields_SingleService(t *testing.T) {
 		var doc struct {
 			Service map[string]any `json:"service"`
 		}
-		require.NoError(t, json.Unmarshal(addSDKGapFields(out, body), &doc))
-		assert.Equal(t, azRebalancingDisabled, doc.Service[availabilityZoneRebalancingField])
+		require.NoError(t, json.Unmarshal(gateway_ecs.AddSDKGapFields(out, body), &doc))
+		assert.Equal(t, gateway_ecs.AZRebalancingDisabled, doc.Service[gateway_ecs.AvailabilityZoneRebalancingField])
 	}
 }
 
@@ -91,7 +92,7 @@ func TestAddSDKGapFields_LeavesOtherResponsesAlone(t *testing.T) {
 	out := &ecs.ListServicesOutput{ServiceArns: aws.StringSlice([]string{"arn:aws:ecs:::service/a"})}
 	body, err := jsonutil.BuildJSON(out)
 	require.NoError(t, err)
-	assert.Equal(t, string(body), string(addSDKGapFields(out, body)))
+	assert.Equal(t, string(body), string(gateway_ecs.AddSDKGapFields(out, body)))
 }
 
 // The re-encode must not rewrite the epoch-second times jsonutil emitted: a
@@ -111,7 +112,7 @@ func TestAddSDKGapFields_PreservesTimeEncoding(t *testing.T) {
 	var after struct {
 		Services []map[string]json.RawMessage `json:"services"`
 	}
-	require.NoError(t, json.Unmarshal(addSDKGapFields(out, body), &after))
+	require.NoError(t, json.Unmarshal(gateway_ecs.AddSDKGapFields(out, body), &after))
 
 	assert.Equal(t, string(before.Services[0]["createdAt"]), string(after.Services[0]["createdAt"]))
 }
@@ -125,6 +126,6 @@ func TestAddSDKGapFields_KeepsAnExistingValue(t *testing.T) {
 	var doc struct {
 		Services []map[string]any `json:"services"`
 	}
-	require.NoError(t, json.Unmarshal(addSDKGapFields(out, body), &doc))
-	assert.Equal(t, "ENABLED", doc.Services[0][availabilityZoneRebalancingField])
+	require.NoError(t, json.Unmarshal(gateway_ecs.AddSDKGapFields(out, body), &doc))
+	assert.Equal(t, "ENABLED", doc.Services[0][gateway_ecs.AvailabilityZoneRebalancingField])
 }
