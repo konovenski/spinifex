@@ -923,7 +923,7 @@ firewall_enabled = true
 
 Before enabling it, check what else the machine is serving — anything listening
 outside the public port group stops accepting new connections. See
-[Firewall and Cluster Membership](/docs/install-multi-node#firewall-and-cluster-membership)
+[Host Firewall](/docs/host-firewall)
 for the full port policy and the cluster-formation steps.
 
 ### Verifying it

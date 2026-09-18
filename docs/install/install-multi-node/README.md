@@ -35,8 +35,7 @@ resources:
 - [Prerequisites](#prerequisites)
 - [Instructions](#instructions)
 - [Verifying the cluster](#step-6-verify-the-cluster)
-- [Firewall and cluster membership](#firewall-and-cluster-membership)
-- [How multi-node storage works](#how-multi-node-storage-works)
+- [Setting up your cluster](#step-7-set-up-your-cluster)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -103,14 +102,14 @@ Open between the three OVN database servers (servers 1 to 3) only:
 |---|---|
 | TCP 6643, 6644 | OVN database clustering |
 
-Predastore uses the same three ports on every server, so the surface does not widen as the cluster grows. See [How multi-node storage works](#how-multi-node-storage-works).
+Predastore uses the same three ports on every server, so the surface does not widen as the cluster grows. See [Predastore Distributed Storage](/docs/predastore-distributed-storage).
 
 Those are the ports your **network** has to permit between the servers — switches, upstream firewalls, and anything else in the path.
 
-Spinifex's own **host** firewall is separate, and already carries this policy. It ships armed on the ISO path and off on the binary installer path. Two things follow from that, both of which the ISO box in Step 2 acts on:
+Spinifex's own **host** firewall is separate, and already carries this policy — see [Host Firewall](/docs/host-firewall). It ships armed on the ISO path and off on the binary installer path. Two things follow from that, both of which the ISO box in Step 2 acts on:
 
 - **The formation port needs nothing from you.** `spx admin init` opens 4432 to any source for the length of the formation window and closes it again afterwards, because a node dialling in to join is not a peer yet. The handshake behind it is TLS 1.3 with a bearer token.
-- **The rest of the cluster plane is peer-scoped**, and that includes the OVN database ports Step 3 uses. Nodes that do not yet know each other cannot reach them, which is why an ISO-installed node has its firewall taken down before Step 3 and re-armed after Step 6.
+- **The rest of the cluster plane is peer-scoped**, and that includes the OVN database ports Step 3 uses. Nodes that do not yet know each other cannot reach them, which is why an ISO-installed node has its firewall taken down before Step 3 and re-armed once the cluster is verified.
 
 ## Prerequisites
 
@@ -172,7 +171,7 @@ Adding a fourth server or more? Export `SPINIFEX_NODE4` and so on alongside thes
 >
 > Each node's firewall currently trusts only itself, because that is the whole cluster as far as it knows, and the cluster plane is peer-scoped — so the OVN database connections Step 3 makes between servers are dropped. Stopping `spinifex.target` is not enough: the firewall lives in the kernel and outlives the services.
 >
-> Turn it back on after Step 6 — see [Firewall and cluster membership](#firewall-and-cluster-membership).
+> Turn it back on once the cluster is verified — see [Host Firewall](/docs/host-firewall).
 
 ## Step 3. Set Up OVN Networking
 
@@ -370,117 +369,13 @@ aws ec2 describe-instance-types
 
 A list of instance types means the gateway, IAM and the cluster behind them are all working.
 
-**4. Every server holds the same cluster state.**
+**Congratulations! Your multi-server Spinifex cluster is installed.**
 
-Services report Ready even over a cluster whose JetStream replicas disagree, so check the replicas themselves. On **every server**, take a digest of its local store:
+## Step 7. Set Up Your Cluster
 
-```bash
-sudo spx admin kv digest --json --seqs > kv-digest-$(hostname).json
-```
+The cluster is running, but it holds nothing yet — no machine images, no networks, no instances.
 
-Copy the files to one server and compare them:
-
-```bash
-spx admin kv compare kv-digest-*.json
-```
-
-```
-compared 3 digests: node1@10:02:11 node2@10:02:14 node3@10:02:18
-ok        KV_spinifex-iam-users  [node1,node2,node3]
-      identical, seqs 1-14
-...
-42 streams: 42 consistent, 0 diverged
-```
-
-The last line must report `0 diverged`, and the command exits non-zero otherwise. The digests are copied from live stores a few seconds apart, so a write landing between two copies can briefly show as a difference: take fresh digests and compare again before acting on one. A difference that persists means the cluster adopted a server's old store as a replica. Do not put that cluster in service — reset the servers and form it again.
-
-A replica that is merely behind is not reported, and neither is a message that one server has already replaced with a newer write to the same key. `spx admin kv compare --help` lists exactly what counts as divergence.
-
-**Congratulations! Your Spinifex cluster is installed.**
-
-Continue to [Setting Up Your Cluster](/docs/setting-up-your-cluster) to import an AMI, create a VPC, and launch your first instance.
-
-## Firewall and Cluster Membership
-
-Spinifex ships an optional host firewall. It divides the node's ports into two groups:
-
-| Group | Ports | Who can reach them |
-|---|---|---|
-| **Public** | SSH, 443, 3000 (console), 8443 (S3), 9999 (AWS gateway), 53 (DNS) | anyone |
-| **Internal** | OVN, NATS, formation, Geneve and the rest of the cluster plane | **cluster members only** |
-
-The internal group is the point. Before this existed, OVN and NATS were reachable from the public internet on a WAN-facing node.
-
-"Cluster members" is not a list you maintain. Each node works it out from the cluster it belongs to and rewrites its own rules whenever membership changes — you never edit the peer list by hand.
-
-### Is it on?
-
-| How the node was installed | Firewall |
-|---|---|
-| From the ISO | **on** |
-| Binary installer (`curl \| bash`) or `setup.sh` | **off** |
-| `setup.sh --firewall=on` | **on** |
-
-The binary installer defaults to off deliberately: it runs on servers that already have an operating system and services on them, and switching on a default-deny policy uninvited could cut off something Spinifex knows nothing about. **For production, turn it on** — either at install time:
-
-```bash
-curl -fsSL https://install.mulgadc.com | bash -s -- --firewall=on
-```
-
-or afterwards, by setting it in `/etc/spinifex/spinifex.toml` and restarting the daemon:
-
-```toml
-[network]
-firewall_enabled = true
-```
-
-Before you do, check what else the machine is serving. Anything listening on a port outside the public group above stops accepting new connections.
-
-### Turning it off and on around cluster changes
-
-A node only recognises the members of the cluster it currently belongs to, so during formation — when the nodes do not yet know each other — internal traffic between them is blocked. Turn the firewall off while you form the cluster, and on again once it is up:
-
-```bash
-# Off — before forming or expanding a cluster. Run on every node.
-sudo /usr/local/lib/spinifex/spinifex-firewall-apply disable
-
-# On — once the cluster is formed and verified. Run on every node.
-sudo systemctl restart spinifex-daemon
-```
-
-Restarting the daemon is what re-arms it: the node rebuilds its peer list from the cluster it is now part of, reloads the rules, and re-enables the boot-time unit so the policy survives a reboot. It also happens on its own within five minutes if you would rather wait.
-
-### Checking it
-
-```bash
-sudo nft list table inet spinifex_filter
-```
-
-The peer list is an nft variable, expanded when the rules load, so it does not appear under a name of its own. Look instead at the `ip saddr { ... }` addresses on the cluster-plane rules — the ones accepting 4222, 6641, 6642 and the rest.
-
-Every node's addresses should be there. On a multi-NIC node that means its WAN, LAN and VPC addresses, so expect several entries per node. A missing node means its cluster traffic is being dropped.
-
-Dropped packets are logged, rate-limited, so this tells you whether a connection problem is the firewall or something else:
-
-```bash
-sudo journalctl -k | grep 'spinifex-fw drop'
-```
-
-## How Multi-Node Storage Works
-
-Background reading — you do not configure any of this by hand. `spx admin init` and `spx admin join` build the topology from the servers that actually form the cluster in Step 4, and each machine gets the same file with its own host ID recorded in `spinifex.toml`.
-
-Predastore is configured for the whole cluster in `/etc/spinifex/predastore/predastore.toml`. Each server is one `[[host]]` — a single Predastore process owning that machine's data directory and TLS identity — carrying three nodes under `[[host.node]]`:
-
-| Role | Port | Purpose |
-|---|---|---|
-| `gate` | TCP 8443 | Serves the S3 API. Every server runs one, so any of them answers an S3 request. |
-| `blob` | UDP 6660 | Holds erasure-coded object shards. One per machine. |
-| `meta` | UDP 7660 | Member of the Raft quorum over global state — buckets and the object index. |
-
-Ports have to be unique within a host but not across the cluster, so every machine uses the same three. Blob and meta traffic between hosts runs over QUIC, authenticated by the cluster CA; nodes on the same machine talk over an in-process pipe and open no socket, which is why a single-server install listens on 8443 alone.
-
-Reed-Solomon parameters are chosen from the cluster size, since each machine contributes exactly one blob node: two servers get `RS(1,1)`, three or more get `RS(2,1)`. `RS(2,1)` survives the loss of any one server's shards — another reason three nodes is the recommended minimum.
+Continue to [Setting Up Your Cluster](/docs/setting-up-your-cluster) to import an AMI, create an SSH key pair, create a VPC with a public subnet, and launch your first instance. It ends by arming the [host firewall](/docs/host-firewall), which is also where you re-arm it if you turned it off to form the cluster.
 
 ## Troubleshooting
 
@@ -500,7 +395,7 @@ If it hangs, check node 1's init output before blaming the firewall — `spx adm
 sudo journalctl -k | grep 'spinifex-fw drop'
 ```
 
-Turn the firewall off on **every** node and retry the join, then re-arm once the cluster is up — see [Firewall and cluster membership](#firewall-and-cluster-membership). The joining node retries for 20 minutes by default, so it is often still waiting while you fix this.
+Turn the firewall off on **every** node and retry the join, then re-arm once the cluster is up — see [Host Firewall](/docs/host-firewall). The joining node retries for 20 minutes by default, so it is often still waiting while you fix this.
 
 ### Join Refuses: "this node is already initialized"
 

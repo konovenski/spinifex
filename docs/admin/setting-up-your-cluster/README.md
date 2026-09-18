@@ -28,6 +28,7 @@ resources:
 - [5. Connect via SSH](#5-connect-via-ssh)
 - [6. Managing Instances](#6-managing-instances)
 - [7. Launching the Web UI](#7-launching-the-web-ui)
+- [8. Secure the Install](#8-secure-the-install)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -339,6 +340,22 @@ aws_secret_access_key = ...
 At the Spinifex login screen, paste the **Access Key ID** and **Secret Access Key** from the `[spinifex]` profile (or whichever profile maps to the IAM user or role you want to use). Additional users and policies can be managed through the UI or via `aws iam` commands — see [IAM Users and Policies](/docs/iam-users-and-policies).
 
 Once logged in, you have browser-based access to every Spinifex feature: launch and manage instances, attach EBS volumes, browse S3 buckets, configure VPCs and security groups, and manage IAM users and keys — all backed by the same AWS-compatible control plane the CLI uses.
+
+## 8. Secure the Install
+
+Your cluster works. Before it carries anything real, close the host down.
+
+**Arm the host firewall.** A binary install leaves it off, because it lands on a machine that was already doing something. Armed, it keeps OVN, NATS and the rest of the cluster plane reachable by cluster members only, and everything outside the public group closed:
+
+```toml
+# /etc/spinifex/spinifex.toml
+[network]
+firewall_enabled = true
+```
+
+**Narrow SSH.** It is accepted from every source by default, so that arming the policy cannot lock you out of the node you are arming it from. Replace `0.0.0.0/0` with your management networks in `/etc/spinifex/firewall/custom.nft` — the one file an upgrade never overwrites.
+
+[Host Firewall](/docs/host-firewall) covers both, what the policy allows, and how each node tracks cluster membership without a peer list you maintain.
 
 ## Additional Options
 

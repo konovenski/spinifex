@@ -122,7 +122,11 @@ If this returns a list of available instance types, your installation is working
 
 **Congratulations! Spinifex is installed.**
 
-Continue to [Setting Up Your Cluster](/docs/setting-up-your-cluster) to import an AMI, create a VPC, and launch your first instance.
+## Step 6. Set Up Your Cluster
+
+Spinifex is running, but it holds nothing yet — no machine images, no networks, no instances.
+
+Continue to [Setting Up Your Cluster](/docs/setting-up-your-cluster) to import an AMI, create an SSH key pair, create a VPC with a public subnet, and launch your first instance.
 
 ## Troubleshooting
 

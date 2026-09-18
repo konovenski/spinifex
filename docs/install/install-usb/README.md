@@ -183,7 +183,7 @@ The node rewrites its peer list from the cluster it is now part of and re-arms i
 sudo nft list table inet spinifex_filter
 ```
 
-Check the `ip saddr { ... }` addresses on the cluster-plane rules — the peer list is an nft variable expanded at load time, so it has no name of its own in the output. The addresses of **all** your servers should appear. If one is missing, that server's cluster traffic will be blocked — see [Firewall and cluster membership](/docs/install-multi-node#firewall-and-cluster-membership).
+Check the `ip saddr { ... }` addresses on the cluster-plane rules — the peer list is an nft variable expanded at load time, so it has no name of its own in the output. The addresses of **all** your servers should appear. If one is missing, that server's cluster traffic will be blocked — see [Host Firewall](/docs/host-firewall).
 
 ### Setup Complete
 
