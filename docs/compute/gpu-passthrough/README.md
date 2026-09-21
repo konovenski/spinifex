@@ -136,6 +136,23 @@ aws ec2 run-instances \
   --key-name spinifex-key
 ```
 
+Spinifex claims the GPU count advertised by the instance type. Multi-GPU types
+such as `g7e.12xlarge` therefore attach every advertised device atomically. To
+override that count for a homogeneous local GPU pool, use the Spinifex
+`Type=gpu` extension:
+
+```bash
+aws ec2 run-instances \
+  --image-id $GPU_AMI \
+  --instance-type g5.2xlarge \
+  --elastic-inference-accelerator Type=gpu,Count=3 \
+  --key-name spinifex-key
+```
+
+The launch fails with `InsufficientInstanceCapacity` rather than attaching only
+part of the requested GPU set. The admin Nodes page and instance detail page
+list every attached whole GPU or MIG slice.
+
 To verify the GPU is visible from inside the instance, SSH in and run:
 
 ```bash

@@ -2318,19 +2318,28 @@ func TestTerminateStoppedInstance_ReleaseAttachedENIs(t *testing.T) {
 // --- StartStoppedInstance tests ---
 
 type fakeGPUClaimer struct {
-	claimed    []string
-	released   []string
-	claimErr   error
-	attachment gpu.GPUAttachment
+	available   int
+	claimed     []string
+	claimCounts []int
+	released    []string
+	claimErr    error
+	attachments []gpu.GPUAttachment
 }
 
-func (f *fakeGPUClaimer) Claim(instanceID, _ string) (*gpu.GPUAttachment, error) {
+func (f *fakeGPUClaimer) Available() int {
+	return f.available
+}
+
+func (f *fakeGPUClaimer) Claim(instanceID, _ string, count int) ([]gpu.GPUAttachment, error) {
 	f.claimed = append(f.claimed, instanceID)
+	f.claimCounts = append(f.claimCounts, count)
 	if f.claimErr != nil {
 		return nil, f.claimErr
 	}
-	att := f.attachment
-	return &att, nil
+	if f.attachments != nil {
+		return append([]gpu.GPUAttachment(nil), f.attachments...), nil
+	}
+	return make([]gpu.GPUAttachment, count), nil
 }
 
 func (f *fakeGPUClaimer) Release(instanceID string) error {
@@ -2759,6 +2768,53 @@ func TestStartStoppedInstance_ConcurrentClaimRace(t *testing.T) {
 	assert.False(t, stillInMgr, "a failed Run must not leave the VM in the manager map")
 }
 
+func TestStartStoppedInstance_ReclaimsEveryPreviousGPU(t *testing.T) {
+	t.Setenv("XDG_RUNTIME_DIR", t.TempDir())
+
+	id := "i-three-gpu"
+	itype := "g5.2xlarge"
+	store := &vmmock.StateStore{Stopped: map[string]*vm.VM{
+		id: {
+			ID:           id,
+			Status:       vm.StateStopped,
+			AccountID:    "acc",
+			InstanceType: itype,
+			GPUAttachments: []gpu.GPUAttachment{
+				{PCIAddress: "0000:01:00.0"},
+				{PCIAddress: "0000:02:00.0"},
+				{PCIAddress: "0000:03:00.0"},
+			},
+		},
+	}}
+	instanceType := &ec2.InstanceTypeInfo{
+		InstanceType: aws.String(itype),
+		GpuInfo: &ec2.GpuInfo{Gpus: []*ec2.GpuDeviceInfo{{
+			Count: aws.Int64(1),
+		}}},
+	}
+	prov := &fakeResourceCapacityProvider{
+		instanceTypes: map[string]*ec2.InstanceTypeInfo{itype: instanceType},
+	}
+	claimer := &fakeGPUClaimer{}
+	mgr := vm.NewManagerWithDeps(vm.Deps{VolumeMounter: raceVolumeMounter{}})
+	svc := &InstanceServiceImpl{
+		stoppedStore: store,
+		resourceMgr:  prov,
+		vmMgr:        mgr,
+		gpuClaimer:   claimer,
+	}
+
+	_, err := svc.StartStoppedInstance(
+		context.Background(),
+		&StartStoppedInstanceInput{InstanceID: id},
+		"acc",
+	)
+	require.Error(t, err)
+	assert.Equal(t, awserrors.ErrorServerInternal, err.Error())
+	assert.Equal(t, []int{3}, claimer.claimCounts)
+	assert.Equal(t, []string{id}, claimer.released)
+}
+
 // --- PrepareRunInstances / ec2.cmd dispatch tests ---------------------------
 
 type fakeAMILoader struct {
@@ -2804,6 +2860,85 @@ func (f *fakeKeyValidator) ValidateKeyPairExists(_ context.Context, _ string, _ 
 func defaultPrepareInstanceTypes() (map[string]*ec2.InstanceTypeInfo, *ec2.InstanceTypeInfo) {
 	it := &ec2.InstanceTypeInfo{InstanceType: aws.String("t3.micro")}
 	return map[string]*ec2.InstanceTypeInfo{"t3.micro": it}, it
+}
+
+func TestGPUCountForRunInstances(t *testing.T) {
+	gpuType := &ec2.InstanceTypeInfo{
+		InstanceType: aws.String("g7e.12xlarge"),
+		GpuInfo: &ec2.GpuInfo{Gpus: []*ec2.GpuDeviceInfo{{
+			Count: aws.Int64(2),
+		}}},
+	}
+	cpuType := &ec2.InstanceTypeInfo{InstanceType: aws.String("t3.micro")}
+
+	tests := []struct {
+		name    string
+		input   *ec2.RunInstancesInput
+		itype   *ec2.InstanceTypeInfo
+		want    int
+		wantErr bool
+	}{
+		{
+			name:  "instance type default",
+			input: &ec2.RunInstancesInput{},
+			itype: gpuType,
+			want:  2,
+		},
+		{
+			name: "explicit pool partition",
+			input: &ec2.RunInstancesInput{
+				ElasticInferenceAccelerators: []*ec2.ElasticInferenceAccelerator{{
+					Type: aws.String("gpu"), Count: aws.Int64(3),
+				}},
+			},
+			itype: gpuType,
+			want:  3,
+		},
+		{
+			name: "non GPU type",
+			input: &ec2.RunInstancesInput{
+				ElasticInferenceAccelerators: []*ec2.ElasticInferenceAccelerator{{
+					Type: aws.String("gpu"), Count: aws.Int64(1),
+				}},
+			},
+			itype:   cpuType,
+			wantErr: true,
+		},
+		{
+			name: "zero count",
+			input: &ec2.RunInstancesInput{
+				ElasticInferenceAccelerators: []*ec2.ElasticInferenceAccelerator{{
+					Type: aws.String("gpu"), Count: aws.Int64(0),
+				}},
+			},
+			itype:   gpuType,
+			wantErr: true,
+		},
+		{
+			name: "duplicate override",
+			input: &ec2.RunInstancesInput{
+				ElasticInferenceAccelerators: []*ec2.ElasticInferenceAccelerator{
+					{Type: aws.String("gpu"), Count: aws.Int64(2)},
+					{Type: aws.String("gpu"), Count: aws.Int64(2)},
+				},
+			},
+			itype:   gpuType,
+			wantErr: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := gpuCountForRunInstances(test.input, test.itype)
+			if test.wantErr {
+				require.Error(t, err)
+				assert.Equal(t, awserrors.ErrorInvalidParameterValue, err.Error())
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, test.want, got)
+		})
+	}
 }
 
 func TestPrepareRunInstances_MissingAccountID(t *testing.T) {
@@ -2944,6 +3079,43 @@ func TestPrepareRunInstances_InsufficientCapacity(t *testing.T) {
 	}, "acc", "")
 	require.Error(t, err)
 	assert.Equal(t, awserrors.ErrorInsufficientInstanceCapacity, err.Error())
+}
+
+func TestPrepareRunInstances_MultiGPUCountGatesCapacity(t *testing.T) {
+	instanceType := &ec2.InstanceTypeInfo{
+		InstanceType: aws.String("g5.2xlarge"),
+		GpuInfo: &ec2.GpuInfo{Gpus: []*ec2.GpuDeviceInfo{{
+			Count: aws.Int64(1),
+		}}},
+	}
+	types := map[string]*ec2.InstanceTypeInfo{"g5.2xlarge": instanceType}
+	prov := &fakeResourceCapacityProvider{
+		instanceTypes: types,
+		canAllocFn:    func(_ *ec2.InstanceTypeInfo, count int) int { return count },
+	}
+	svc := &InstanceServiceImpl{
+		instanceTypes: types,
+		amiLoader: &fakeAMILoader{byID: map[string]ebsmetadata.AMI{
+			"ami-1": {ImageOwnerAlias: "acc"},
+		}},
+		resourceMgr: prov,
+		gpuClaimer: &fakeGPUClaimer{
+			available: 5,
+		},
+	}
+
+	_, _, _, err := svc.PrepareRunInstances(context.Background(), &ec2.RunInstancesInput{
+		InstanceType: aws.String("g5.2xlarge"),
+		ImageId:      aws.String("ami-1"),
+		MinCount:     aws.Int64(2),
+		MaxCount:     aws.Int64(2),
+		ElasticInferenceAccelerators: []*ec2.ElasticInferenceAccelerator{{
+			Type: aws.String("gpu"), Count: aws.Int64(3),
+		}},
+	}, "acc", "")
+	require.Error(t, err)
+	assert.Equal(t, awserrors.ErrorInsufficientInstanceCapacity, err.Error())
+	assert.Empty(t, prov.allocated)
 }
 
 func TestPrepareRunInstances_HappyPathNoENI(t *testing.T) {
