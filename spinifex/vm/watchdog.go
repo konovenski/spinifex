@@ -18,8 +18,9 @@ const (
 )
 
 // StartPendingWatchdog spawns a goroutine that marks instances stuck in
-// Pending/Provisioning beyond PendingWatchdogTimeout as failed. Exits when
-// ctx is cancelled. Call once per Manager to avoid duplicating the goroutine.
+// Pending/Provisioning beyond their launch timeout as failed. VFIO guests get
+// enough time for the memory-scaled QMP greeting deadline. Exits when ctx is
+// cancelled. Call once per Manager to avoid duplicating the goroutine.
 func (m *Manager) StartPendingWatchdog(ctx context.Context) {
 	ticker := time.NewTicker(PendingWatchdogInterval)
 	go func() {
@@ -35,6 +36,13 @@ func (m *Manager) StartPendingWatchdog(ctx context.Context) {
 	}()
 }
 
+func pendingWatchdogTimeout(v *VM) time.Duration {
+	if len(v.GPUAttachments) == 0 {
+		return PendingWatchdogTimeout
+	}
+	return max(PendingWatchdogTimeout, qmpGreetingTimeout(v)+PendingWatchdogInterval)
+}
+
 // scanAndMarkStuckPending runs one pass of the watchdog body with a
 // caller-supplied "now". Extracted so tests can drive the body
 // deterministically without waiting for the production tick interval.
@@ -42,13 +50,14 @@ func (m *Manager) scanAndMarkStuckPending(now time.Time) {
 	stuck := m.Filter(func(v *VM) bool {
 		return (v.Status == StatePending || v.Status == StateProvisioning) &&
 			v.Instance != nil && v.Instance.LaunchTime != nil &&
-			now.Sub(*v.Instance.LaunchTime) > PendingWatchdogTimeout
+			now.Sub(*v.Instance.LaunchTime) > pendingWatchdogTimeout(v)
 	})
 
 	for _, instance := range stuck {
 		slog.Warn("Instance stuck in pending, marking failed",
 			"instanceId", instance.ID, "status", instance.Status,
-			"elapsed_ms", otelsetup.Millis(now.Sub(*instance.Instance.LaunchTime)))
+			"elapsed_ms", otelsetup.Millis(now.Sub(*instance.Instance.LaunchTime)),
+			"timeout_ms", otelsetup.Millis(pendingWatchdogTimeout(instance)))
 		m.MarkFailed(context.Background(), instance, "launch_timeout")
 	}
 }

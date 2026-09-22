@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/mulgadc/spinifex/spinifex/gpu"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
@@ -85,6 +86,22 @@ func TestScanAndMarkStuckPending_StuckProvisioning_MarkedFailed(t *testing.T) {
 	m.scanAndMarkStuckPending(now)
 
 	assertStuckMarkedFailed(t, m, rt, v, terminated)
+}
+
+func TestScanAndMarkStuckPending_VFIOUsesGreetingDeadline(t *testing.T) {
+	m, _, rt, _ := crashTestManager(t)
+
+	now := time.Now()
+	v := pendingInstance("i-vfio-starting", StateProvisioning, now.Add(-PendingWatchdogTimeout-time.Minute))
+	v.Config.Memory = 192 * 1024
+	v.GPUAttachments = []gpu.GPUAttachment{{PCIAddress: "0000:01:00.0"}}
+	m.Insert(v)
+
+	m.scanAndMarkStuckPending(now)
+
+	assert.Empty(t, rt.snapshot(),
+		"a VFIO guest still inside its memory-scaled QMP greeting deadline must not be marked stuck")
+	assert.Equal(t, qmpGreetingTimeout(v)+PendingWatchdogInterval, pendingWatchdogTimeout(v))
 }
 
 func TestScanAndMarkStuckPending_NoLaunchTime_NotMarked(t *testing.T) {
