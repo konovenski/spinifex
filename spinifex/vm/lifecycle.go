@@ -559,15 +559,23 @@ func (m *Manager) startQEMU(instance *VM) error {
 
 	for i, att := range instance.GPUAttachments {
 		var devSpec string
+		bus := ""
+		if !instance.DirectBoot {
+			slot, ok := gpuHotPlugENISlot(instance.InstanceType, i)
+			if !ok {
+				return fmt.Errorf("GPU %d has no reserved PCIe root port for instance type %s", i, instance.InstanceType)
+			}
+			bus = fmt.Sprintf(",bus=hotplug-eni%d", slot)
+		}
 		if att.MdevPath != "" {
-			devSpec = fmt.Sprintf("vfio-pci,sysfsdev=%s,id=gpu%d,x-vga=off", att.MdevPath, i)
+			devSpec = fmt.Sprintf("vfio-pci,sysfsdev=%s,id=gpu%d,x-vga=off%s", att.MdevPath, i, bus)
 			slog.Info("MIG device configured", "mdev", att.MdevPath, "index", i, "instanceId", instance.ID)
 		} else {
 			xvga := "off"
 			if att.XVGAEnabled {
 				xvga = "on"
 			}
-			devSpec = fmt.Sprintf("vfio-pci,host=%s,id=gpu%d,x-vga=%s", att.PCIAddress, i, xvga)
+			devSpec = fmt.Sprintf("vfio-pci,host=%s,id=gpu%d,x-vga=%s%s", att.PCIAddress, i, xvga, bus)
 			slog.Info("GPU passthrough device configured",
 				"pci", att.PCIAddress, "index", i, "instanceId", instance.ID, "xvga", xvga)
 		}
@@ -1376,15 +1384,26 @@ func buildBaseVMConfig(instanceID, instanceType, pidFile, consoleLogPath, serial
 	return cfg
 }
 
+// gpuHotPlugENISlot maps each GPU to one of the highest-numbered ENI root
+// ports. Keeping passthrough devices behind pre-allocated root ports prevents
+// them from exhausting q35's root bus while preserving the low-numbered ports
+// for ENI hot-plug.
+func gpuHotPlugENISlot(instanceType string, gpuIndex int) (int, bool) {
+	slot := instancetypes.HotPlugENISlotsForType(instanceType) - gpuIndex
+	return slot, slot > 0
+}
+
 // initENIRequests resets the per-VM ENI slot free-list to mirror the
-// hotplug-eni{1..N} root ports in buildBaseVMConfig. AttachedByENIID is
-// preserved across restart; on a cold boot it starts empty.
+// hotplug-eni{1..N} root ports in buildBaseVMConfig. The highest-numbered
+// ports are reserved for GPUs. AttachedByENIID is preserved across restart;
+// on a cold boot it starts empty.
 func (m *Manager) initENIRequests(instance *VM) {
 	eniSlots := instancetypes.HotPlugENISlotsForType(instance.InstanceType)
+	reserved := min(len(instance.GPUAttachments), eniSlots)
 	instance.ENIRequests.Mu.Lock()
 	defer instance.ENIRequests.Mu.Unlock()
-	instance.ENIRequests.AvailableSlots = make([]int, 0, eniSlots)
-	for i := 1; i <= eniSlots; i++ {
+	instance.ENIRequests.AvailableSlots = make([]int, 0, eniSlots-reserved)
+	for i := 1; i <= eniSlots-reserved; i++ {
 		instance.ENIRequests.AvailableSlots = append(instance.ENIRequests.AvailableSlots, i)
 	}
 	if instance.ENIRequests.AttachedByENIID == nil {

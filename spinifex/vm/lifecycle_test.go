@@ -83,6 +83,25 @@ func TestBuildBaseVMConfig_ENISlotCountPerType(t *testing.T) {
 	}
 }
 
+func TestGPUHotPlugENISlotsAreReserved(t *testing.T) {
+	instance := &VM{
+		InstanceType:   "m5.8xlarge",
+		GPUAttachments: make([]gpu.GPUAttachment, 5),
+	}
+
+	manager := &Manager{}
+	manager.initENIRequests(instance)
+
+	assert.Equal(t, []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, instance.ENIRequests.AvailableSlots)
+	for i, want := range []int{14, 13, 12, 11, 10} {
+		got, ok := gpuHotPlugENISlot(instance.InstanceType, i)
+		assert.True(t, ok)
+		assert.Equal(t, want, got)
+	}
+	_, ok := gpuHotPlugENISlot("t3.nano", 2)
+	assert.False(t, ok)
+}
+
 // TestBuildBaseVMConfig_BootMode pins the bootMode → UseUEFI mapping.
 // "uefi" and AWS's "uefi-preferred" both flip the firmware flag; "bios" and
 // any unrecognised value (including "") fall through as BIOS.
