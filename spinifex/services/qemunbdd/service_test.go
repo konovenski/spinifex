@@ -7,6 +7,7 @@ import (
 
 	"github.com/mulgadc/spinifex/spinifex/ebsprovider"
 	"github.com/mulgadc/spinifex/spinifex/testutil"
+	"github.com/mulgadc/spinifex/spinifex/types"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,4 +84,60 @@ func TestLaunchService_ScopesPublishToNodeID(t *testing.T) {
 	// proves the node-scoped subject (not the wildcard) is what's subscribed.
 	require.NotNil(t, resp.Error)
 	assert.Equal(t, ebsprovider.ErrorCodeNotFound, resp.Error.Code)
+}
+
+func TestServeLegacyVolumeMountsBridgesPublishLifecycle(t *testing.T) {
+	_, client := testutil.StartTestNATS(t)
+	provider := ebsprovider.NewMemoryProvider(ebsprovider.Capabilities{VolumeEnumeration: true})
+	_, err := provider.CreateVolume(t.Context(), ebsprovider.CreateVolumeRequest{
+		Versioned:     ebsprovider.NewVersioned(),
+		VolumeID:      "vol-legacy",
+		CapacityRange: ebsprovider.CapacityRange{RequiredBytes: 1024},
+	})
+	require.NoError(t, err)
+
+	stop, err := serveLegacyVolumeMounts(client, provider, "node-a")
+	require.NoError(t, err)
+	t.Cleanup(stop)
+	require.NoError(t, client.Flush())
+
+	mountBody, err := json.Marshal(types.EBSRequest{Name: "vol-legacy"})
+	require.NoError(t, err)
+	msg, err := client.Request("ebs.node-a.mount", mountBody, time.Second)
+	require.NoError(t, err)
+	var mounted types.EBSMountResponse
+	require.NoError(t, json.Unmarshal(msg.Data, &mounted))
+	require.Empty(t, mounted.Error)
+	assert.True(t, mounted.Mounted)
+	assert.Equal(t, "nbd+unix:///?socket=/memory/vol-legacy.sock", mounted.URI)
+
+	msg, err = client.Request("ebs.node-a.unmount", mountBody, time.Second)
+	require.NoError(t, err)
+	var unmounted types.EBSUnMountResponse
+	require.NoError(t, json.Unmarshal(msg.Data, &unmounted))
+	require.Empty(t, unmounted.Error)
+	assert.False(t, unmounted.Mounted)
+	assert.Equal(t, "vol-legacy", unmounted.Volume)
+
+	volume, err := provider.GetVolume(t.Context(), ebsprovider.GetVolumeRequest{
+		Versioned: ebsprovider.NewVersioned(),
+		VolumeID:  "vol-legacy",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, ebsprovider.VolumeStateAvailable, volume.State)
+
+	deleteBody, err := json.Marshal(types.EBSDeleteRequest{Volume: "vol-legacy"})
+	require.NoError(t, err)
+	msg, err = client.Request("ebs.delete", deleteBody, time.Second)
+	require.NoError(t, err)
+	var deleted types.EBSDeleteResponse
+	require.NoError(t, json.Unmarshal(msg.Data, &deleted))
+	require.Empty(t, deleted.Error)
+	assert.True(t, deleted.Success)
+
+	volumes, err := provider.ListVolumes(t.Context(), ebsprovider.ListVolumesRequest{
+		Versioned: ebsprovider.NewVersioned(),
+	})
+	require.NoError(t, err)
+	assert.Empty(t, volumes.Volumes)
 }

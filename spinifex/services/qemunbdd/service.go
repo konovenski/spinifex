@@ -2,6 +2,7 @@ package qemunbdd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,8 +10,11 @@ import (
 	"syscall"
 
 	"github.com/mulgadc/spinifex/spinifex/admin"
+	"github.com/mulgadc/spinifex/spinifex/ebsprovider"
 	"github.com/mulgadc/spinifex/spinifex/ebsprovider/natsserve"
+	"github.com/mulgadc/spinifex/spinifex/types"
 	"github.com/mulgadc/spinifex/spinifex/utils"
+	"github.com/nats-io/nats.go"
 )
 
 // serviceName roots this daemon's PID file: baseDir/qemunbd.pid.
@@ -89,6 +93,11 @@ func launchService(cfg *Config) error {
 	if err != nil {
 		return fmt.Errorf("serve ebs.provider.v1: %w", err)
 	}
+	stopLegacy, err := serveLegacyVolumeMounts(nc, provider, cfg.NodeName)
+	if err != nil {
+		stop()
+		return fmt.Errorf("serve legacy volume mounts: %w", err)
+	}
 
 	slog.Info("qemunbdd: waiting for EBS provider events", "node", cfg.NodeName)
 
@@ -96,7 +105,94 @@ func launchService(cfg *Config) error {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	<-sigChan
 	slog.Info("qemunbdd: shutting down gracefully...")
+	stopLegacy()
 	stop()
-
 	return nil
+}
+
+// serveLegacyVolumeMounts bridges the VM manager's node-scoped mount subjects
+// to the provider-neutral publish contract. The VM manager still consumes the
+// legacy response shape, but storage implementations remain behind EBSProvider.
+func serveLegacyVolumeMounts(nc *nats.Conn, provider ebsprovider.EBSProvider, nodeID string) (func(), error) {
+	mountSub, err := nc.Subscribe("ebs."+nodeID+".mount", func(msg *nats.Msg) {
+		var req types.EBSRequest
+		if err := json.Unmarshal(msg.Data, &req); err != nil {
+			respondLegacy(msg, types.EBSMountResponse{Error: err.Error()})
+			return
+		}
+		published, err := provider.PublishVolume(context.Background(), ebsprovider.PublishVolumeRequest{
+			Versioned: ebsprovider.NewVersioned(),
+			VolumeID:  req.Name,
+			NodeID:    nodeID,
+		})
+		if err != nil {
+			respondLegacy(msg, types.EBSMountResponse{Error: err.Error()})
+			return
+		}
+		respondLegacy(msg, types.EBSMountResponse{URI: published.NBDURI, Mounted: true})
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	unmountSub, err := nc.Subscribe("ebs."+nodeID+".unmount", func(msg *nats.Msg) {
+		var req types.EBSRequest
+		if err := json.Unmarshal(msg.Data, &req); err != nil {
+			respondLegacy(msg, types.EBSUnMountResponse{Volume: req.Name, Error: err.Error()})
+			return
+		}
+		err := provider.UnpublishVolume(context.Background(), ebsprovider.UnpublishVolumeRequest{
+			Versioned: ebsprovider.NewVersioned(),
+			VolumeID:  req.Name,
+			NodeID:    nodeID,
+		})
+		if err != nil {
+			respondLegacy(msg, types.EBSUnMountResponse{Volume: req.Name, Error: err.Error()})
+			return
+		}
+		respondLegacy(msg, types.EBSUnMountResponse{Volume: req.Name})
+	})
+	if err != nil {
+		_ = mountSub.Unsubscribe()
+		return nil, err
+	}
+
+	deleteSub, err := nc.Subscribe("ebs.delete", func(msg *nats.Msg) {
+		var req types.EBSDeleteRequest
+		if err := json.Unmarshal(msg.Data, &req); err != nil {
+			respondLegacy(msg, types.EBSDeleteResponse{Volume: req.Volume, Error: err.Error()})
+			return
+		}
+		err := provider.DeleteVolume(context.Background(), ebsprovider.DeleteVolumeRequest{
+			Versioned: ebsprovider.NewVersioned(),
+			VolumeID:  req.Volume,
+		})
+		if err != nil {
+			respondLegacy(msg, types.EBSDeleteResponse{Volume: req.Volume, Error: err.Error()})
+			return
+		}
+		respondLegacy(msg, types.EBSDeleteResponse{Volume: req.Volume, Success: true})
+	})
+	if err != nil {
+		_ = mountSub.Unsubscribe()
+		_ = unmountSub.Unsubscribe()
+		return nil, err
+	}
+
+	return func() {
+		_ = mountSub.Unsubscribe()
+		_ = unmountSub.Unsubscribe()
+		_ = deleteSub.Unsubscribe()
+	}, nil
+}
+
+func respondLegacy(msg *nats.Msg, response any) {
+	data, err := json.Marshal(response)
+	if err != nil {
+		slog.Error("qemunbdd: encode legacy EBS response", "err", err)
+		return
+	}
+	if err := msg.Respond(data); err != nil {
+		slog.Error("qemunbdd: send legacy EBS response", "err", err)
+	}
 }
